@@ -210,6 +210,254 @@ class OfficeWellnessApp {
     }
 
     /**
+     * 设置UI事件处理器
+     * @private
+     */
+    setupUIEventHandlers() {
+        if (!this.uiController) return;
+
+        // 喝水提醒控制事件
+        this.uiController.on('waterToggle', (data) => {
+            if (data.isActive) {
+                this.startReminder('water');
+            } else {
+                this.stopReminder('water');
+            }
+        });
+
+        this.uiController.on('waterReset', () => {
+            this.resetReminder('water');
+        });
+
+        this.uiController.on('waterDrink', () => {
+            if (this.waterReminder) {
+                this.waterReminder.acknowledge();
+                // 更新每日统计
+                this.updateDailyStats('water');
+            }
+        });
+
+        // 久坐提醒控制事件
+        this.uiController.on('postureToggle', (data) => {
+            if (data.isActive) {
+                this.startReminder('posture');
+            } else {
+                this.stopReminder('posture');
+            }
+        });
+
+        this.uiController.on('postureReset', () => {
+            this.resetReminder('posture');
+        });
+
+        this.uiController.on('postureActivity', () => {
+            if (this.postureReminder) {
+                this.postureReminder.acknowledge();
+                // 更新每日统计
+                this.updateDailyStats('posture');
+            }
+        });
+
+        // 全局控制事件
+        this.uiController.on('startAll', () => {
+            this.startReminder('water');
+            this.startReminder('posture');
+        });
+
+        this.uiController.on('pauseAll', () => {
+            this.stopReminder('water');
+            this.stopReminder('posture');
+        });
+
+        // 设置保存事件
+        this.uiController.on('saveSettings', () => {
+            this.handleSaveSettings();
+        });
+
+        this.uiController.on('resetSettings', () => {
+            this.handleResetSettings();
+        });
+    }
+
+    /**
+     * 处理保存设置
+     * @private
+     */
+    handleSaveSettings() {
+        try {
+            const newSettings = this.uiController.getSettingsFromUI();
+            this.updateSettings(newSettings);
+            
+            // 显示保存成功提示
+            this.notificationService.showInPageAlert('success', {
+                title: '设置已保存',
+                message: '您的设置已成功保存并应用'
+            });
+            
+            // 关闭设置面板
+            this.uiController.hideSettings();
+            
+        } catch (error) {
+            console.error('保存设置失败:', error);
+            this.notificationService.showInPageAlert('error', {
+                title: '保存失败',
+                message: '设置保存失败，请重试'
+            });
+        }
+    }
+
+    /**
+     * 处理重置设置
+     * @private
+     */
+    handleResetSettings() {
+        try {
+            // 重置为默认设置
+            this.currentSettings = { ...this.defaultSettings };
+            
+            // 应用到UI
+            this.uiController.applySettingsToUI(this.currentSettings);
+            
+            // 更新提醒管理器
+            if (this.waterReminder) {
+                this.waterReminder.updateSettings(this.currentSettings.water);
+            }
+            if (this.postureReminder) {
+                this.postureReminder.updateSettings(this.currentSettings.posture);
+            }
+            
+            // 保存设置
+            this.saveSettings();
+            
+            // 显示重置成功提示
+            this.notificationService.showInPageAlert('success', {
+                title: '设置已重置',
+                message: '所有设置已恢复为默认值'
+            });
+            
+        } catch (error) {
+            console.error('重置设置失败:', error);
+            this.notificationService.showInPageAlert('error', {
+                title: '重置失败',
+                message: '设置重置失败，请重试'
+            });
+        }
+    }
+
+    /**
+     * 更新每日统计
+     * @param {string} type - 'water' | 'posture'
+     * @private
+     */
+    updateDailyStats(type) {
+        try {
+            const today = new Date().toDateString();
+            const statsKey = `dailyStats_${today}`;
+            
+            // 从存储中获取今日统计
+            let dailyStats = this.storageManager.loadSettings(statsKey) || {
+                water: { completed: 0, target: 8 },
+                posture: { completed: 0, target: 8 }
+            };
+            
+            // 更新统计
+            if (dailyStats[type]) {
+                dailyStats[type].completed += 1;
+            }
+            
+            // 保存统计
+            this.storageManager.saveSettings(statsKey, dailyStats);
+            
+            // 更新UI显示
+            if (this.uiController) {
+                this.uiController.updateDailyProgress(
+                    type, 
+                    dailyStats[type].completed, 
+                    dailyStats[type].target
+                );
+            }
+            
+            console.log(`${type}统计已更新:`, dailyStats[type]);
+            
+        } catch (error) {
+            console.error('更新每日统计失败:', error);
+        }
+    }
+
+    /**
+     * 深度合并设置对象
+     * @param {Object} target - 目标对象
+     * @param {Object} source - 源对象
+     * @returns {Object} 合并后的对象
+     * @private
+     */
+    mergeSettings(target, source) {
+        const result = { ...target };
+        
+        for (const key in source) {
+            if (source.hasOwnProperty(key)) {
+                if (source[key] instanceof Object && !Array.isArray(source[key]) && key in result) {
+                    result[key] = this.mergeSettings(result[key], source[key]);
+                } else {
+                    result[key] = source[key];
+                }
+            }
+        }
+        
+        return result;
+    }
+
+    /**
+     * 获取错误信息
+     * @param {Error} error - 错误对象
+     * @returns {string} 用户友好的错误信息
+     * @private
+     */
+    getErrorMessage(error) {
+        if (error.message.includes('localStorage')) {
+            return '本地存储不可用，设置将无法保存';
+        } else if (error.message.includes('notification')) {
+            return '通知功能不可用，将使用页面内提醒';
+        } else if (error.message.includes('audio')) {
+            return '音频功能不可用，将使用静音提醒';
+        } else {
+            return '应用启动时遇到问题，部分功能可能不可用';
+        }
+    }
+
+    /**
+     * 显示备用错误信息
+     * @param {string} message - 错误信息
+     * @private
+     */
+    showFallbackError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f44336;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            z-index: 9999;
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            text-align: center;
+        `;
+        errorDiv.textContent = message;
+        document.body.appendChild(errorDiv);
+        
+        // 5秒后自动隐藏
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.parentNode.removeChild(errorDiv);
+            }
+        }, 5000);
+    }
+
+    /**
      * 请求通知权限
      * @private
      */

@@ -15,21 +15,34 @@
             <header class="app-header">
                 <h1>办公族健康提醒</h1>
                 <p class="app-subtitle">保持健康工作习惯</p>
+                <div class="app-status-summary" id="app-status-summary">
+                    <div class="status-indicator active" id="app-status-indicator"></div>
+                    <span id="app-status-text">健康提醒已启动</span>
+                </div>
             </header>
 
             <!-- 状态显示区域 -->
             <section class="status-section">
                 <div class="reminder-card" id="water-card">
-                    <div class="card-icon">💧</div>
-                    <div class="card-content">
+                    <div class="card-header">
+                        <div class="card-icon">💧</div>
                         <h3>喝水提醒</h3>
-                        <div class="status-display" id="water-status">未启动</div>
-                        <div class="time-remaining" id="water-time"></div>
+                        <div class="status-badge" id="water-status-badge">未启动</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="status-info">
+                            <div class="status-display" id="water-status">未启动</div>
+                            <div class="time-remaining" id="water-time"></div>
+                        </div>
                         <div class="daily-stats" id="water-stats">
                             <span class="stats-text">今日: 0/8 杯</span>
                             <div class="progress-bar">
                                 <div class="progress-fill" id="water-progress"></div>
                             </div>
+                        </div>
+                        <div class="next-reminder" id="water-next-reminder">
+                            <span class="next-reminder-label">下次提醒:</span>
+                            <span class="next-reminder-time" id="water-next-time">--:--</span>
                         </div>
                     </div>
                     <div class="card-controls">
@@ -40,16 +53,29 @@
                 </div>
 
                 <div class="reminder-card" id="posture-card">
-                    <div class="card-icon">🪑</div>
-                    <div class="card-content">
+                    <div class="card-header">
+                        <div class="card-icon">🪑</div>
                         <h3>久坐提醒</h3>
-                        <div class="status-display" id="posture-status">未启动</div>
-                        <div class="time-remaining" id="posture-time"></div>
+                        <div class="status-badge" id="posture-status-badge">未启动</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="status-info">
+                            <div class="status-display" id="posture-status">未启动</div>
+                            <div class="time-remaining" id="posture-time"></div>
+                        </div>
                         <div class="daily-stats" id="posture-stats">
                             <span class="stats-text">今日: 0/8 次活动</span>
                             <div class="progress-bar">
                                 <div class="progress-fill" id="posture-progress"></div>
                             </div>
+                        </div>
+                        <div class="next-reminder" id="posture-next-reminder">
+                            <span class="next-reminder-label">下次提醒:</span>
+                            <span class="next-reminder-time" id="posture-next-time">--:--</span>
+                        </div>
+                        <div class="activity-status" id="activity-status">
+                            <span class="activity-status-label">活动状态:</span>
+                            <span class="activity-status-value" id="activity-status-value">活跃</span>
                         </div>
                     </div>
                     <div class="card-controls">
@@ -62,8 +88,35 @@
 
             <!-- 快速操作区域 -->
             <section class="quick-actions">
-                <button class="btn-action" id="settings-btn">⚙️ 设置</button>
-                <button class="btn-action" id="help-btn">❓ 帮助</button>
+                <div class="quick-actions-group">
+                    <button class="btn-action" id="start-all-btn">▶️ 全部开始</button>
+                    <button class="btn-action" id="pause-all-btn">⏸️ 全部暂停</button>
+                </div>
+                <div class="quick-actions-group">
+                    <button class="btn-action" id="settings-btn">⚙️ 设置</button>
+                    <button class="btn-action" id="help-btn">❓ 帮助</button>
+                </div>
+            </section>
+            
+            <!-- 状态摘要区域 -->
+            <section class="status-summary">
+                <div class="summary-card">
+                    <div class="summary-title">今日健康状态</div>
+                    <div class="summary-content">
+                        <div class="summary-item">
+                            <span class="summary-label">喝水次数:</span>
+                            <span class="summary-value" id="water-count">0/8</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">活动次数:</span>
+                            <span class="summary-value" id="posture-count">0/8</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">健康评分:</span>
+                            <span class="summary-value" id="health-score">--</span>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
 

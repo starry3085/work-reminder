@@ -59,25 +59,43 @@ class UIController {
             // 应用容器
             appContainer: document.getElementById('app'),
             
+            // 应用状态摘要
+            appStatusIndicator: document.getElementById('app-status-indicator'),
+            appStatusText: document.getElementById('app-status-text'),
+            
             // 喝水提醒相关
             waterCard: document.getElementById('water-card'),
             waterStatus: document.getElementById('water-status'),
+            waterStatusBadge: document.getElementById('water-status-badge'),
             waterTime: document.getElementById('water-time'),
+            waterNextTime: document.getElementById('water-next-time'),
             waterToggle: document.getElementById('water-toggle'),
             waterReset: document.getElementById('water-reset'),
             waterDrink: document.getElementById('waterDrink'),
             waterStats: document.getElementById('water-stats'),
             waterProgress: document.getElementById('water-progress'),
+            waterCount: document.getElementById('water-count'),
             
             // 久坐提醒相关
             postureCard: document.getElementById('posture-card'),
             postureStatus: document.getElementById('posture-status'),
+            postureStatusBadge: document.getElementById('posture-status-badge'),
             postureTime: document.getElementById('posture-time'),
+            postureNextTime: document.getElementById('posture-next-time'),
             postureToggle: document.getElementById('posture-toggle'),
             postureReset: document.getElementById('posture-reset'),
             postureActivity: document.getElementById('postureActivity'),
             postureStats: document.getElementById('posture-stats'),
             postureProgress: document.getElementById('posture-progress'),
+            postureCount: document.getElementById('posture-count'),
+            activityStatusValue: document.getElementById('activity-status-value'),
+            
+            // 快速操作按钮
+            startAllBtn: document.getElementById('start-all-btn'),
+            pauseAllBtn: document.getElementById('pause-all-btn'),
+            
+            // 健康评分
+            healthScore: document.getElementById('health-score'),
             
             // 设置面板
             settingsBtn: document.getElementById('settings-btn'),
@@ -171,6 +189,15 @@ class UIController {
         
         this.addEventHandler('postureActivity', 'click', () => {
             this.triggerEvent('postureActivity');
+        });
+        
+        // 全局控制按钮
+        this.addEventHandler('startAllBtn', 'click', () => {
+            this.triggerEvent('startAll');
+        });
+        
+        this.addEventHandler('pauseAllBtn', 'click', () => {
+            this.triggerEvent('pauseAll');
         });
     }
     
@@ -277,6 +304,19 @@ class UIController {
         this.updateDailyProgress('water', 0, 8);
         this.updateDailyProgress('posture', 0, 8);
         
+        // 设置应用状态摘要
+        this.updateAppStatusSummary(false);
+        
+        // 设置下次提醒时间
+        this.updateNextReminderTime('water', null);
+        this.updateNextReminderTime('posture', null);
+        
+        // 设置活动状态
+        this.updateActivityStatus(true);
+        
+        // 设置健康评分
+        this.updateHealthScore(0, 0);
+        
         // 隐藏设置面板
         this.hideSettings();
         
@@ -329,6 +369,7 @@ class UIController {
     updateReminderStatus(type, status) {
         const card = this.elements[`${type}Card`];
         const statusElement = this.elements[`${type}Status`];
+        const statusBadge = this.elements[`${type}StatusBadge`];
         const timeElement = this.elements[`${type}Time`];
         const toggleButton = this.elements[`${type}Toggle`];
         const resetButton = this.elements[`${type}Reset`];
@@ -347,6 +388,16 @@ class UIController {
         
         // 更新状态文本
         statusElement.textContent = status.status || (status.isActive ? '运行中' : '未启动');
+        
+        // 更新状态徽章
+        if (statusBadge) {
+            statusBadge.textContent = status.isActive ? '运行中' : '未启动';
+            if (status.isActive) {
+                statusBadge.classList.add('active');
+            } else {
+                statusBadge.classList.remove('active');
+            }
+        }
         
         // 更新剩余时间显示
         if (status.isActive && status.timeRemaining > 0) {
@@ -368,6 +419,22 @@ class UIController {
             toggleButton.className = 'btn-primary';
             if (resetButton) resetButton.style.display = 'none';
             if (actionButton) actionButton.style.display = 'none';
+        }
+        
+        // 更新应用状态摘要
+        this.updateAppStatusSummary(
+            this.uiState.water.isActive || this.uiState.posture.isActive
+        );
+        
+        // 更新UI状态
+        if (type === 'water') {
+            this.uiState.water.isActive = status.isActive;
+            this.uiState.water.status = status.status || (status.isActive ? '运行中' : '未启动');
+            this.uiState.water.timeRemaining = status.timeRemaining || 0;
+        } else if (type === 'posture') {
+            this.uiState.posture.isActive = status.isActive;
+            this.uiState.posture.status = status.status || (status.isActive ? '运行中' : '未启动');
+            this.uiState.posture.timeRemaining = status.timeRemaining || 0;
         }
     }
 
@@ -592,6 +659,22 @@ class UIController {
      */
     handleHelpToggle() {
         this.toggleHelp();
+    }
+
+    /**
+     * 处理保存设置
+     * @private
+     */
+    handleSaveSettings() {
+        this.triggerEvent('saveSettings');
+    }
+
+    /**
+     * 处理重置设置
+     * @private
+     */
+    handleResetSettings() {
+        this.triggerEvent('resetSettings');
     }
 
     /**
@@ -825,5 +908,98 @@ class UIController {
         if (element) {
             element.classList.remove(className);
         }
+    }
+    
+    /**
+     * 更新应用状态摘要
+     * @param {boolean} isActive - 是否有活跃的提醒
+     */
+    updateAppStatusSummary(isActive) {
+        if (!this.elements.appStatusIndicator || !this.elements.appStatusText) {
+            return;
+        }
+        
+        if (isActive) {
+            this.elements.appStatusIndicator.classList.add('active');
+            this.elements.appStatusText.textContent = '健康提醒已启动';
+        } else {
+            this.elements.appStatusIndicator.classList.remove('active');
+            this.elements.appStatusText.textContent = '健康提醒未启动';
+        }
+    }
+    
+    /**
+     * 更新下次提醒时间
+     * @param {string} type - 'water' | 'posture'
+     * @param {Date|null} nextTime - 下次提醒时间
+     */
+    updateNextReminderTime(type, nextTime) {
+        const nextTimeElement = this.elements[`${type}NextTime`];
+        if (!nextTimeElement) {
+            return;
+        }
+        
+        if (nextTime && nextTime instanceof Date) {
+            const hours = nextTime.getHours().toString().padStart(2, '0');
+            const minutes = nextTime.getMinutes().toString().padStart(2, '0');
+            nextTimeElement.textContent = `${hours}:${minutes}`;
+        } else {
+            nextTimeElement.textContent = '--:--';
+        }
+    }
+    
+    /**
+     * 更新活动状态
+     * @param {boolean} isActive - 用户是否活跃
+     */
+    updateActivityStatus(isActive) {
+        if (!this.elements.activityStatusValue) {
+            return;
+        }
+        
+        if (isActive) {
+            this.elements.activityStatusValue.textContent = '活跃';
+            this.elements.activityStatusValue.classList.remove('inactive');
+        } else {
+            this.elements.activityStatusValue.textContent = '离开';
+            this.elements.activityStatusValue.classList.add('inactive');
+        }
+    }
+    
+    /**
+     * 更新健康评分
+     * @param {number} waterCompletionRate - 喝水完成率 (0-1)
+     * @param {number} postureCompletionRate - 久坐提醒完成率 (0-1)
+     */
+    updateHealthScore(waterCompletionRate, postureCompletionRate) {
+        if (!this.elements.healthScore) {
+            return;
+        }
+        
+        // 简单计算健康评分 (满分100)
+        const score = Math.round((waterCompletionRate * 0.5 + postureCompletionRate * 0.5) * 100);
+        
+        // 根据分数设置不同颜色
+        let scoreClass = '';
+        if (score >= 80) {
+            scoreClass = 'score-excellent';
+        } else if (score >= 60) {
+            scoreClass = 'score-good';
+        } else if (score >= 40) {
+            scoreClass = 'score-average';
+        } else {
+            scoreClass = 'score-poor';
+        }
+        
+        // 移除所有可能的分数类
+        this.elements.healthScore.classList.remove(
+            'score-excellent', 'score-good', 'score-average', 'score-poor'
+        );
+        
+        // 添加当前分数类
+        this.elements.healthScore.classList.add(scoreClass);
+        
+        // 设置分数文本
+        this.elements.healthScore.textContent = score;
     }
 }

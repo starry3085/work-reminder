@@ -41,6 +41,7 @@ body {
 .app-header {
     text-align: center;
     margin-bottom: 2rem;
+    position: relative;
 }
 
 .app-header h1 {
@@ -52,6 +53,51 @@ body {
 .app-subtitle {
     color: var(--text-secondary);
     font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.app-status-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: var(--background-secondary);
+    border-radius: 20px;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--text-secondary);
+}
+
+.status-indicator.active {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+#app-status-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 /* 主控制面板 */
@@ -80,7 +126,7 @@ body {
     border-radius: var(--border-radius);
     padding: 1.5rem;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 1rem;
     transition: var(--transition);
     position: relative;
@@ -108,33 +154,35 @@ body {
     background: var(--primary-color);
 }
 
-.reminder-card.water.active::before {
+#water-card.active::before {
     background: #2196F3;
 }
 
-.reminder-card.posture.active::before {
+#posture-card.active::before {
     background: #FF9800;
 }
 
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
 .card-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
     flex-shrink: 0;
 }
 
-.card-content {
+.card-header h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin: 0;
     flex: 1;
 }
 
-.card-content h3 {
-    font-size: 1.2rem;
-    margin-bottom: 0.5rem;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.card-content h3 .status-badge {
+.status-badge {
     font-size: 0.7rem;
     padding: 0.2rem 0.5rem;
     border-radius: 12px;
@@ -143,15 +191,27 @@ body {
     font-weight: normal;
 }
 
-.card-content h3 .status-badge.active {
+.status-badge.active {
     background: #e8f5e9;
     color: var(--primary-color);
+}
+
+.card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.status-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .status-display {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    margin-bottom: 0.25rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -173,7 +233,6 @@ body {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--primary-color);
-    margin-top: 0.25rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -185,7 +244,7 @@ body {
 }
 
 .daily-stats {
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
 }
 
 .stats-text {
@@ -211,10 +270,45 @@ body {
     width: 0%;
 }
 
+.next-reminder {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border-color);
+}
+
+.next-reminder-time {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.activity-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border-color);
+}
+
+.activity-status-value {
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.activity-status-value.inactive {
+    color: var(--text-secondary);
+}
+
 .card-controls {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
 }
 
 /* 按钮样式 */
@@ -274,9 +368,60 @@ body {
 /* 快速操作区域 */
 .quick-actions {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     gap: 1rem;
     flex-wrap: wrap;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.quick-actions-group {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* 状态摘要区域 */
+.status-summary {
+    margin-top: 1rem;
+}
+
+.summary-card {
+    background: var(--background-secondary);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}
+
+.summary-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+.summary-content {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.summary-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.summary-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 /* 设置面板 */
@@ -632,10 +777,22 @@ body {
         gap: 1rem;
     }
     
-    .reminder-card {
-        flex-direction: column;
+    .card-header {
+        justify-content: center;
+    }
+    
+    .card-content {
         text-align: center;
-        gap: 1rem;
+    }
+    
+    .status-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .next-reminder, .activity-status {
+        flex-direction: column;
+        gap: 0.25rem;
     }
     
     .card-controls {
@@ -653,9 +810,25 @@ body {
         align-items: center;
     }
     
+    .quick-actions-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
     .btn-action {
         width: 100%;
         max-width: 200px;
+    }
+    
+    .summary-content {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .summary-item {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
     }
 }
 
