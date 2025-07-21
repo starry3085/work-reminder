@@ -61,6 +61,9 @@ body {
     border-radius: var(--border-radius);
     padding: 2rem;
     box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 }
 
 /* 状态显示区域 */
@@ -80,16 +83,37 @@ body {
     align-items: center;
     gap: 1rem;
     transition: var(--transition);
+    position: relative;
+    overflow: hidden;
 }
 
 .reminder-card:hover {
     border-color: var(--primary-color);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .reminder-card.active {
     border-color: var(--primary-color);
     background: linear-gradient(135deg, #f8fff8 0%, #ffffff 100%);
+}
+
+.reminder-card.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary-color);
+}
+
+.reminder-card.water.active::before {
+    background: #2196F3;
+}
+
+.reminder-card.posture.active::before {
+    background: #FF9800;
 }
 
 .card-icon {
@@ -105,18 +129,59 @@ body {
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-content h3 .status-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    background: var(--background-secondary);
+    color: var(--text-secondary);
+    font-weight: normal;
+}
+
+.card-content h3 .status-badge.active {
+    background: #e8f5e9;
+    color: var(--primary-color);
 }
 
 .status-display {
     font-size: 0.9rem;
     color: var(--text-secondary);
     margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-display .status-icon {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+}
+
+.status-display .status-icon.active {
+    background: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
 .time-remaining {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--primary-color);
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.time-remaining .time-icon {
+    font-size: 0.9rem;
+    opacity: 0.7;
 }
 
 .daily-stats {

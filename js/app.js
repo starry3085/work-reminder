@@ -109,7 +109,19 @@ class OfficeWellnessApp {
      * @private
      */
     loadSettings() {
-        // 待实现
+        try {
+            const savedSettings = this.storageManager.loadSettings('appSettings');
+            if (savedSettings) {
+                // 深度合并保存的设置和默认设置
+                this.currentSettings = this.mergeSettings(this.defaultSettings, savedSettings);
+                console.log('已加载用户设置:', this.currentSettings);
+            } else {
+                console.log('使用默认设置');
+            }
+        } catch (error) {
+            console.warn('加载设置失败，使用默认设置:', error);
+            this.currentSettings = { ...this.defaultSettings };
+        }
     }
 
     /**
@@ -117,7 +129,12 @@ class OfficeWellnessApp {
      * @private
      */
     saveSettings() {
-        // 待实现
+        try {
+            this.storageManager.saveSettings('appSettings', this.currentSettings);
+            console.log('设置已保存');
+        } catch (error) {
+            console.error('保存设置失败:', error);
+        }
     }
 
     /**
@@ -175,7 +192,21 @@ class OfficeWellnessApp {
      * @private
      */
     initializeUI() {
-        // 待实现
+        if (!this.uiController) {
+            console.error('UI控制器未初始化');
+            return;
+        }
+
+        // 初始化UI控制器
+        this.uiController.initialize();
+        
+        // 应用当前设置到UI
+        this.uiController.applySettingsToUI(this.currentSettings);
+        
+        // 绑定UI事件到应用逻辑
+        this.setupUIEventHandlers();
+        
+        console.log('UI初始化完成');
     }
 
     /**
@@ -183,7 +214,35 @@ class OfficeWellnessApp {
      * @private
      */
     async requestNotificationPermission() {
-        // 待实现
+        if (!this.currentSettings.notifications.browserNotifications) {
+            return;
+        }
+
+        try {
+            const hasPermission = await this.notificationService.requestPermission();
+            if (!hasPermission) {
+                // 显示权限请求提示
+                this.uiController.showPermissionPrompt(
+                    async () => {
+                        // 用户点击允许
+                        const granted = await this.notificationService.requestPermission();
+                        if (granted) {
+                            console.log('通知权限已获得');
+                        } else {
+                            console.log('用户拒绝了通知权限');
+                        }
+                    },
+                    () => {
+                        // 用户点击拒绝
+                        console.log('用户选择不开启通知权限');
+                        this.currentSettings.notifications.browserNotifications = false;
+                        this.saveSettings();
+                    }
+                );
+            }
+        } catch (error) {
+            console.warn('请求通知权限失败:', error);
+        }
     }
 
     /**
@@ -192,7 +251,23 @@ class OfficeWellnessApp {
      * @private
      */
     handleInitializationError(error) {
-        // 待实现
+        console.error('应用初始化错误:', error);
+        
+        // 显示用户友好的错误信息
+        const errorMessage = this.getErrorMessage(error);
+        
+        // 尝试显示错误信息
+        try {
+            if (this.uiController) {
+                this.uiController.showInPageNotification('error', '初始化失败', errorMessage);
+            } else {
+                // 如果UI控制器不可用，直接在页面显示
+                this.showFallbackError(errorMessage);
+            }
+        } catch (displayError) {
+            console.error('显示错误信息失败:', displayError);
+            this.showFallbackError('应用启动失败，请刷新页面重试');
+        }
     }
 
     /**
