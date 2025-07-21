@@ -103,9 +103,27 @@
         </div>
         
         <div class="test-section">
-            <h2>集成测试</h2>
-            <button onclick="runIntegrationTests()">运行集成测试</button>
+            <h2>基础集成测试</h2>
+            <button onclick="runIntegrationTests()">运行基础集成测试</button>
             <div id="integrationOutput" class="output" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>用户流程集成测试</h2>
+            <button onclick="runUserFlowTests()">运行用户流程测试</button>
+            <div id="userFlowOutput" class="output" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>浏览器兼容性测试</h2>
+            <button onclick="runBrowserCompatibilityTests()">运行兼容性测试</button>
+            <div id="compatibilityOutput" class="output" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>响应式设计测试</h2>
+            <button onclick="runResponsiveDesignTests()">运行响应式设计测试</button>
+            <div id="responsiveOutput" class="output" style="display: none;"></div>
         </div>
         
         <div class="test-section">
@@ -130,6 +148,9 @@
     <script src="reminder-manager.test.js"></script>
     <script src="mobile-adapter.test.js"></script>
     <script src="activity-reminder-integration.test.js"></script>
+    <script src="user-flow-integration.test.js"></script>
+    <script src="browser-compatibility.test.js"></script>
+    <script src="responsive-design.test.js"></script>
 
     <script>
         // 重定向console输出到页面
@@ -345,12 +366,102 @@
             await new Promise(resolve => setTimeout(resolve, 500));
             
             await runIntegrationTests();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await runUserFlowTests();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await runBrowserCompatibilityTests();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await runResponsiveDesignTests();
             
             console.log('\n🎉 所有测试运行完成！');
         }
 
+        async function runUserFlowTests() {
+            const redirector = createConsoleRedirector('userFlowOutput');
+            
+            try {
+                redirector.start();
+                console.log('=== 用户流程集成测试 ===\n');
+                
+                const tests = new UserFlowIntegrationTests();
+                const success = tests.runAllTests();
+                
+                console.log('\n=== 测试完成 ===');
+                if (success) {
+                    console.log('✅ 所有测试通过！');
+                } else {
+                    console.log('❌ 部分测试失败');
+                }
+                
+            } catch (error) {
+                console.error('测试运行出错:', error);
+            } finally {
+                redirector.stop();
+            }
+        }
+
+        async function runBrowserCompatibilityTests() {
+            const redirector = createConsoleRedirector('compatibilityOutput');
+            
+            try {
+                redirector.start();
+                console.log('=== 浏览器兼容性测试 ===\n');
+                
+                const tests = new BrowserCompatibilityTests();
+                const success = tests.runAllTests();
+                
+                console.log('\n=== 测试完成 ===');
+                if (success) {
+                    console.log('✅ 所有测试通过！');
+                } else {
+                    console.log('❌ 部分测试失败');
+                }
+                
+            } catch (error) {
+                console.error('测试运行出错:', error);
+            } finally {
+                redirector.stop();
+            }
+        }
+
+        async function runResponsiveDesignTests() {
+            const redirector = createConsoleRedirector('responsiveOutput');
+            
+            try {
+                redirector.start();
+                console.log('=== 响应式设计测试 ===\n');
+                
+                const tests = new ResponsiveDesignTests();
+                const success = tests.runAllTests();
+                
+                console.log('\n=== 测试完成 ===');
+                if (success) {
+                    console.log('✅ 所有测试通过！');
+                } else {
+                    console.log('❌ 部分测试失败');
+                }
+                
+            } catch (error) {
+                console.error('测试运行出错:', error);
+            } finally {
+                redirector.stop();
+            }
+        }
+
         function clearAllOutputs() {
-            const outputs = ['storageOutput', 'settingsOutput', 'reminderOutput', 'mobileOutput', 'integrationOutput'];
+            const outputs = [
+                'storageOutput', 
+                'settingsOutput', 
+                'reminderOutput', 
+                'mobileOutput', 
+                'integrationOutput',
+                'userFlowOutput',
+                'compatibilityOutput',
+                'responsiveOutput'
+            ];
             outputs.forEach(id => {
                 const element = document.getElementById(id);
                 element.innerHTML = '';
