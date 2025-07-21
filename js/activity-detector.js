@@ -160,4 +160,27 @@ class ActivityDetector {
         }
         return false;
     }
+    
+    /**
+     * 设置最后活动时间（用于状态恢复）
+     * @param {number} timestamp - 时间戳
+     */
+    setLastActivityTime(timestamp) {
+        if (typeof timestamp === 'number' && timestamp > 0) {
+            this.lastActivityTime = timestamp;
+            
+            // 检查是否应该更新离开状态
+            const now = Date.now();
+            const timeSinceLastActivity = now - this.lastActivityTime;
+            
+            if (timeSinceLastActivity > this.awayThreshold) {
+                this.isAway = true;
+            } else {
+                this.isAway = false;
+            }
+            
+            return true;
+        }
+        return false;
+    }
 }

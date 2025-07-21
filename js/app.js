@@ -3,45 +3,23 @@
  */
 class OfficeWellnessApp {
     constructor() {
-        // 默认设置
-        this.defaultSettings = {
-            water: {
-                enabled: true,
-                interval: 30, // 分钟
-                sound: true,
-                lastReminder: null,
-                target: 8 // 每日目标杯数
-            },
-            posture: {
-                enabled: true,
-                interval: 60, // 分钟
-                sound: true,
-                lastReminder: null,
-                activityThreshold: 5, // 分钟
-                target: 8, // 每日目标次数
-                activityDetection: true // 活动检测
-            },
-            notifications: {
-                browserNotifications: true,
-                soundEnabled: true,
-                style: 'standard' // 通知样式: standard, minimal, detailed
-            },
-            appearance: {
-                theme: 'light', // 主题: light, dark, auto
-                language: 'zh-CN'
-            }
-        };
-
-        this.currentSettings = { ...this.defaultSettings };
         this.isInitialized = false;
         
         // 组件实例
         this.storageManager = null;
+        this.appSettings = null;
         this.notificationService = null;
         this.activityDetector = null;
         this.waterReminder = null;
         this.postureReminder = null;
         this.uiController = null;
+        
+        // 应用状态
+        this.appState = {
+            isInitializing: false,
+            isFirstUse: false,
+            lastSessionTime: null
+        };
     }
 
     /**
@@ -50,12 +28,13 @@ class OfficeWellnessApp {
     async initialize() {
         try {
             console.log('正在初始化办公族健康提醒应用...');
+            this.appState.isInitializing = true;
             
             // 初始化各个组件
             await this.initializeComponents();
             
-            // 加载用户设置
-            this.loadSettings();
+            // 加载用户设置和状态
+            await this.loadSettingsAndState();
             
             // 设置事件监听
             this.setupEventListeners();
@@ -66,11 +45,24 @@ class OfficeWellnessApp {
             // 请求通知权限
             await this.requestNotificationPermission();
             
+            // 恢复上次会话状态
+            await this.restorePreviousState();
+            
+            // 检查是否首次使用
+            if (this.appSettings.isFirstUse()) {
+                this.showFirstUseGuide();
+            }
+            
             this.isInitialized = true;
+            this.appState.isInitializing = false;
             console.log('应用初始化完成');
+            
+            // 记录会话开始时间
+            this.appState.lastSessionTime = Date.now();
             
         } catch (error) {
             console.error('应用初始化失败:', error);
+            this.appState.isInitializing = false;
             this.handleInitializationError(error);
         }
     }
@@ -83,6 +75,9 @@ class OfficeWellnessApp {
         // 初始化存储管理器
         this.storageManager = new StorageManager();
         
+        // 初始化应用设置管理器
+        this.appSettings = new AppSettings(this.storageManager);
+        
         // 初始化通知服务
         this.notificationService = new NotificationService();
         
@@ -90,16 +85,30 @@ class OfficeWellnessApp {
         this.activityDetector = new ActivityDetector((event) => {
             console.log('用户活动状态变化:', event);
             // 活动检测器的回调会在ReminderManager中处理
+            
+            // 更新应用状态中的用户活动信息
+            if (this.appSettings) {
+                const currentState = this.appSettings.getState();
+                currentState.userActivity = {
+                    isActive: event.isActive,
+                    lastActivityTime: event.lastActivityTime,
+                    awayStartTime: event.awayStartTime
+                };
+                this.appSettings.updateState(currentState);
+            }
         });
+        
+        // 获取当前设置
+        const currentSettings = this.appSettings.getSettings();
         
         // 初始化提醒管理器
         this.waterReminder = new WaterReminder(
-            this.currentSettings.water, 
+            currentSettings.water, 
             this.notificationService
         );
         
         this.postureReminder = new PostureReminder(
-            this.currentSettings.posture, 
+            currentSettings.posture, 
             this.notificationService,
             this.activityDetector // 将活动检测器传递给久坐提醒
         );
@@ -109,22 +118,26 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 加载用户设置
+     * 加载用户设置和应用状态
      * @private
      */
-    loadSettings() {
+    async loadSettingsAndState() {
         try {
-            const savedSettings = this.storageManager.loadSettings('appSettings');
-            if (savedSettings) {
-                // 深度合并保存的设置和默认设置
-                this.currentSettings = this.mergeSettings(this.defaultSettings, savedSettings);
-                console.log('已加载用户设置:', this.currentSettings);
-            } else {
-                console.log('使用默认设置');
-            }
+            // 加载设置
+            const settings = this.appSettings.loadSettings();
+            console.log('已加载用户设置:', settings);
+            
+            // 加载应用状态
+            const state = this.appSettings.loadState();
+            console.log('已加载应用状态:', state);
+            
+            // 检查是否首次使用
+            this.appState.isFirstUse = this.appSettings.isFirstUse();
+            
+            return { settings, state };
         } catch (error) {
-            console.warn('加载设置失败，使用默认设置:', error);
-            this.currentSettings = { ...this.defaultSettings };
+            console.warn('加载设置和状态失败:', error);
+            throw error;
         }
     }
 
@@ -134,10 +147,54 @@ class OfficeWellnessApp {
      */
     saveSettings() {
         try {
-            this.storageManager.saveSettings('appSettings', this.currentSettings);
+            const currentSettings = this.appSettings.getSettings();
+            this.appSettings.saveSettings(currentSettings);
             console.log('设置已保存');
+            return true;
         } catch (error) {
             console.error('保存设置失败:', error);
+            return false;
+        }
+    }
+    
+    /**
+     * 保存应用状态
+     * @private
+     */
+    saveAppState() {
+        try {
+            // 获取当前提醒状态
+            const waterStatus = this.waterReminder ? this.waterReminder.getCurrentStatus() : null;
+            const postureStatus = this.postureReminder ? this.postureReminder.getCurrentStatus() : null;
+            
+            // 更新应用状态
+            const currentState = this.appSettings.getState();
+            
+            if (waterStatus) {
+                currentState.waterReminder = {
+                    isActive: waterStatus.isActive,
+                    timeRemaining: waterStatus.timeRemaining,
+                    nextReminderAt: waterStatus.nextReminderAt,
+                    lastAcknowledged: waterStatus.lastAcknowledged
+                };
+            }
+            
+            if (postureStatus) {
+                currentState.postureReminder = {
+                    isActive: postureStatus.isActive,
+                    timeRemaining: postureStatus.timeRemaining,
+                    nextReminderAt: postureStatus.nextReminderAt,
+                    lastAcknowledged: postureStatus.lastAcknowledged
+                };
+            }
+            
+            // 保存状态
+            this.appSettings.saveState(currentState);
+            console.log('应用状态已保存');
+            return true;
+        } catch (error) {
+            console.error('保存应用状态失败:', error);
+            return false;
         }
     }
 
@@ -290,7 +347,22 @@ class OfficeWellnessApp {
     handleSaveSettings() {
         try {
             const newSettings = this.uiController.getSettingsFromUI();
-            this.updateSettings(newSettings);
+            
+            // 验证设置
+            if (!this.appSettings.validateSettings(newSettings)) {
+                throw new Error('设置验证失败');
+            }
+            
+            // 更新设置
+            this.appSettings.updateSettings(newSettings);
+            
+            // 更新提醒管理器
+            if (this.waterReminder && newSettings.water) {
+                this.waterReminder.updateSettings(newSettings.water);
+            }
+            if (this.postureReminder && newSettings.posture) {
+                this.postureReminder.updateSettings(newSettings.posture);
+            }
             
             // 显示保存成功提示
             this.notificationService.showInPageAlert('success', {
@@ -317,21 +389,18 @@ class OfficeWellnessApp {
     handleResetSettings() {
         try {
             // 重置为默认设置
-            this.currentSettings = { ...this.defaultSettings };
+            const defaultSettings = this.appSettings.resetSettings();
             
             // 应用到UI
-            this.uiController.applySettingsToUI(this.currentSettings);
+            this.uiController.applySettingsToUI(defaultSettings);
             
             // 更新提醒管理器
             if (this.waterReminder) {
-                this.waterReminder.updateSettings(this.currentSettings.water);
+                this.waterReminder.updateSettings(defaultSettings.water);
             }
             if (this.postureReminder) {
-                this.postureReminder.updateSettings(this.currentSettings.posture);
+                this.postureReminder.updateSettings(defaultSettings.posture);
             }
-            
-            // 保存设置
-            this.saveSettings();
             
             // 显示重置成功提示
             this.notificationService.showInPageAlert('success', {
@@ -364,6 +433,14 @@ class OfficeWellnessApp {
                 posture: { completed: 0, target: 8 }
             };
             
+            // 获取当前设置中的目标值
+            const currentSettings = this.appSettings.getSettings();
+            if (type === 'water' && currentSettings.water) {
+                dailyStats.water.target = currentSettings.water.target;
+            } else if (type === 'posture' && currentSettings.posture) {
+                dailyStats.posture.target = currentSettings.posture.target;
+            }
+            
             // 更新统计
             if (dailyStats[type]) {
                 dailyStats[type].completed += 1;
@@ -389,26 +466,172 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 深度合并设置对象
-     * @param {Object} target - 目标对象
-     * @param {Object} source - 源对象
-     * @returns {Object} 合并后的对象
+     * 恢复上次会话状态
      * @private
      */
-    mergeSettings(target, source) {
-        const result = { ...target };
-        
-        for (const key in source) {
-            if (source.hasOwnProperty(key)) {
-                if (source[key] instanceof Object && !Array.isArray(source[key]) && key in result) {
-                    result[key] = this.mergeSettings(result[key], source[key]);
-                } else {
-                    result[key] = source[key];
+    async restorePreviousState() {
+        try {
+            console.log('正在恢复上次会话状态...');
+            const currentState = this.appSettings.getState();
+            const currentSettings = this.appSettings.getSettings();
+            
+            // 恢复水提醒状态
+            if (currentState.waterReminder && this.waterReminder) {
+                // 检查是否应该恢复活动状态
+                if (currentState.waterReminder.isActive && currentSettings.water.enabled) {
+                    console.log('恢复水提醒状态');
+                    
+                    // 计算剩余时间
+                    let timeRemaining = 0;
+                    if (currentState.waterReminder.nextReminderAt) {
+                        const now = Date.now();
+                        const nextReminder = currentState.waterReminder.nextReminderAt;
+                        timeRemaining = Math.max(0, nextReminder - now);
+                    }
+                    
+                    // 如果剩余时间有效，则恢复计时器
+                    if (timeRemaining > 0 && timeRemaining < currentSettings.water.interval * 60 * 1000) {
+                        this.waterReminder.restoreState({
+                            isActive: true,
+                            timeRemaining: timeRemaining,
+                            nextReminderAt: currentState.waterReminder.nextReminderAt,
+                            lastAcknowledged: currentState.waterReminder.lastAcknowledged
+                        });
+                    } else {
+                        // 如果时间无效，则重新开始
+                        this.waterReminder.start();
+                    }
                 }
             }
+            
+            // 恢复久坐提醒状态
+            if (currentState.postureReminder && this.postureReminder) {
+                // 检查是否应该恢复活动状态
+                if (currentState.postureReminder.isActive && currentSettings.posture.enabled) {
+                    console.log('恢复久坐提醒状态');
+                    
+                    // 计算剩余时间
+                    let timeRemaining = 0;
+                    if (currentState.postureReminder.nextReminderAt) {
+                        const now = Date.now();
+                        const nextReminder = currentState.postureReminder.nextReminderAt;
+                        timeRemaining = Math.max(0, nextReminder - now);
+                    }
+                    
+                    // 如果剩余时间有效，则恢复计时器
+                    if (timeRemaining > 0 && timeRemaining < currentSettings.posture.interval * 60 * 1000) {
+                        this.postureReminder.restoreState({
+                            isActive: true,
+                            timeRemaining: timeRemaining,
+                            nextReminderAt: currentState.postureReminder.nextReminderAt,
+                            lastAcknowledged: currentState.postureReminder.lastAcknowledged
+                        });
+                    } else {
+                        // 如果时间无效，则重新开始
+                        this.postureReminder.start();
+                    }
+                }
+            }
+            
+            // 恢复用户活动状态
+            if (currentState.userActivity && this.activityDetector) {
+                this.activityDetector.setLastActivityTime(currentState.userActivity.lastActivityTime || Date.now());
+            }
+            
+            console.log('会话状态恢复完成');
+            return true;
+        } catch (error) {
+            console.error('恢复会话状态失败:', error);
+            return false;
         }
-        
-        return result;
+    }
+    
+    /**
+     * 显示首次使用引导
+     * @private
+     */
+    showFirstUseGuide() {
+        try {
+            console.log('显示首次使用引导...');
+            
+            // 创建引导弹窗
+            const guideOverlay = document.createElement('div');
+            guideOverlay.className = 'guide-overlay';
+            guideOverlay.innerHTML = `
+                <div class="guide-modal">
+                    <div class="guide-header">
+                        <h2>欢迎使用办公族健康提醒</h2>
+                        <button class="btn-close" id="guide-close">✕</button>
+                    </div>
+                    <div class="guide-content">
+                        <div class="guide-step">
+                            <div class="guide-step-number">1</div>
+                            <div class="guide-step-content">
+                                <h3>设置提醒间隔</h3>
+                                <p>根据您的需要设置喝水和久坐提醒的时间间隔</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-number">2</div>
+                            <div class="guide-step-content">
+                                <h3>开启提醒</h3>
+                                <p>点击"开始"按钮启动提醒功能</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-number">3</div>
+                            <div class="guide-step-content">
+                                <h3>确认完成</h3>
+                                <p>收到提醒后，点击"已完成"按钮确认并重置计时器</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="guide-footer">
+                        <button class="btn-primary" id="guide-settings">设置提醒</button>
+                        <button class="btn-secondary" id="guide-start">直接开始</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(guideOverlay);
+            
+            // 添加事件监听
+            document.getElementById('guide-close').addEventListener('click', () => {
+                this.closeFirstUseGuide(guideOverlay);
+            });
+            
+            document.getElementById('guide-settings').addEventListener('click', () => {
+                this.closeFirstUseGuide(guideOverlay);
+                // 打开设置面板
+                if (this.uiController) {
+                    this.uiController.showSettings();
+                }
+            });
+            
+            document.getElementById('guide-start').addEventListener('click', () => {
+                this.closeFirstUseGuide(guideOverlay);
+                // 直接开始提醒
+                this.startReminder('water');
+                this.startReminder('posture');
+            });
+            
+            // 标记首次使用完成
+            this.appSettings.markFirstUseComplete();
+            
+        } catch (error) {
+            console.error('显示首次使用引导失败:', error);
+        }
+    }
+    
+    /**
+     * 关闭首次使用引导
+     * @param {HTMLElement} guideOverlay - 引导弹窗元素
+     * @private
+     */
+    closeFirstUseGuide(guideOverlay) {
+        if (guideOverlay && guideOverlay.parentNode) {
+            guideOverlay.parentNode.removeChild(guideOverlay);
+        }
     }
 
     /**
@@ -527,14 +750,22 @@ class OfficeWellnessApp {
      * @param {string} type - 'water' | 'posture'
      */
     startReminder(type) {
+        const currentSettings = this.appSettings.getSettings();
+        
         if (type === 'water' && this.waterReminder) {
             this.waterReminder.start();
-            this.currentSettings.water.enabled = true;
-            this.saveSettings();
+            currentSettings.water.enabled = true;
+            this.appSettings.updateSettings(currentSettings);
+            
+            // 保存应用状态
+            this.saveAppState();
         } else if (type === 'posture' && this.postureReminder) {
             this.postureReminder.start();
-            this.currentSettings.posture.enabled = true;
-            this.saveSettings();
+            currentSettings.posture.enabled = true;
+            this.appSettings.updateSettings(currentSettings);
+            
+            // 保存应用状态
+            this.saveAppState();
         }
     }
 
@@ -543,14 +774,22 @@ class OfficeWellnessApp {
      * @param {string} type - 'water' | 'posture'
      */
     stopReminder(type) {
+        const currentSettings = this.appSettings.getSettings();
+        
         if (type === 'water' && this.waterReminder) {
             this.waterReminder.stop();
-            this.currentSettings.water.enabled = false;
-            this.saveSettings();
+            currentSettings.water.enabled = false;
+            this.appSettings.updateSettings(currentSettings);
+            
+            // 保存应用状态
+            this.saveAppState();
         } else if (type === 'posture' && this.postureReminder) {
             this.postureReminder.stop();
-            this.currentSettings.posture.enabled = false;
-            this.saveSettings();
+            currentSettings.posture.enabled = false;
+            this.appSettings.updateSettings(currentSettings);
+            
+            // 保存应用状态
+            this.saveAppState();
         }
     }
 
@@ -561,8 +800,14 @@ class OfficeWellnessApp {
     resetReminder(type) {
         if (type === 'water' && this.waterReminder) {
             this.waterReminder.reset();
+            
+            // 保存应用状态
+            this.saveAppState();
         } else if (type === 'posture' && this.postureReminder) {
             this.postureReminder.reset();
+            
+            // 保存应用状态
+            this.saveAppState();
         }
     }
 
@@ -571,40 +816,33 @@ class OfficeWellnessApp {
      * @param {Object} newSettings
      */
     updateSettings(newSettings) {
-        // 深度合并设置
-        const mergeSettings = (target, source) => {
-            for (const key in source) {
-                if (source.hasOwnProperty(key)) {
-                    if (source[key] instanceof Object && key in target) {
-                        mergeSettings(target[key], source[key]);
-                    } else {
-                        target[key] = source[key];
-                    }
-                }
+        try {
+            // 更新设置
+            const updatedSettings = this.appSettings.updateSettings(newSettings);
+            
+            // 更新提醒管理器设置
+            if (newSettings.water && this.waterReminder) {
+                this.waterReminder.updateSettings(newSettings.water);
             }
-            return target;
-        };
-        
-        this.currentSettings = mergeSettings(this.currentSettings, newSettings);
-        
-        // 更新提醒管理器设置
-        if (newSettings.water && this.waterReminder) {
-            this.waterReminder.updateSettings(newSettings.water);
+            
+            if (newSettings.posture && this.postureReminder) {
+                this.postureReminder.updateSettings(newSettings.posture);
+            }
+            
+            // 更新UI
+            if (this.uiController) {
+                this.uiController.updateSettings(updatedSettings);
+            }
+            
+            // 保存应用状态
+            this.saveAppState();
+            
+            console.log('设置已更新:', updatedSettings);
+            return updatedSettings;
+        } catch (error) {
+            console.error('更新设置失败:', error);
+            throw error;
         }
-        
-        if (newSettings.posture && this.postureReminder) {
-            this.postureReminder.updateSettings(newSettings.posture);
-        }
-        
-        // 保存设置到本地存储
-        this.saveSettings();
-        
-        // 更新UI
-        if (this.uiController) {
-            this.uiController.updateSettings(this.currentSettings);
-        }
-        
-        console.log('设置已更新:', this.currentSettings);
     }
 
     /**
@@ -614,7 +852,8 @@ class OfficeWellnessApp {
     getAppState() {
         return {
             isInitialized: this.isInitialized,
-            settings: this.currentSettings,
+            settings: this.appSettings?.getSettings(),
+            state: this.appSettings?.getState(),
             waterReminder: this.waterReminder?.getCurrentStatus(),
             postureReminder: this.postureReminder?.getCurrentStatus()
         };
@@ -661,7 +900,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 页面卸载前保存状态
 window.addEventListener('beforeunload', () => {
     if (app && app.isInitialized) {
+        // 保存设置和应用状态
         app.saveSettings();
+        app.saveAppState();
+    }
+});
+
+// 页面可见性变化时保存状态
+document.addEventListener('visibilitychange', () => {
+    if (app && app.isInitialized) {
+        if (document.visibilityState === 'hidden') {
+            // 页面隐藏时保存状态
+            app.saveAppState();
+        } else if (document.visibilityState === 'visible') {
+            // 页面可见时检查状态
+            // 这里可以添加额外的恢复逻辑，如果需要的话
+        }
     }
 });
 

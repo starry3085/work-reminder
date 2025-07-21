@@ -505,6 +505,72 @@ class ReminderManager {
     }
 
     /**
+     * 恢复保存的状态
+     * @param {Object} state - 要恢复的状态
+     */
+    restoreState(state) {
+        if (!state) return;
+        
+        try {
+            // 恢复活动状态
+            this.isActive = state.isActive || false;
+            this.isPaused = state.isPaused || false;
+            
+            // 恢复时间信息
+            if (state.timeRemaining) {
+                this.timeRemaining = state.timeRemaining;
+            }
+            
+            if (state.nextReminderAt) {
+                this.nextReminderTime = state.nextReminderAt;
+            } else if (this.timeRemaining > 0) {
+                this.nextReminderTime = Date.now() + this.timeRemaining;
+            }
+            
+            // 如果是活动状态，启动定时器
+            if (this.isActive && !this.isPaused) {
+                this.startTime = Date.now();
+                this.startTimer();
+                this.startUpdateTimer();
+                
+                // 如果是久坐提醒，启动活动检测
+                if (this.type === 'posture' && this.activityDetector) {
+                    this.activityDetector.startMonitoring();
+                }
+                
+                // 触发状态变化回调
+                this.triggerStatusChange({
+                    status: 'restored',
+                    isActive: true,
+                    isPaused: false,
+                    timeRemaining: this.timeRemaining
+                });
+            } else if (this.isActive && this.isPaused) {
+                // 如果是暂停状态，只触发状态变化回调
+                this.pauseTime = Date.now();
+                
+                this.triggerStatusChange({
+                    status: 'restored',
+                    isActive: true,
+                    isPaused: true,
+                    timeRemaining: this.timeRemaining
+                });
+            }
+            
+            console.log(`${this.type}提醒状态已恢复:`, {
+                isActive: this.isActive,
+                isPaused: this.isPaused,
+                timeRemaining: this.timeRemaining
+            });
+            
+            return true;
+        } catch (error) {
+            console.error(`恢复${this.type}提醒状态失败:`, error);
+            return false;
+        }
+    }
+
+    /**
      * 销毁提醒管理器
      */
     destroy() {
