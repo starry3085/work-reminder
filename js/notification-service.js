@@ -159,20 +159,46 @@ class NotificationService {
         // 移除已存在的通知
         this.hideInPageAlert();
 
+        // 检测是否为移动设备
+        const isMobile = window.mobileAdapter && window.mobileAdapter.isMobile;
+
         // 创建通知容器
         const alertContainer = document.createElement('div');
-        alertContainer.className = `notification-alert notification-${type}`;
+        alertContainer.className = `notification-alert notification-${type}${isMobile ? ' mobile' : ''}`;
         alertContainer.id = 'wellness-notification';
 
-        // 创建通知内容
-        alertContainer.innerHTML = `
-            <div class="notification-content">
-                <div class="notification-icon">
-                    ${this.getNotificationEmoji(type)}
+        // 创建通知内容 - 移动设备使用更紧凑的布局
+        if (isMobile) {
+            alertContainer.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        ${this.getNotificationEmoji(type)}
+                    </div>
+                    <div class="notification-text">
+                        <h3 class="notification-title">${title}</h3>
+                        <p class="notification-message">${message}</p>
+                    </div>
                 </div>
-                <div class="notification-text">
-                    <h3 class="notification-title">${title}</h3>
-                    <p class="notification-message">${message}</p>
+                <div class="notification-actions">
+                    <button class="btn btn-primary mobile-touch-feedback" id="confirm-btn">
+                        ${type === 'water' ? '已喝水' : '已起身活动'}
+                    </button>
+                    <button class="btn btn-secondary mobile-touch-feedback" id="snooze-btn">
+                        稍后提醒
+                    </button>
+                </div>
+            `;
+        } else {
+            alertContainer.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        ${this.getNotificationEmoji(type)}
+                    </div>
+                    <div class="notification-text">
+                        <h3 class="notification-title">${title}</h3>
+                        <p class="notification-message">${message}</p>
+                    </div>
+                    <button class="btn btn-close" id="close-btn">×</button>
                 </div>
                 <div class="notification-actions">
                     <button class="btn btn-primary" id="confirm-btn">
@@ -181,10 +207,9 @@ class NotificationService {
                     <button class="btn btn-secondary" id="snooze-btn">
                         稍后提醒
                     </button>
-                    <button class="btn btn-close" id="close-btn">×</button>
                 </div>
-            </div>
-        `;
+            `;
+        }
 
         // 添加到页面
         document.body.appendChild(alertContainer);
@@ -204,21 +229,42 @@ class NotificationService {
             if (onSnooze) onSnooze();
         });
 
-        closeBtn.addEventListener('click', () => {
-            this.hideInPageAlert();
-        });
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.hideInPageAlert();
+            });
+        }
+
+        // 在移动设备上，点击通知背景也可以关闭
+        if (isMobile) {
+            alertContainer.addEventListener('click', (e) => {
+                // 只有点击背景才关闭，避免点击按钮时关闭
+                if (e.target === alertContainer) {
+                    this.hideInPageAlert();
+                }
+            });
+        }
 
         // 添加显示动画
         setTimeout(() => {
             alertContainer.classList.add('show');
         }, 100);
 
-        // 自动隐藏（60秒后）
+        // 自动隐藏（移动设备30秒，桌面60秒）
         setTimeout(() => {
             if (document.getElementById('wellness-notification')) {
                 this.hideInPageAlert();
             }
-        }, 60000);
+        }, isMobile ? 30000 : 60000);
+        
+        // 在移动设备上添加振动反馈（如果支持）
+        if (isMobile && navigator.vibrate) {
+            try {
+                navigator.vibrate([200, 100, 200]);
+            } catch (e) {
+                console.warn('振动API不可用:', e);
+            }
+        }
     }
 
     /**

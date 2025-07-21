@@ -889,26 +889,29 @@ body {
     }
     
     .card-header {
-        justify-content: center;
+        justify-content: space-between;
     }
     
     .card-content {
-        text-align: center;
+        text-align: left;
     }
     
     .status-info {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0.5rem;
+        justify-content: space-between;
+        align-items: center;
     }
     
     .next-reminder, .activity-status {
-        flex-direction: column;
+        flex-direction: row;
         gap: 0.25rem;
+        justify-content: space-between;
     }
     
     .card-controls {
         flex-direction: row;
-        justify-content: center;
+        justify-content: flex-end;
     }
     
     .settings-panel {
@@ -917,35 +920,75 @@ body {
     }
     
     .quick-actions {
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
     }
     
     .quick-actions-group {
-        flex-direction: column;
-        width: 100%;
+        flex-direction: row;
+        width: auto;
+        gap: 0.5rem;
     }
     
     .btn-action {
-        width: 100%;
-        max-width: 200px;
+        width: auto;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
     }
     
     .summary-content {
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+    
+    .summary-item {
+        width: auto;
         flex-direction: column;
         align-items: center;
     }
     
-    .summary-item {
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-between;
+    /* Touch-friendly adjustments */
+    button, .btn-primary, .btn-secondary, .btn-action {
+        min-height: 44px; /* Minimum touch target size */
+    }
+    
+    .setting-item input[type="range"] {
+        height: 30px;
+    }
+    
+    /* Improved touch targets for settings */
+    .setting-item {
+        padding: 0.5rem 0;
+    }
+    
+    /* Swipe gesture area */
+    .swipe-area {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 20px;
+        height: 100%;
+        z-index: 999;
+    }
+    
+    /* Mobile notification adjustments */
+    .notification-alert {
+        width: calc(100% - 20px);
+        max-width: 100%;
     }
 }
 
 @media (max-width: 480px) {
     .app-header h1 {
         font-size: 1.5rem;
+    }
+    
+    .app-subtitle {
+        font-size: 0.9rem;
     }
     
     .notification-modal, .help-modal {
@@ -955,10 +998,128 @@ body {
     
     .notification-actions {
         flex-direction: column;
+        gap: 0.75rem;
     }
     
-    .settings-actions {
+    .notification-actions button {
+        width: 100%;
+    }
+    
+    .settings-footer {
         flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .settings-footer button {
+        width: 100%;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
+    }
+    
+    .quick-actions-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .quick-actions-group button {
+        flex: 1;
+        text-align: center;
+        padding: 0.75rem 0.5rem;
+    }
+    
+    /* Adjust card controls for better mobile experience */
+    .card-controls {
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
+    
+    .card-controls button {
+        flex: 1;
+        margin: 0 0.25rem;
+    }
+    
+    /* Improve settings panel for small screens */
+    .settings-content {
+        padding: 0.75rem;
+    }
+    
+    .settings-section {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .setting-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .setting-label {
+        margin-bottom: 0.5rem;
+    }
+    
+    .setting-control {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    /* Adjust theme selector for mobile */
+    .theme-selector {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Portrait orientation specific styles */
+@media (max-width: 480px) and (orientation: portrait) {
+    .status-section {
+        margin-bottom: 1rem;
+    }
+    
+    .reminder-card {
+        padding: 1rem;
+    }
+}
+
+/* Landscape orientation specific styles */
+@media (max-height: 480px) and (orientation: landscape) {
+    .app-header {
+        margin-bottom: 1rem;
+    }
+    
+    .app-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .app-subtitle {
+        display: none;
+    }
+    
+    .status-section {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .reminder-card {
+        padding: 0.75rem;
+    }
+    
+    .card-header {
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-content {
+        gap: 0.5rem;
+    }
+    
+    .status-summary {
+        margin-top: 0.5rem;
     }
 }/* 开
 关样式 */
@@ -1011,4 +1172,160 @@ input:focus + .slider {
 
 input:checked + .slider:before {
     transform: translateX(26px);
+}/* Mob
+ile-specific enhancements */
+.mobile-touch-feedback {
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-touch-feedback::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.5s;
+}
+
+.mobile-touch-feedback:active::after {
+    transform: scale(0, 0);
+    opacity: 0.3;
+    transition: 0s;
+}
+
+/* Mobile gesture support */
+.swipe-indicator {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    width: 5px;
+    height: 60px;
+    background-color: rgba(76, 175, 80, 0.3);
+    border-radius: 3px 0 0 3px;
+    transform: translateY(-50%);
+    z-index: 990;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.swipe-indicator:hover,
+.swipe-indicator:active {
+    opacity: 0.8;
+}
+
+/* Mobile notification styles */
+@media (max-width: 768px) {
+    .notification-alert {
+        bottom: 20px;
+        top: auto;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) translateY(100px);
+        width: 90%;
+        max-width: 400px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    
+    .notification-alert.show {
+        transform: translateX(-50%) translateY(0);
+    }
+    
+    /* Fullscreen notification for mobile */
+    .notification-overlay .notification-modal {
+        width: 90%;
+        max-width: 350px;
+        padding: 1.5rem;
+    }
+    
+    /* Touch-friendly buttons */
+    .notification-actions .btn-primary,
+    .notification-actions .btn-secondary {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border-radius: 8px;
+    }
+    
+    /* Settings panel mobile adjustments */
+    .settings-panel.show {
+        box-shadow: -5px 0 25px rgba(0,0,0,0.25);
+    }
+    
+    /* Mobile-friendly range inputs */
+    input[type="range"] {
+        -webkit-appearance: none;
+        height: 6px;
+        background: var(--background-secondary);
+        border-radius: 3px;
+        width: 100%;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        cursor: pointer;
+        border: none;
+    }
+}
+
+/* Tablet-specific adjustments */
+@media (min-width: 481px) and (max-width: 768px) {
+    .status-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .quick-actions {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    
+    .settings-panel {
+        width: 80%;
+        right: -80%;
+    }
+}
+
+/* Accessibility improvements for mobile */
+@media (max-width: 768px) {
+    /* Increase contrast for better readability on mobile */
+    .text-secondary {
+        color: #555;
+    }
+    
+    /* Increase touch targets for better accessibility */
+    .setting-item label.switch {
+        width: 54px;
+        height: 28px;
+    }
+    
+    .setting-item .slider:before {
+        height: 20px;
+        width: 20px;
+    }
+    
+    /* Improve form controls for touch */
+    select, input[type="number"] {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        padding: 0.6rem;
+    }
 }
