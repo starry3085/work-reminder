@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>办公族健康提醒 - Office Wellness Reminder</title>
+    <meta name="description" content="帮助办公族养成健康工作习惯的喝水和防久坐提醒应用">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div id="app">
+        <!-- 主控制面板 -->
+        <main class="main-panel">
+            <header class="app-header">
+                <h1>办公族健康提醒</h1>
+                <p class="app-subtitle">保持健康工作习惯</p>
+            </header>
+
+            <!-- 状态显示区域 -->
+            <section class="status-section">
+                <div class="reminder-card" id="water-card">
+                    <div class="card-icon">💧</div>
+                    <div class="card-content">
+                        <h3>喝水提醒</h3>
+                        <div class="status-display" id="water-status">未启动</div>
+                        <div class="time-remaining" id="water-time"></div>
+                    </div>
+                    <div class="card-controls">
+                        <button class="btn-primary" id="water-toggle">开始</button>
+                        <button class="btn-secondary" id="water-reset" style="display: none;">重置</button>
+                    </div>
+                </div>
+
+                <div class="reminder-card" id="posture-card">
+                    <div class="card-icon">🪑</div>
+                    <div class="card-content">
+                        <h3>久坐提醒</h3>
+                        <div class="status-display" id="posture-status">未启动</div>
+                        <div class="time-remaining" id="posture-time"></div>
+                    </div>
+                    <div class="card-controls">
+                        <button class="btn-primary" id="posture-toggle">开始</button>
+                        <button class="btn-secondary" id="posture-reset" style="display: none;">重置</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 快速操作区域 -->
+            <section class="quick-actions">
+                <button class="btn-action" id="settings-btn">⚙️ 设置</button>
+                <button class="btn-action" id="help-btn">❓ 帮助</button>
+            </section>
+        </main>
+
+        <!-- 设置面板 -->
+        <aside class="settings-panel" id="settings-panel">
+            <div class="settings-header">
+                <h2>设置</h2>
+                <button class="btn-close" id="settings-close">✕</button>
+            </div>
+            
+            <div class="settings-content">
+                <div class="setting-group">
+                    <h3>喝水提醒</h3>
+                    <label>
+                        <input type="checkbox" id="water-enabled" checked>
+                        启用喝水提醒
+                    </label>
+                    <label>
+                        提醒间隔：
+                        <select id="water-interval">
+                            <option value="15">15分钟</option>
+                            <option value="30" selected>30分钟</option>
+                            <option value="45">45分钟</option>
+                            <option value="60">1小时</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="setting-group">
+                    <h3>久坐提醒</h3>
+                    <label>
+                        <input type="checkbox" id="posture-enabled" checked>
+                        启用久坐提醒
+                    </label>
+                    <label>
+                        提醒间隔：
+                        <select id="posture-interval">
+                            <option value="30">30分钟</option>
+                            <option value="60" selected>1小时</option>
+                            <option value="90">1.5小时</option>
+                            <option value="120">2小时</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="setting-group">
+                    <h3>通知设置</h3>
+                    <label>
+                        <input type="checkbox" id="browser-notifications" checked>
+                        浏览器通知
+                    </label>
+                    <label>
+                        <input type="checkbox" id="sound-enabled" checked>
+                        提醒音效
+                    </label>
+                </div>
+
+                <div class="settings-actions">
+                    <button class="btn-primary" id="save-settings">保存设置</button>
+                    <button class="btn-secondary" id="reset-settings">重置为默认</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 通知弹窗 -->
+        <div class="notification-overlay" id="notification-overlay">
+            <div class="notification-modal">
+                <div class="notification-icon" id="notification-icon">💧</div>
+                <div class="notification-content">
+                    <h3 id="notification-title">喝水时间到了！</h3>
+                    <p id="notification-message">记得补充水分，保持身体健康</p>
+                </div>
+                <div class="notification-actions">
+                    <button class="btn-primary" id="notification-confirm">已完成</button>
+                    <button class="btn-secondary" id="notification-snooze">稍后提醒</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 帮助面板 -->
+        <div class="help-overlay" id="help-overlay">
+            <div class="help-modal">
+                <div class="help-header">
+                    <h2>使用帮助</h2>
+                    <button class="btn-close" id="help-close">✕</button>
+                </div>
+                <div class="help-content">
+                    <h3>功能介绍</h3>
+                    <ul>
+                        <li><strong>喝水提醒</strong>：定时提醒您补充水分</li>
+                        <li><strong>久坐提醒</strong>：提醒您起身活动，避免久坐危害</li>
+                        <li><strong>智能检测</strong>：自动检测您的活动状态</li>
+                    </ul>
+                    
+                    <h3>使用方法</h3>
+                    <ol>
+                        <li>点击"开始"按钮启动提醒</li>
+                        <li>在设置中调整提醒间隔</li>
+                        <li>收到提醒时点击"已完成"确认</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 文件 -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/activity-detector.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/ui-controller.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
