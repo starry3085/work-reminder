@@ -89,14 +89,12 @@ class OfficeWellnessApp {
         });
         
         // 初始化提醒管理器
-        this.waterReminder = new ReminderManager(
-            'water', 
+        this.waterReminder = new WaterReminder(
             this.currentSettings.water, 
             this.notificationService
         );
         
-        this.postureReminder = new ReminderManager(
-            'posture', 
+        this.postureReminder = new PostureReminder(
             this.currentSettings.posture, 
             this.notificationService,
             this.activityDetector // 将活动检测器传递给久坐提醒
