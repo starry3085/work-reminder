@@ -9,21 +9,25 @@ class OfficeWellnessApp {
                 enabled: true,
                 interval: 30, // 分钟
                 sound: true,
-                lastReminder: null
+                lastReminder: null,
+                target: 8 // 每日目标杯数
             },
             posture: {
                 enabled: true,
                 interval: 60, // 分钟
                 sound: true,
                 lastReminder: null,
-                activityThreshold: 5 // 分钟
+                activityThreshold: 5, // 分钟
+                target: 8, // 每日目标次数
+                activityDetection: true // 活动检测
             },
             notifications: {
                 browserNotifications: true,
-                soundEnabled: true
+                soundEnabled: true,
+                style: 'standard' // 通知样式: standard, minimal, detailed
             },
-            ui: {
-                theme: 'light',
+            appearance: {
+                theme: 'light', // 主题: light, dark, auto
                 language: 'zh-CN'
             }
         };

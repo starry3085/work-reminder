@@ -121,65 +121,140 @@
         </main>
 
         <!-- 设置面板 -->
-        <aside class="settings-panel" id="settings-panel">
+        <div class="settings-panel" id="settings-panel">
             <div class="settings-header">
                 <h2>设置</h2>
                 <button class="btn-close" id="settings-close">✕</button>
             </div>
-            
             <div class="settings-content">
-                <div class="setting-group">
+                <div class="settings-section">
                     <h3>喝水提醒</h3>
-                    <label>
-                        <input type="checkbox" id="water-enabled" checked>
-                        启用喝水提醒
-                    </label>
-                    <label>
-                        提醒间隔：
-                        <select id="water-interval">
-                            <option value="15">15分钟</option>
-                            <option value="30" selected>30分钟</option>
-                            <option value="45">45分钟</option>
-                            <option value="60">1小时</option>
-                        </select>
-                    </label>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="water-enabled" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <div class="setting-label">
+                            <span>启用喝水提醒</span>
+                            <small>定时提醒您补充水分</small>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="water-interval">提醒间隔</label>
+                        <div class="setting-control">
+                            <input type="range" id="water-interval-slider" min="5" max="120" value="30" step="5">
+                            <div class="range-value">
+                                <input type="number" id="water-interval" min="5" max="120" value="30"> 分钟
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="water-target">每日目标</label>
+                        <div class="setting-control">
+                            <input type="number" id="water-target" min="1" max="20" value="8"> 杯水
+                        </div>
+                    </div>
                 </div>
-
-                <div class="setting-group">
+                
+                <div class="settings-section">
                     <h3>久坐提醒</h3>
-                    <label>
-                        <input type="checkbox" id="posture-enabled" checked>
-                        启用久坐提醒
-                    </label>
-                    <label>
-                        提醒间隔：
-                        <select id="posture-interval">
-                            <option value="30">30分钟</option>
-                            <option value="60" selected>1小时</option>
-                            <option value="90">1.5小时</option>
-                            <option value="120">2小时</option>
-                        </select>
-                    </label>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="posture-enabled" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <div class="setting-label">
+                            <span>启用久坐提醒</span>
+                            <small>提醒您定时起身活动</small>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="posture-interval">提醒间隔</label>
+                        <div class="setting-control">
+                            <input type="range" id="posture-interval-slider" min="15" max="120" value="60" step="5">
+                            <div class="range-value">
+                                <input type="number" id="posture-interval" min="15" max="120" value="60"> 分钟
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="posture-target">每日目标</label>
+                        <div class="setting-control">
+                            <input type="number" id="posture-target" min="1" max="20" value="8"> 次活动
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="activity-detection" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <div class="setting-label">
+                            <span>活动检测</span>
+                            <small>检测到活动时重置计时器</small>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="setting-group">
+                
+                <div class="settings-section">
                     <h3>通知设置</h3>
-                    <label>
-                        <input type="checkbox" id="browser-notifications" checked>
-                        浏览器通知
-                    </label>
-                    <label>
-                        <input type="checkbox" id="sound-enabled" checked>
-                        提醒音效
-                    </label>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="browser-notifications" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <div class="setting-label">
+                            <span>桌面通知</span>
+                            <small>在系统桌面显示通知</small>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="sound-enabled" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <div class="setting-label">
+                            <span>提示音</span>
+                            <small>播放提示音效</small>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label for="notification-style">通知样式</label>
+                        <div class="setting-control">
+                            <select id="notification-style">
+                                <option value="standard">标准</option>
+                                <option value="minimal">简约</option>
+                                <option value="detailed">详细</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="settings-actions">
-                    <button class="btn-primary" id="save-settings">保存设置</button>
-                    <button class="btn-secondary" id="reset-settings">重置为默认</button>
+                
+                <div class="settings-section">
+                    <h3>外观设置</h3>
+                    <div class="setting-item">
+                        <label for="theme-selector">主题</label>
+                        <div class="setting-control theme-selector" id="theme-selector">
+                            <button class="theme-option active" data-theme="light">
+                                <div class="theme-preview light-theme"></div>
+                                <span>浅色</span>
+                            </button>
+                            <button class="theme-option" data-theme="dark">
+                                <div class="theme-preview dark-theme"></div>
+                                <span>深色</span>
+                            </button>
+                            <button class="theme-option" data-theme="auto">
+                                <div class="theme-preview auto-theme"></div>
+                                <span>自动</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </aside>
+            <div class="settings-footer">
+                <button class="btn-secondary" id="reset-settings">重置</button>
+                <button class="btn-primary" id="save-settings">保存</button>
+            </div>
+        </div>
 
         <!-- 通知弹窗 -->
         <div class="notification-overlay" id="notification-overlay">

@@ -104,13 +104,26 @@ class UIController {
             saveSettings: document.getElementById('save-settings'),
             resetSettings: document.getElementById('reset-settings'),
             
-            // 设置项
+            // 设置项 - 喝水提醒
             waterEnabled: document.getElementById('water-enabled'),
             waterInterval: document.getElementById('water-interval'),
+            waterIntervalSlider: document.getElementById('water-interval-slider'),
+            waterTarget: document.getElementById('water-target'),
+            
+            // 设置项 - 久坐提醒
             postureEnabled: document.getElementById('posture-enabled'),
             postureInterval: document.getElementById('posture-interval'),
+            postureIntervalSlider: document.getElementById('posture-interval-slider'),
+            postureTarget: document.getElementById('posture-target'),
+            activityDetection: document.getElementById('activity-detection'),
+            
+            // 设置项 - 通知
             browserNotifications: document.getElementById('browser-notifications'),
             soundEnabled: document.getElementById('sound-enabled'),
+            notificationStyle: document.getElementById('notification-style'),
+            
+            // 设置项 - 外观
+            themeSelector: document.getElementById('theme-selector'),
             
             // 通知弹窗
             notificationOverlay: document.getElementById('notification-overlay'),
@@ -199,6 +212,43 @@ class UIController {
         this.addEventHandler('pauseAllBtn', 'click', () => {
             this.triggerEvent('pauseAll');
         });
+        
+        // 设置面板滑块联动
+        if (this.elements.waterIntervalSlider && this.elements.waterInterval) {
+            this.elements.waterIntervalSlider.addEventListener('input', () => {
+                this.elements.waterInterval.value = this.elements.waterIntervalSlider.value;
+            });
+            
+            this.elements.waterInterval.addEventListener('change', () => {
+                this.elements.waterIntervalSlider.value = this.elements.waterInterval.value;
+            });
+        }
+        
+        if (this.elements.postureIntervalSlider && this.elements.postureInterval) {
+            this.elements.postureIntervalSlider.addEventListener('input', () => {
+                this.elements.postureInterval.value = this.elements.postureIntervalSlider.value;
+            });
+            
+            this.elements.postureInterval.addEventListener('change', () => {
+                this.elements.postureIntervalSlider.value = this.elements.postureInterval.value;
+            });
+        }
+        
+        // 主题选择器
+        if (this.elements.themeSelector) {
+            const themeOptions = this.elements.themeSelector.querySelectorAll('.theme-option');
+            themeOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    // 移除所有active类
+                    themeOptions.forEach(opt => opt.classList.remove('active'));
+                    // 添加当前选中的active类
+                    option.classList.add('active');
+                    // 应用主题
+                    const theme = option.getAttribute('data-theme');
+                    this.applyTheme(theme);
+                });
+            });
+        }
     }
     
     /**
@@ -351,10 +401,29 @@ class UIController {
     
     /**
      * 应用主题
-     * @param {string} theme - 主题名称 ('light' | 'dark')
+     * @param {string} theme - 主题名称 ('light' | 'dark' | 'auto')
      */
     applyTheme(theme) {
-        if (theme === 'dark') {
+        if (theme === 'auto') {
+            // 根据系统偏好设置自动选择主题
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            
+            // 监听系统主题变化
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                if (this.getSettingsFromUI().appearance.theme === 'auto') {
+                    if (e.matches) {
+                        document.body.classList.add('dark-theme');
+                    } else {
+                        document.body.classList.remove('dark-theme');
+                    }
+                }
+            });
+        } else if (theme === 'dark') {
             document.body.classList.add('dark-theme');
         } else {
             document.body.classList.remove('dark-theme');
@@ -591,18 +660,34 @@ class UIController {
      * @returns {Object} 设置对象
      */
     getSettingsFromUI() {
+        // 获取当前选中的主题
+        let selectedTheme = 'light';
+        if (this.elements.themeSelector) {
+            const activeTheme = this.elements.themeSelector.querySelector('.theme-option.active');
+            if (activeTheme) {
+                selectedTheme = activeTheme.getAttribute('data-theme');
+            }
+        }
+        
         return {
             water: {
                 enabled: this.elements.waterEnabled ? this.elements.waterEnabled.checked : true,
-                interval: this.elements.waterInterval ? parseInt(this.elements.waterInterval.value) : 30
+                interval: this.elements.waterInterval ? parseInt(this.elements.waterInterval.value) : 30,
+                target: this.elements.waterTarget ? parseInt(this.elements.waterTarget.value) : 8
             },
             posture: {
                 enabled: this.elements.postureEnabled ? this.elements.postureEnabled.checked : true,
-                interval: this.elements.postureInterval ? parseInt(this.elements.postureInterval.value) : 60
+                interval: this.elements.postureInterval ? parseInt(this.elements.postureInterval.value) : 60,
+                target: this.elements.postureTarget ? parseInt(this.elements.postureTarget.value) : 8,
+                activityDetection: this.elements.activityDetection ? this.elements.activityDetection.checked : true
             },
             notifications: {
                 browserNotifications: this.elements.browserNotifications ? this.elements.browserNotifications.checked : true,
-                soundEnabled: this.elements.soundEnabled ? this.elements.soundEnabled.checked : true
+                soundEnabled: this.elements.soundEnabled ? this.elements.soundEnabled.checked : true,
+                style: this.elements.notificationStyle ? this.elements.notificationStyle.value : 'standard'
+            },
+            appearance: {
+                theme: selectedTheme
             }
         };
     }
@@ -622,6 +707,12 @@ class UIController {
             if (this.elements.waterInterval) {
                 this.elements.waterInterval.value = settings.water.interval || 30;
             }
+            if (this.elements.waterIntervalSlider) {
+                this.elements.waterIntervalSlider.value = settings.water.interval || 30;
+            }
+            if (this.elements.waterTarget) {
+                this.elements.waterTarget.value = settings.water.target || 8;
+            }
         }
         
         // 应用久坐提醒设置
@@ -632,6 +723,15 @@ class UIController {
             if (this.elements.postureInterval) {
                 this.elements.postureInterval.value = settings.posture.interval || 60;
             }
+            if (this.elements.postureIntervalSlider) {
+                this.elements.postureIntervalSlider.value = settings.posture.interval || 60;
+            }
+            if (this.elements.postureTarget) {
+                this.elements.postureTarget.value = settings.posture.target || 8;
+            }
+            if (this.elements.activityDetection) {
+                this.elements.activityDetection.checked = settings.posture.activityDetection !== false;
+            }
         }
         
         // 应用通知设置
@@ -641,6 +741,25 @@ class UIController {
             }
             if (this.elements.soundEnabled) {
                 this.elements.soundEnabled.checked = settings.notifications.soundEnabled !== false;
+            }
+            if (this.elements.notificationStyle) {
+                this.elements.notificationStyle.value = settings.notifications.style || 'standard';
+            }
+        }
+        
+        // 应用外观设置
+        if (settings.appearance && settings.appearance.theme) {
+            this.applyTheme(settings.appearance.theme);
+            
+            // 更新主题选择器UI
+            if (this.elements.themeSelector) {
+                const themeOptions = this.elements.themeSelector.querySelectorAll('.theme-option');
+                themeOptions.forEach(option => {
+                    option.classList.remove('active');
+                    if (option.getAttribute('data-theme') === settings.appearance.theme) {
+                        option.classList.add('active');
+                    }
+                });
             }
         }
     }
