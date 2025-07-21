@@ -76,7 +76,34 @@ class OfficeWellnessApp {
      * @private
      */
     async initializeComponents() {
-        // 待实现
+        // 初始化存储管理器
+        this.storageManager = new StorageManager();
+        
+        // 初始化通知服务
+        this.notificationService = new NotificationService();
+        
+        // 初始化活动检测器（用于久坐提醒）
+        this.activityDetector = new ActivityDetector((event) => {
+            console.log('用户活动状态变化:', event);
+            // 活动检测器的回调会在ReminderManager中处理
+        });
+        
+        // 初始化提醒管理器
+        this.waterReminder = new ReminderManager(
+            'water', 
+            this.currentSettings.water, 
+            this.notificationService
+        );
+        
+        this.postureReminder = new ReminderManager(
+            'posture', 
+            this.currentSettings.posture, 
+            this.notificationService,
+            this.activityDetector // 将活动检测器传递给久坐提醒
+        );
+        
+        // 初始化UI控制器
+        this.uiController = new UIController();
     }
 
     /**
@@ -100,7 +127,49 @@ class OfficeWellnessApp {
      * @private
      */
     setupEventListeners() {
-        // 待实现
+        // 设置水提醒状态变化回调
+        if (this.waterReminder) {
+            this.waterReminder.setStatusChangeCallback((status) => {
+                console.log('水提醒状态变化:', status);
+                if (this.uiController) {
+                    this.uiController.updateReminderStatus('water', status);
+                }
+            });
+            
+            this.waterReminder.setTimeUpdateCallback((timeInfo) => {
+                if (this.uiController) {
+                    this.uiController.updateReminderTime('water', timeInfo);
+                }
+            });
+        }
+        
+        // 设置久坐提醒状态变化回调
+        if (this.postureReminder) {
+            this.postureReminder.setStatusChangeCallback((status) => {
+                console.log('久坐提醒状态变化:', status);
+                if (this.uiController) {
+                    this.uiController.updateReminderStatus('posture', status);
+                }
+                
+                // 如果是自动暂停或恢复，显示提示
+                if (status.isAuto) {
+                    const message = status.status === 'paused' 
+                        ? '检测到您已离开，久坐提醒已自动暂停' 
+                        : '检测到您已返回，久坐提醒已自动恢复';
+                    
+                    this.notificationService.showInPageAlert('info', {
+                        title: '活动检测',
+                        message: message
+                    });
+                }
+            });
+            
+            this.postureReminder.setTimeUpdateCallback((timeInfo) => {
+                if (this.uiController) {
+                    this.uiController.updateReminderTime('posture', timeInfo);
+                }
+            });
+        }
     }
 
     /**
@@ -133,7 +202,15 @@ class OfficeWellnessApp {
      * @param {string} type - 'water' | 'posture'
      */
     startReminder(type) {
-        // 待实现
+        if (type === 'water' && this.waterReminder) {
+            this.waterReminder.start();
+            this.currentSettings.water.enabled = true;
+            this.saveSettings();
+        } else if (type === 'posture' && this.postureReminder) {
+            this.postureReminder.start();
+            this.currentSettings.posture.enabled = true;
+            this.saveSettings();
+        }
     }
 
     /**
@@ -141,7 +218,15 @@ class OfficeWellnessApp {
      * @param {string} type - 'water' | 'posture'
      */
     stopReminder(type) {
-        // 待实现
+        if (type === 'water' && this.waterReminder) {
+            this.waterReminder.stop();
+            this.currentSettings.water.enabled = false;
+            this.saveSettings();
+        } else if (type === 'posture' && this.postureReminder) {
+            this.postureReminder.stop();
+            this.currentSettings.posture.enabled = false;
+            this.saveSettings();
+        }
     }
 
     /**
@@ -149,7 +234,11 @@ class OfficeWellnessApp {
      * @param {string} type - 'water' | 'posture'
      */
     resetReminder(type) {
-        // 待实现
+        if (type === 'water' && this.waterReminder) {
+            this.waterReminder.reset();
+        } else if (type === 'posture' && this.postureReminder) {
+            this.postureReminder.reset();
+        }
     }
 
     /**
@@ -157,7 +246,40 @@ class OfficeWellnessApp {
      * @param {Object} newSettings
      */
     updateSettings(newSettings) {
-        // 待实现
+        // 深度合并设置
+        const mergeSettings = (target, source) => {
+            for (const key in source) {
+                if (source.hasOwnProperty(key)) {
+                    if (source[key] instanceof Object && key in target) {
+                        mergeSettings(target[key], source[key]);
+                    } else {
+                        target[key] = source[key];
+                    }
+                }
+            }
+            return target;
+        };
+        
+        this.currentSettings = mergeSettings(this.currentSettings, newSettings);
+        
+        // 更新提醒管理器设置
+        if (newSettings.water && this.waterReminder) {
+            this.waterReminder.updateSettings(newSettings.water);
+        }
+        
+        if (newSettings.posture && this.postureReminder) {
+            this.postureReminder.updateSettings(newSettings.posture);
+        }
+        
+        // 保存设置到本地存储
+        this.saveSettings();
+        
+        // 更新UI
+        if (this.uiController) {
+            this.uiController.updateSettings(this.currentSettings);
+        }
+        
+        console.log('设置已更新:', this.currentSettings);
     }
 
     /**
