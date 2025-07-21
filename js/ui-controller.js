@@ -78,7 +78,42 @@ class UIController {
      * @private
      */
     bindEvents() {
-        // 待实现
+        // 设置面板事件
+        if (this.elements.settingsBtn) {
+            this.elements.settingsBtn.addEventListener('click', this.handleSettingsToggle);
+        }
+        
+        if (this.elements.settingsClose) {
+            this.elements.settingsClose.addEventListener('click', this.handleSettingsToggle);
+        }
+        
+        // 帮助面板事件
+        if (this.elements.helpBtn) {
+            this.elements.helpBtn.addEventListener('click', this.handleHelpToggle);
+        }
+        
+        if (this.elements.helpClose) {
+            this.elements.helpClose.addEventListener('click', this.handleHelpToggle);
+        }
+        
+        // 通知弹窗事件
+        if (this.elements.notificationConfirm) {
+            this.elements.notificationConfirm.addEventListener('click', () => {
+                this.hideNotificationModal();
+                if (this.currentNotification && this.currentNotification.onConfirm) {
+                    this.currentNotification.onConfirm();
+                }
+            });
+        }
+        
+        if (this.elements.notificationSnooze) {
+            this.elements.notificationSnooze.addEventListener('click', () => {
+                this.hideNotificationModal();
+                if (this.currentNotification && this.currentNotification.onSnooze) {
+                    this.currentNotification.onSnooze();
+                }
+            });
+        }
     }
 
     /**
@@ -107,42 +142,143 @@ class UIController {
      * @param {Function} onSnooze - 稍后提醒回调
      */
     showNotificationModal(type, title, message, onConfirm, onSnooze) {
-        // 待实现
+        // 保存当前通知信息
+        this.currentNotification = {
+            type,
+            title,
+            message,
+            onConfirm,
+            onSnooze
+        };
+        
+        // 设置通知内容
+        if (this.elements.notificationIcon) {
+            this.elements.notificationIcon.textContent = type === 'water' ? '💧' : '🧘';
+        }
+        
+        if (this.elements.notificationTitle) {
+            this.elements.notificationTitle.textContent = title;
+        }
+        
+        if (this.elements.notificationMessage) {
+            this.elements.notificationMessage.textContent = message;
+        }
+        
+        if (this.elements.notificationConfirm) {
+            this.elements.notificationConfirm.textContent = type === 'water' ? '已喝水' : '已起身活动';
+        }
+        
+        // 显示通知弹窗
+        if (this.elements.notificationOverlay) {
+            this.elements.notificationOverlay.classList.add('show');
+            
+            // 添加键盘事件监听
+            document.addEventListener('keydown', this.handleNotificationKeydown);
+        }
     }
 
     /**
      * 隐藏通知弹窗
      */
     hideNotificationModal() {
-        // 待实现
+        if (this.elements.notificationOverlay) {
+            this.elements.notificationOverlay.classList.remove('show');
+            
+            // 移除键盘事件监听
+            document.removeEventListener('keydown', this.handleNotificationKeydown);
+        }
+        
+        // 清除当前通知信息
+        this.currentNotification = null;
+    }
+    
+    /**
+     * 处理通知弹窗的键盘事件
+     * @param {KeyboardEvent} event - 键盘事件
+     * @private
+     */
+    handleNotificationKeydown = (event) => {
+        // 按下Escape键关闭通知
+        if (event.key === 'Escape') {
+            this.hideNotificationModal();
+        }
+        
+        // 按下Enter键确认通知
+        if (event.key === 'Enter' && this.currentNotification && this.currentNotification.onConfirm) {
+            this.hideNotificationModal();
+            this.currentNotification.onConfirm();
+        }
     }
 
     /**
      * 切换设置面板显示状态
      */
     toggleSettings() {
-        // 待实现
+        if (this.isSettingsOpen) {
+            this.hideSettings();
+        } else {
+            this.showSettings();
+        }
     }
 
     /**
      * 显示设置面板
      */
     showSettings() {
-        // 待实现
+        if (this.elements.settingsPanel) {
+            this.elements.settingsPanel.classList.add('open');
+            this.isSettingsOpen = true;
+            
+            // 添加键盘事件监听
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    this.hideSettings();
+                }
+            });
+            
+            // 添加点击外部关闭事件
+            document.addEventListener('click', this.handleOutsideClick);
+        }
     }
 
     /**
      * 隐藏设置面板
      */
     hideSettings() {
-        // 待实现
+        if (this.elements.settingsPanel) {
+            this.elements.settingsPanel.classList.remove('open');
+            this.isSettingsOpen = false;
+            
+            // 移除点击外部关闭事件
+            document.removeEventListener('click', this.handleOutsideClick);
+        }
     }
 
     /**
      * 切换帮助面板显示状态
      */
     toggleHelp() {
-        // 待实现
+        if (this.elements.helpOverlay) {
+            if (this.elements.helpOverlay.classList.contains('show')) {
+                this.elements.helpOverlay.classList.remove('show');
+            } else {
+                this.elements.helpOverlay.classList.add('show');
+            }
+        }
+    }
+    
+    /**
+     * 处理点击外部关闭设置面板
+     * @param {MouseEvent} event - 鼠标事件
+     * @private
+     */
+    handleOutsideClick = (event) => {
+        if (this.isSettingsOpen && 
+            this.elements.settingsPanel && 
+            !this.elements.settingsPanel.contains(event.target) && 
+            event.target !== this.elements.settingsBtn) {
+            this.hideSettings();
+        }
     }
 
     /**
