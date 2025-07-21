@@ -1459,4 +1459,122 @@ ile-specific enhancements */
         height: 28px;
         font-size: 0.9rem;
     }
+}/
+* 错误处理和兼容性提示样式 */
+.compatibility-notice {
+    background-color: var(--background-primary);
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+    overflow-y: auto;
+    padding: 0;
+    animation: bounceIn 0.5s ease-out;
+}
+
+.compatibility-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.compatibility-content {
+    padding: 1.5rem;
+}
+
+.compatibility-content p {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+}
+
+.compatibility-content ul {
+    margin-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.compatibility-content li {
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.compatibility-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* 错误提示样式 */
+.error-message {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--danger-color);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    z-index: 9999;
+    font-family: Arial, sans-serif;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: fadeInDown 0.5s ease;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* 错误类型样式 */
+.error-message.warning {
+    background: #FF9800;
+}
+
+.error-message.info {
+    background: #2196F3;
+}
+
+.error-message.success {
+    background: var(--primary-color);
+}
+
+/* 移动端适配 */
+@media (max-width: 480px) {
+    .compatibility-notice {
+        width: 95%;
+    }
+    
+    .compatibility-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .compatibility-content {
+        padding: 1rem;
+    }
+    
+    .compatibility-footer {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .compatibility-footer button {
+        width: 100%;
+    }
+    
+    .error-message {
+        width: 90%;
+        padding: 0.75rem 1rem;
+    }
 }

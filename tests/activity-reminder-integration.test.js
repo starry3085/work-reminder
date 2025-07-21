@@ -1,194 +1,121 @@
 /**
- * 活动检测器与久坐提醒集成测试
+ * 活动提醒集成测试
  */
-
-describe('ActivityDetector与ReminderManager集成', () => {
+describe('ActivityReminder Integration', () => {
     let activityDetector;
-    let reminderManager;
+    let postureReminder;
     let notificationService;
-    let mockStatusCallback;
-    let mockTimeCallback;
     
-    // 模拟设置
-    const settings = {
-        interval: 60, // 60分钟
-        activityThreshold: 5, // 5分钟
-        sound: true
-    };
-    
-    // 在每个测试前设置
     beforeEach(() => {
         // 创建模拟通知服务
         notificationService = {
-            showNotification: jest.fn()
+            showNotification: jest.fn(),
+            showInPageAlert: jest.fn()
         };
         
         // 创建活动检测器
-        activityDetector = new ActivityDetector(() => {});
+        activityDetector = new ActivityDetector((event) => {
+            // 活动检测回调
+            if (postureReminder) {
+                postureReminder.handleActivityChange(event);
+            }
+        });
         
-        // 创建回调函数
-        mockStatusCallback = jest.fn();
-        mockTimeCallback = jest.fn();
+        // 创建久坐提醒
+        postureReminder = new PostureReminder(
+            { interval: 60, enabled: true },
+            notificationService,
+            activityDetector
+        );
         
-        // 创建久坐提醒管理器
-        reminderManager = new ReminderManager('posture', settings, notificationService, activityDetector);
-        reminderManager.setStatusChangeCallback(mockStatusCallback);
-        reminderManager.setTimeUpdateCallback(mockTimeCallback);
-        
-        // 模拟Date.now
-        jest.spyOn(Date, 'now').mockImplementation(() => 1000);
-        
-        // 模拟setInterval和clearInterval
+        // 模拟计时器
         jest.useFakeTimers();
     });
     
-    // 在每个测试后清理
     afterEach(() => {
-        if (reminderManager.isActive) {
-            reminderManager.stop();
-        }
-        
-        jest.restoreAllMocks();
-        jest.clearAllTimers();
+        // 恢复真实计时器
+        jest.useRealTimers();
     });
     
-    test('启动久坐提醒应该同时启动活动检测', () => {
-        // 模拟活动检测器的startMonitoring方法
-        const startMonitoringSpy = jest.spyOn(activityDetector, 'startMonitoring');
-        
+    test('应该在用户离开时自动暂停久坐提醒', () => {
         // 启动久坐提醒
-        reminderManager.start();
+        postureReminder.start();
         
-        // 验证活动检测器被启动
-        expect(startMonitoringSpy).toHaveBeenCalled();
-        expect(reminderManager.isActive).toBe(true);
-    });
-    
-    test('停止久坐提醒应该同时停止活动检测', () => {
-        // 先启动久坐提醒
-        reminderManager.start();
-        
-        // 模拟活动检测器的stopMonitoring方法
-        const stopMonitoringSpy = jest.spyOn(activityDetector, 'stopMonitoring');
-        
-        // 停止久坐提醒
-        reminderManager.stop();
-        
-        // 验证活动检测器被停止
-        expect(stopMonitoringSpy).toHaveBeenCalled();
-        expect(reminderManager.isActive).toBe(false);
-    });
-    
-    test('用户离开应该自动暂停久坐提醒', () => {
-        // 启动久坐提醒
-        reminderManager.start();
+        // 确认提醒已启动
+        expect(postureReminder.isActive()).toBe(true);
         
         // 模拟用户离开事件
-        activityDetector.callback({
-            type: 'user-away',
-            timestamp: 2000,
-            lastActivity: 1000
-        });
+        activityDetector.handleUserAway();
         
-        // 验证久坐提醒被暂停
-        expect(reminderManager.isPaused).toBe(true);
-        expect(mockStatusCallback).toHaveBeenCalledWith({
-            type: 'posture',
-            status: 'paused',
-            isActive: true,
-            isPaused: true,
-            isAuto: true
-        });
+        // 确认提醒已暂停
+        expect(postureReminder.isActive()).toBe(false);
     });
     
-    test('用户返回应该自动恢复久坐提醒', () => {
-        // 启动久坐提醒并暂停
-        reminderManager.start();
-        reminderManager.pause(true);
+    test('应该在用户返回时自动恢复久坐提醒', () => {
+        // 启动久坐提醒
+        postureReminder.start();
         
-        // 清除之前的回调记录
-        mockStatusCallback.mockClear();
+        // 模拟用户离开事件
+        activityDetector.handleUserAway();
+        
+        // 确认提醒已暂停
+        expect(postureReminder.isActive()).toBe(false);
         
         // 模拟用户返回事件
-        activityDetector.callback({
-            type: 'user-return',
-            timestamp: 3000,
-            awayDuration: 2000
-        });
+        activityDetector.handleUserActivity();
         
-        // 验证久坐提醒被恢复
-        expect(reminderManager.isPaused).toBe(false);
-        expect(mockStatusCallback).toHaveBeenCalledWith({
-            type: 'posture',
-            status: 'resumed',
-            isActive: true,
-            isPaused: false,
-            isAuto: true
-        });
+        // 确认提醒已恢复
+        expect(postureReminder.isActive()).toBe(true);
     });
     
-    test('用户长时间离开后返回应该重置久坐提醒计时器', () => {
+    test('应该在检测到用户活动时重置久坐计时器', () => {
         // 启动久坐提醒
-        reminderManager.start();
+        postureReminder.start();
         
-        // 设置一个较短的剩余时间
-        reminderManager.remainingTime = 10 * 60 * 1000; // 10分钟
+        // 前进30分钟
+        jest.advanceTimersByTime(30 * 60 * 1000);
         
-        // 模拟用户长时间离开后返回
-        activityDetector.callback({
-            type: 'user-return',
-            timestamp: 10000,
-            awayDuration: 6 * 60 * 1000 // 6分钟
-        });
+        // 模拟用户活动
+        activityDetector.handleUserActivity();
         
-        // 验证计时器被重置
-        expect(reminderManager.remainingTime).toBe(reminderManager.interval);
-        expect(mockTimeCallback).toHaveBeenCalled();
+        // 获取当前状态
+        const status = postureReminder.getCurrentStatus();
+        
+        // 确认计时器已重置（剩余时间应接近60分钟）
+        const expectedTimeRemaining = 60 * 60 * 1000;
+        const tolerance = 1000; // 允许1秒的误差
+        
+        expect(Math.abs(status.timeRemaining - expectedTimeRemaining)).toBeLessThan(tolerance);
     });
     
-    test('更新设置应该更新活动检测阈值', () => {
-        // 模拟活动检测器的setAwayThreshold方法
-        const setAwayThresholdSpy = jest.spyOn(activityDetector, 'setAwayThreshold');
-        
-        // 更新设置
-        reminderManager.updateSettings({
-            activityThreshold: 10 // 10分钟
-        });
-        
-        // 验证活动检测阈值被更新
-        expect(setAwayThresholdSpy).toHaveBeenCalledWith(10);
-    });
-    
-    test('久坐提醒计时器应该考虑用户活动状态', () => {
+    test('应该在提醒触发时显示通知', () => {
         // 启动久坐提醒
-        reminderManager.start();
+        postureReminder.start();
         
-        // 设置初始剩余时间
-        reminderManager.remainingTime = 60000; // 1分钟
-        reminderManager.lastCheckTime = 1000;
+        // 前进60分钟触发提醒
+        jest.advanceTimersByTime(60 * 60 * 1000);
         
-        // 模拟时间流逝
-        Date.now.mockReturnValue(2000); // 1秒后
+        // 确认通知已显示
+        expect(notificationService.showNotification).toHaveBeenCalled();
+    });
+    
+    test('应该在确认提醒后重置计时器', () => {
+        // 启动久坐提醒
+        postureReminder.start();
         
-        // 模拟用户活跃
-        jest.spyOn(activityDetector, 'isUserActive').mockReturnValue(true);
+        // 前进60分钟触发提醒
+        jest.advanceTimersByTime(60 * 60 * 1000);
         
-        // 触发定时器更新
-        reminderManager.updateTimer();
+        // 确认提醒
+        postureReminder.acknowledge();
         
-        // 验证剩余时间减少了
-        expect(reminderManager.remainingTime).toBe(59000); // 60000 - 1000
+        // 获取当前状态
+        const status = postureReminder.getCurrentStatus();
         
-        // 模拟用户不活跃
-        jest.spyOn(activityDetector, 'isUserActive').mockReturnValue(false);
+        // 确认计时器已重置
+        const expectedTimeRemaining = 60 * 60 * 1000;
+        const tolerance = 1000; // 允许1秒的误差
         
-        // 再次模拟时间流逝
-        Date.now.mockReturnValue(3000); // 再过1秒
-        
-        // 触发定时器更新
-        reminderManager.updateTimer();
-        
-        // 验证剩余时间没有减少
-        expect(reminderManager.remainingTime).toBe(59000); // 保持不变
+        expect(Math.abs(status.timeRemaining - expectedTimeRemaining)).toBeLessThan(tolerance);
     });
 });

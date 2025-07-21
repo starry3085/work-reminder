@@ -6,6 +6,8 @@ class OfficeWellnessApp {
         this.isInitialized = false;
         
         // 组件实例
+        this.errorHandler = null;
+        this.mobileAdapter = null;
         this.storageManager = null;
         this.appSettings = null;
         this.notificationService = null;
@@ -18,7 +20,8 @@ class OfficeWellnessApp {
         this.appState = {
             isInitializing: false,
             isFirstUse: false,
-            lastSessionTime: null
+            lastSessionTime: null,
+            compatibilityChecked: false
         };
     }
 
@@ -72,49 +75,118 @@ class OfficeWellnessApp {
      * @private
      */
     async initializeComponents() {
-        // 初始化存储管理器
-        this.storageManager = new StorageManager();
-        
-        // 初始化应用设置管理器
-        this.appSettings = new AppSettings(this.storageManager);
-        
-        // 初始化通知服务
-        this.notificationService = new NotificationService();
-        
-        // 初始化活动检测器（用于久坐提醒）
-        this.activityDetector = new ActivityDetector((event) => {
-            console.log('用户活动状态变化:', event);
-            // 活动检测器的回调会在ReminderManager中处理
+        try {
+            // 初始化错误处理器
+            this.errorHandler = new ErrorHandler();
             
-            // 更新应用状态中的用户活动信息
-            if (this.appSettings) {
-                const currentState = this.appSettings.getState();
-                currentState.userActivity = {
-                    isActive: event.isActive,
-                    lastActivityTime: event.lastActivityTime,
-                    awayStartTime: event.awayStartTime
-                };
-                this.appSettings.updateState(currentState);
+            // 初始化移动端适配器
+            this.mobileAdapter = new MobileAdapter(this.errorHandler);
+            
+            // 检查浏览器兼容性
+            this.checkBrowserCompatibility();
+            
+            // 初始化存储管理器
+            this.storageManager = new StorageManager();
+            
+            // 初始化应用设置管理器
+            this.appSettings = new AppSettings(this.storageManager);
+            
+            // 初始化通知服务
+            this.notificationService = new NotificationService();
+            
+            // 初始化活动检测器（用于久坐提醒）
+            this.activityDetector = new ActivityDetector((event) => {
+                console.log('用户活动状态变化:', event);
+                // 活动检测器的回调会在ReminderManager中处理
+                
+                // 更新应用状态中的用户活动信息
+                if (this.appSettings) {
+                    const currentState = this.appSettings.getState();
+                    currentState.userActivity = {
+                        isActive: event.isActive,
+                        lastActivityTime: event.lastActivityTime,
+                        awayStartTime: event.awayStartTime
+                    };
+                    this.appSettings.updateState(currentState);
+                }
+            });
+            
+            // 获取当前设置
+            const currentSettings = this.appSettings.getSettings();
+            
+            // 初始化提醒管理器
+            this.waterReminder = new WaterReminder(
+                currentSettings.water, 
+                this.notificationService
+            );
+            
+            this.postureReminder = new PostureReminder(
+                currentSettings.posture, 
+                this.notificationService,
+                this.activityDetector // 将活动检测器传递给久坐提醒
+            );
+            
+            // 初始化UI控制器
+            this.uiController = new UIController();
+            
+            // 应用移动端适配
+            if (this.mobileAdapter) {
+                this.mobileAdapter.applyMobileAdaptation();
             }
-        });
+        } catch (error) {
+            console.error('初始化组件失败:', error);
+            if (this.errorHandler) {
+                this.errorHandler.handleError({
+                    type: 'initialization',
+                    error: error,
+                    message: '初始化组件失败: ' + (error.message || '未知错误'),
+                    timestamp: Date.now()
+                });
+            }
+            throw error;
+        }
+    }
+    
+    /**
+     * 检查浏览器兼容性
+     * @private
+     */
+    checkBrowserCompatibility() {
+        if (!this.mobileAdapter || this.appState.compatibilityChecked) {
+            return;
+        }
         
-        // 获取当前设置
-        const currentSettings = this.appSettings.getSettings();
-        
-        // 初始化提醒管理器
-        this.waterReminder = new WaterReminder(
-            currentSettings.water, 
-            this.notificationService
-        );
-        
-        this.postureReminder = new PostureReminder(
-            currentSettings.posture, 
-            this.notificationService,
-            this.activityDetector // 将活动检测器传递给久坐提醒
-        );
-        
-        // 初始化UI控制器
-        this.uiController = new UIController();
+        try {
+            // 检查功能支持和替代方案
+            const compatibilityResult = this.mobileAdapter.checkFeaturesAndFallbacks();
+            
+            // 标记已检查兼容性
+            this.appState.compatibilityChecked = true;
+            
+            // 如果有不支持的功能，在UI初始化后显示提示
+            if (Object.values(compatibilityResult.supported).includes(false)) {
+                // 在DOM加载完成后显示兼容性提示
+                document.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(() => {
+                        if (this.uiController && this.uiController.isInitialized) {
+                            this.mobileAdapter.showCompatibilityNotice(document.body);
+                        }
+                    }, 1000); // 延迟1秒显示，确保UI已初始化
+                });
+            }
+            
+            return compatibilityResult;
+        } catch (error) {
+            console.error('检查浏览器兼容性失败:', error);
+            if (this.errorHandler) {
+                this.errorHandler.handleError({
+                    type: 'compatibility',
+                    error: error,
+                    message: '检查浏览器兼容性失败: ' + (error.message || '未知错误'),
+                    timestamp: Date.now()
+                });
+            }
+        }
     }
 
     /**
@@ -728,16 +800,36 @@ class OfficeWellnessApp {
     handleInitializationError(error) {
         console.error('应用初始化错误:', error);
         
-        // 显示用户友好的错误信息
-        const errorMessage = this.getErrorMessage(error);
+        // 使用错误处理器获取用户友好的错误信息
+        let errorInfo;
+        if (this.errorHandler) {
+            errorInfo = this.errorHandler.getUserFriendlyError(error);
+        } else {
+            // 如果错误处理器不可用，使用旧方法
+            errorInfo = {
+                title: '初始化失败',
+                message: this.getErrorMessage(error),
+                type: 'error',
+                solution: '请刷新页面重试'
+            };
+        }
         
         // 尝试显示错误信息
         try {
-            if (this.uiController) {
-                this.uiController.showInPageNotification('error', '初始化失败', errorMessage);
+            if (this.uiController && this.uiController.isInitialized) {
+                this.uiController.showInPageNotification(
+                    errorInfo.type || 'error', 
+                    errorInfo.title || '初始化失败', 
+                    errorInfo.message
+                );
+                
+                // 如果有解决方案，显示在控制台
+                if (errorInfo.solution) {
+                    console.info('建议解决方案:', errorInfo.solution);
+                }
             } else {
                 // 如果UI控制器不可用，直接在页面显示
-                this.showFallbackError(errorMessage);
+                this.showFallbackError(errorInfo.message || '应用初始化失败');
             }
         } catch (displayError) {
             console.error('显示错误信息失败:', displayError);
