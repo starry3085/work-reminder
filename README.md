@@ -55,13 +55,35 @@ office-wellness-reminder/
 ## 开发进度
 
 - [x] 项目基础结构
-- [ ] 存储管理系统
-- [ ] 通知服务
-- [ ] 用户活动检测
-- [ ] 提醒管理核心功能
-- [ ] UI交互控制
-- [ ] 响应式设计
-- [ ] 测试和优化
+- [x] 存储管理系统
+- [x] 通知服务
+- [x] 用户活动检测
+- [x] 提醒管理核心功能
+- [x] UI交互控制
+- [x] 响应式设计
+- [x] 测试和优化
+- [x] GitHub Pages 部署
+
+## 部署指南
+
+### GitHub Pages 部署
+
+1. Fork 或克隆此仓库
+2. 启用 GitHub Pages:
+   - 进入仓库设置 -> Pages
+   - 选择 `gh-pages` 分支作为源
+   - 点击保存
+3. 自动部署将在每次推送到 `main` 分支后执行
+4. 访问 `https://<your-username>.github.io/office-wellness-reminder/` 查看应用
+
+### 本地开发
+
+1. 克隆仓库: `git clone https://github.com/yourusername/office-wellness-reminder.git`
+2. 进入项目目录: `cd office-wellness-reminder`
+3. 使用本地服务器运行项目:
+   - 使用 Python: `python -m http.server`
+   - 或使用 Node.js: `npx serve`
+4. 在浏览器中访问 `http://localhost:8000`
 
 ## 许可证
 

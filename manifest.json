@@ -1,0 +1,21 @@
+{
+  "name": "办公族健康提醒 - Office Wellness Reminder",
+  "short_name": "健康提醒",
+  "description": "帮助办公族养成健康工作习惯的喝水和防久坐提醒应用",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4CAF50",
+  "icons": [
+    {
+      "src": "assets/posture-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/water-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

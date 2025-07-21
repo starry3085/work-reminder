@@ -1,4 +1,19 @@
 /**
+ * 注册Service Worker
+ */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/js/service-worker.js')
+            .then(registration => {
+                console.log('Service Worker 注册成功:', registration.scope);
+            })
+            .catch(error => {
+                console.log('Service Worker 注册失败:', error);
+            });
+    });
+}
+
+/**
  * 主应用类 - 协调各个组件的工作
  */
 class OfficeWellnessApp {
