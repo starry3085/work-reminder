@@ -91,6 +91,18 @@
         </div>
         
         <div class="test-section">
+            <h2>ReminderManager 测试</h2>
+            <button onclick="runReminderManagerTests()">运行 ReminderManager 测试</button>
+            <div id="reminderOutput" class="output" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>MobileAdapter 测试</h2>
+            <button onclick="runMobileAdapterTests()">运行 MobileAdapter 测试</button>
+            <div id="mobileOutput" class="output" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
             <h2>集成测试</h2>
             <button onclick="runIntegrationTests()">运行集成测试</button>
             <div id="integrationOutput" class="output" style="display: none;"></div>
@@ -106,10 +118,18 @@
     <!-- 加载源代码 -->
     <script src="../js/storage-manager.js"></script>
     <script src="../js/app-settings.js"></script>
+    <script src="../js/reminder-manager.js"></script>
+    <script src="../js/notification-service.js"></script>
+    <script src="../js/activity-detector.js"></script>
+    <script src="../js/error-handler.js"></script>
+    <script src="../js/mobile-adapter.js"></script>
     
     <!-- 加载测试代码 -->
     <script src="storage-manager.test.js"></script>
     <script src="app-settings.test.js"></script>
+    <script src="reminder-manager.test.js"></script>
+    <script src="mobile-adapter.test.js"></script>
+    <script src="activity-reminder-integration.test.js"></script>
 
     <script>
         // 重定向console输出到页面
@@ -240,11 +260,70 @@
                     console.error('✗ 数据备份测试失败');
                 }
                 
+                // 运行活动检测器和提醒管理器集成测试
+                console.log('\n测试活动检测器和提醒管理器集成...');
+                const activityReminderTests = new ActivityReminderIntegrationTests();
+                const activityReminderSuccess = activityReminderTests.runAllTests();
+                
+                if (activityReminderSuccess) {
+                    console.log('✓ 活动检测器和提醒管理器集成测试通过');
+                } else {
+                    console.error('✗ 活动检测器和提醒管理器集成测试失败');
+                }
+                
                 console.log('\n=== 集成测试完成 ===');
                 console.log('✅ 所有集成测试通过！');
                 
             } catch (error) {
                 console.error('集成测试出错:', error);
+            } finally {
+                redirector.stop();
+            }
+        }
+
+        async function runReminderManagerTests() {
+            const redirector = createConsoleRedirector('reminderOutput');
+            
+            try {
+                redirector.start();
+                console.log('=== ReminderManager 单元测试 ===\n');
+                
+                const tests = new ReminderManagerTests();
+                const success = tests.runAllTests();
+                
+                console.log('\n=== 测试完成 ===');
+                if (success) {
+                    console.log('✅ 所有测试通过！');
+                } else {
+                    console.log('❌ 部分测试失败');
+                }
+                
+            } catch (error) {
+                console.error('测试运行出错:', error);
+            } finally {
+                redirector.stop();
+            }
+        }
+
+        async function runMobileAdapterTests() {
+            const redirector = createConsoleRedirector('mobileOutput');
+            
+            try {
+                redirector.start();
+                console.log('=== MobileAdapter 单元测试 ===\n');
+                
+                const tests = new MobileAdapterTests();
+                const success = tests.runAllTests();
+                
+                console.log('\n=== 测试完成 ===');
+                if (success) {
+                    console.log('✅ 所有测试通过！');
+                } else {
+                    console.log('❌ 部分测试失败');
+                }
+                
+            } catch (error) {
+                console.error('测试运行出错:', error);
             } finally {
                 redirector.stop();
             }
@@ -259,13 +338,19 @@
             await runAppSettingsTests();
             await new Promise(resolve => setTimeout(resolve, 500));
             
+            await runReminderManagerTests();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await runMobileAdapterTests();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             await runIntegrationTests();
             
             console.log('\n🎉 所有测试运行完成！');
         }
 
         function clearAllOutputs() {
-            const outputs = ['storageOutput', 'settingsOutput', 'integrationOutput'];
+            const outputs = ['storageOutput', 'settingsOutput', 'reminderOutput', 'mobileOutput', 'integrationOutput'];
             outputs.forEach(id => {
                 const element = document.getElementById(id);
                 element.innerHTML = '';
