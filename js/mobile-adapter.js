@@ -1,5 +1,5 @@
 /**
- * 移动端适配器 - 处理浏览器兼容性和移动设备适配
+ * Mobile Adapter - Handles browser compatibility and mobile device adaptation
  */
 class MobileAdapter {
     constructor(errorHandler) {
@@ -40,7 +40,7 @@ class MobileAdapter {
         // 检测触摸事件支持
         this.features.touchEvents = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         
-        console.log('浏览器功能支持检测结果:', this.features);
+        console.log('Browser feature support detection results:', this.features);
     }
 
     /**
@@ -91,7 +91,7 @@ class MobileAdapter {
      */
     getBrowserInfo() {
         const ua = navigator.userAgent;
-        let browserName = "未知浏览器";
+        let browserName = "Unknown Browser";
         let browserVersion = "";
         
         // 检测常见浏览器
@@ -145,7 +145,7 @@ class MobileAdapter {
                 this.handleIOSSpecifics();
             }
             
-            console.log('已应用移动端适配');
+            console.log('Mobile adaptation applied');
         }
     }
 
@@ -183,15 +183,15 @@ class MobileAdapter {
         // 为不支持的功能提供替代方案
         if (!this.features.localStorage) {
             result.fallbacks.localStorage = {
-                message: '本地存储不可用，设置将无法保存',
-                solution: '使用内存存储'
+                message: 'Local storage unavailable, settings cannot be saved',
+                solution: 'Using memory storage'
             };
             
             // 报告错误
             if (this.errorHandler) {
                 this.errorHandler.handleError({
                     type: 'compatibility',
-                    message: '本地存储不可用，设置将无法在会话结束后保存',
+                    message: 'Local storage unavailable, settings cannot be saved after session ends',
                     timestamp: Date.now()
                 });
             }
@@ -199,15 +199,15 @@ class MobileAdapter {
         
         if (!this.features.notifications) {
             result.fallbacks.notifications = {
-                message: '浏览器通知不可用，将使用页面内通知',
-                solution: '使用页面内通知'
+                message: 'Browser notifications unavailable, will use in-page notifications',
+                solution: 'Using in-page notifications'
             };
             
             // 报告错误
             if (this.errorHandler) {
                 this.errorHandler.handleError({
                     type: 'compatibility',
-                    message: '浏览器通知不可用，将使用页面内通知',
+                    message: 'Browser notifications unavailable, will use in-page notifications',
                     timestamp: Date.now()
                 });
             }
@@ -215,15 +215,15 @@ class MobileAdapter {
         
         if (!this.features.audio) {
             result.fallbacks.audio = {
-                message: '音频功能不可用，将使用静音通知',
-                solution: '使用静音通知'
+                message: 'Audio functionality unavailable, will use silent notifications',
+                solution: 'Using silent notifications'
             };
             
             // 报告错误
             if (this.errorHandler) {
                 this.errorHandler.handleError({
                     type: 'compatibility',
-                    message: '音频功能不可用，将使用静音通知',
+                    message: 'Audio functionality unavailable, will use silent notifications',
                     timestamp: Date.now()
                 });
             }
@@ -250,31 +250,31 @@ class MobileAdapter {
             
             let noticeContent = `
                 <div class="compatibility-header">
-                    <h3>浏览器兼容性提示</h3>
-                    <button class="btn-close" id="compatibility-close">✕</button>
+                    <h3>Browser Compatibility Notice</h3>
+                    <button class="btn-close" id="compatibility-close">X</button>
                 </div>
                 <div class="compatibility-content">
-                    <p>检测到您正在使用 ${browserInfo.name} ${browserInfo.version}，某些功能可能受限：</p>
+                    <p>You are using ${browserInfo.name} ${browserInfo.version}, some features may be limited:</p>
                     <ul>
             `;
             
             // 添加不支持的功能
             if (!featureCheck.supported.localStorage) {
-                noticeContent += `<li>本地存储不可用，您的设置将无法在会话结束后保存</li>`;
+                noticeContent += `<li>Local storage unavailable, your settings cannot be saved after session ends</li>`;
             }
             if (!featureCheck.supported.notifications) {
-                noticeContent += `<li>浏览器通知不可用，将使用页面内通知代替</li>`;
+                noticeContent += `<li>Browser notifications unavailable, will use in-page notifications instead</li>`;
             }
             if (!featureCheck.supported.audio) {
-                noticeContent += `<li>音频功能不可用，提醒将不会播放声音</li>`;
+                noticeContent += `<li>Audio functionality unavailable, reminders will not play sounds</li>`;
             }
             
             noticeContent += `
                     </ul>
-                    <p>为了获得最佳体验，建议使用最新版本的Chrome、Firefox、Safari或Edge浏览器。</p>
+                    <p>For the best experience, we recommend using the latest version of Chrome, Firefox, Safari, or Edge.</p>
                 </div>
                 <div class="compatibility-footer">
-                    <button class="btn-primary" id="compatibility-understand">我知道了</button>
+                    <button class="btn-primary" id="compatibility-understand">I Understand</button>
                 </div>
             `;
             
@@ -293,7 +293,7 @@ class MobileAdapter {
                     noticeElement.remove();
                 });
             } else {
-                console.warn('未提供容器元素，无法显示兼容性提示');
+                console.warn('No container element provided, cannot display compatibility notice');
             }
         }
     }

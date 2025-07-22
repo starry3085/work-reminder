@@ -479,12 +479,12 @@ class UIController {
         
         // 更新按钮状态
         if (status.isActive) {
-            toggleButton.textContent = '暂停';
+            toggleButton.textContent = 'Pause';
             toggleButton.className = 'btn-secondary';
             if (resetButton) resetButton.style.display = 'inline-block';
             if (actionButton) actionButton.style.display = 'inline-block';
         } else {
-            toggleButton.textContent = '开始';
+            toggleButton.textContent = 'Start';
             toggleButton.className = 'btn-primary';
             if (resetButton) resetButton.style.display = 'none';
             if (actionButton) actionButton.style.display = 'none';
@@ -1077,10 +1077,10 @@ class UIController {
         }
         
         if (isActive) {
-            this.elements.activityStatusValue.textContent = '活跃';
+            this.elements.activityStatusValue.textContent = 'Active';
             this.elements.activityStatusValue.classList.remove('inactive');
         } else {
-            this.elements.activityStatusValue.textContent = '离开';
+            this.elements.activityStatusValue.textContent = 'Away';
             this.elements.activityStatusValue.classList.add('inactive');
         }
     }
