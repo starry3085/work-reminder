@@ -1,7 +1,7 @@
 {
   "name": "office-wellness-reminder",
-  "version": "2025-07-22T02:56:23.443Z",
-  "timestamp": 1753152983446,
+  "version": "2025-07-22T03:07:24.370Z",
+  "timestamp": 1753153644373,
   "files": [
     "404.html",
     "CNAME",
@@ -11,6 +11,7 @@
     "assets/posture-reminder.mp3",
     "assets/water-icon.png",
     "assets/water-reminder.mp3",
+    "cache-manifest.json",
     "index.html",
     "js/activity-detector.f2cc8696.js",
     "js/app-settings.2f3cf030.js",
@@ -26,6 +27,7 @@
     "js/ui-controller.051c7732.js",
     "js/water-reminder.84f40542.js",
     "manifest.json",
+    "optimization-report.json",
     "robots.txt",
     "service-worker.js",
     "sitemap.xml",

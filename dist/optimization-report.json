@@ -1,9 +1,9 @@
 {
-  "timestamp": "2025-07-22T02:56:23.610Z",
-  "originalSize": "29.78 MB",
-  "optimizedSize": "162.17 KB",
-  "savings": "29.62 MB",
-  "savingsPercentage": "99.47%",
+  "timestamp": "2025-07-22T03:07:25.423Z",
+  "originalSize": "71.45 MB",
+  "optimizedSize": "162.53 KB",
+  "savings": "71.29 MB",
+  "savingsPercentage": "99.78%",
   "configuration": {
     "addHash": true,
     "generateSourcemap": false,
