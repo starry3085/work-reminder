@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: |
+          npm install -g http-server
+          npm install -g lighthouse
+
+      - name: Start HTTP server
+        run: |
+          http-server . -p 8080 &
+          sleep 5
+
+      - name: Run Lighthouse audit
+        run: |
+          lighthouse http://localhost:8080 --output-path=./lighthouse-report.html --output=html --chrome-flags="--headless --no-sandbox --disable-gpu"
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v2
+        with:
+          name: lighthouse-report
+          path: ./lighthouse-report.html
+
+      - name: Check HTML validity
+        run: |
+          npx html-validate index.html
+
+      - name: Check for broken links
+        run: |
+          npx broken-link-checker http://localhost:8080 --recursive --ordered
