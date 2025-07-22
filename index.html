@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#4CAF50">
-    <title>办公族健康提醒 - Office Wellness Reminder</title>
-    <meta name="description" content="帮助办公族养成健康工作习惯的喝水和防久坐提醒应用">
+    <meta name="theme-color" content="#2c3e50">
+    <title>Office Wellness Reminder</title>
+    <meta name="description" content="An application to help office workers develop healthy work habits with water and posture reminders">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="assets/posture-icon.png">
@@ -15,109 +15,109 @@
 </head>
 <body>
     <div id="app">
-        <!-- 主控制面板 -->
+        <!-- Main Control Panel -->
         <main class="main-panel">
             <header class="app-header">
-                <h1>办公族健康提醒</h1>
-                <p class="app-subtitle">保持健康工作习惯</p>
+                <h1>Office Wellness Reminder</h1>
+                <p class="app-subtitle">Maintain Healthy Work Habits</p>
                 <div class="app-status-summary" id="app-status-summary">
                     <div class="status-indicator active" id="app-status-indicator"></div>
-                    <span id="app-status-text">健康提醒已启动</span>
+                    <span id="app-status-text">Wellness Reminders Active</span>
                 </div>
             </header>
 
-            <!-- 状态显示区域 -->
+            <!-- Status Display Area -->
             <section class="status-section">
                 <div class="reminder-card" id="water-card">
                     <div class="card-header">
-                        <div class="card-icon">💧</div>
-                        <h3>喝水提醒</h3>
-                        <div class="status-badge" id="water-status-badge">未启动</div>
+                        <div class="card-icon water-icon"></div>
+                        <h3>Water Reminder</h3>
+                        <div class="status-badge" id="water-status-badge">Inactive</div>
                     </div>
                     <div class="card-content">
                         <div class="status-info">
-                            <div class="status-display" id="water-status">未启动</div>
+                            <div class="status-display" id="water-status">Inactive</div>
                             <div class="time-remaining" id="water-time"></div>
                         </div>
                         <div class="daily-stats" id="water-stats">
-                            <span class="stats-text">今日: 0/8 杯</span>
+                            <span class="stats-text">Today: 0/8 glasses</span>
                             <div class="progress-bar">
                                 <div class="progress-fill" id="water-progress"></div>
                             </div>
                         </div>
                         <div class="next-reminder" id="water-next-reminder">
-                            <span class="next-reminder-label">下次提醒:</span>
+                            <span class="next-reminder-label">Next reminder:</span>
                             <span class="next-reminder-time" id="water-next-time">--:--</span>
                         </div>
                     </div>
                     <div class="card-controls">
-                        <button class="btn-primary" id="water-toggle">开始</button>
-                        <button class="btn-secondary" id="water-reset" style="display: none;">重置</button>
-                        <button class="btn-action" id="waterDrink" style="display: none;">已喝水</button>
+                        <button class="btn-primary" id="water-toggle">Start</button>
+                        <button class="btn-secondary" id="water-reset" style="display: none;">Reset</button>
+                        <button class="btn-action" id="waterDrink" style="display: none;">Hydrated</button>
                     </div>
                 </div>
 
                 <div class="reminder-card" id="posture-card">
                     <div class="card-header">
-                        <div class="card-icon">🪑</div>
-                        <h3>久坐提醒</h3>
-                        <div class="status-badge" id="posture-status-badge">未启动</div>
+                        <div class="card-icon posture-icon"></div>
+                        <h3>Posture Reminder</h3>
+                        <div class="status-badge" id="posture-status-badge">Inactive</div>
                     </div>
                     <div class="card-content">
                         <div class="status-info">
-                            <div class="status-display" id="posture-status">未启动</div>
+                            <div class="status-display" id="posture-status">Inactive</div>
                             <div class="time-remaining" id="posture-time"></div>
                         </div>
                         <div class="daily-stats" id="posture-stats">
-                            <span class="stats-text">今日: 0/8 次活动</span>
+                            <span class="stats-text">Today: 0/8 activities</span>
                             <div class="progress-bar">
                                 <div class="progress-fill" id="posture-progress"></div>
                             </div>
                         </div>
                         <div class="next-reminder" id="posture-next-reminder">
-                            <span class="next-reminder-label">下次提醒:</span>
+                            <span class="next-reminder-label">Next reminder:</span>
                             <span class="next-reminder-time" id="posture-next-time">--:--</span>
                         </div>
                         <div class="activity-status" id="activity-status">
-                            <span class="activity-status-label">活动状态:</span>
-                            <span class="activity-status-value" id="activity-status-value">活跃</span>
+                            <span class="activity-status-label">Activity status:</span>
+                            <span class="activity-status-value" id="activity-status-value">Active</span>
                         </div>
                     </div>
                     <div class="card-controls">
-                        <button class="btn-primary" id="posture-toggle">开始</button>
-                        <button class="btn-secondary" id="posture-reset" style="display: none;">重置</button>
-                        <button class="btn-action" id="postureActivity" style="display: none;">已活动</button>
+                        <button class="btn-primary" id="posture-toggle">Start</button>
+                        <button class="btn-secondary" id="posture-reset" style="display: none;">Reset</button>
+                        <button class="btn-action" id="postureActivity" style="display: none;">Moved</button>
                     </div>
                 </div>
             </section>
 
-            <!-- 快速操作区域 -->
+            <!-- Quick Actions Area -->
             <section class="quick-actions">
                 <div class="quick-actions-group">
-                    <button class="btn-action" id="start-all-btn">▶️ 全部开始</button>
-                    <button class="btn-action" id="pause-all-btn">⏸️ 全部暂停</button>
+                    <button class="btn-action" id="start-all-btn">Start All</button>
+                    <button class="btn-action" id="pause-all-btn">Pause All</button>
                 </div>
                 <div class="quick-actions-group">
-                    <button class="btn-action" id="settings-btn">⚙️ 设置</button>
-                    <button class="btn-action" id="help-btn">❓ 帮助</button>
+                    <button class="btn-action" id="settings-btn">Settings</button>
+                    <button class="btn-action" id="help-btn">Help</button>
                 </div>
             </section>
             
-            <!-- 状态摘要区域 -->
+            <!-- Status Summary Area -->
             <section class="status-summary">
                 <div class="summary-card">
-                    <div class="summary-title">今日健康状态</div>
+                    <div class="summary-title">Today's Wellness Status</div>
                     <div class="summary-content">
                         <div class="summary-item">
-                            <span class="summary-label">喝水次数:</span>
+                            <span class="summary-label">Hydration count:</span>
                             <span class="summary-value" id="water-count">0/8</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">活动次数:</span>
+                            <span class="summary-label">Activity count:</span>
                             <span class="summary-value" id="posture-count">0/8</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">健康评分:</span>
+                            <span class="summary-label">Wellness score:</span>
                             <span class="summary-value" id="health-score">--</span>
                         </div>
                     </div>
@@ -125,67 +125,67 @@
             </section>
         </main>
 
-        <!-- 设置面板 -->
+        <!-- Settings Panel -->
         <div class="settings-panel" id="settings-panel">
             <div class="settings-header">
-                <h2>设置</h2>
+                <h2>Settings</h2>
                 <button class="btn-close" id="settings-close">✕</button>
             </div>
             <div class="settings-content">
                 <div class="settings-section">
-                    <h3>喝水提醒</h3>
+                    <h3>Water Reminder</h3>
                     <div class="setting-item">
                         <label class="switch">
                             <input type="checkbox" id="water-enabled" checked>
                             <span class="slider"></span>
                         </label>
                         <div class="setting-label">
-                            <span>启用喝水提醒</span>
-                            <small>定时提醒您补充水分</small>
+                            <span>Enable Water Reminder</span>
+                            <small>Reminds you to stay hydrated</small>
                         </div>
                     </div>
                     <div class="setting-item">
-                        <label for="water-interval">提醒间隔</label>
+                        <label for="water-interval">Reminder Interval</label>
                         <div class="setting-control">
                             <input type="range" id="water-interval-slider" min="5" max="120" value="30" step="5">
                             <div class="range-value">
-                                <input type="number" id="water-interval" min="5" max="120" value="30"> 分钟
+                                <input type="number" id="water-interval" min="5" max="120" value="30"> minutes
                             </div>
                         </div>
                     </div>
                     <div class="setting-item">
-                        <label for="water-target">每日目标</label>
+                        <label for="water-target">Daily Target</label>
                         <div class="setting-control">
-                            <input type="number" id="water-target" min="1" max="20" value="8"> 杯水
+                            <input type="number" id="water-target" min="1" max="20" value="8"> glasses
                         </div>
                     </div>
                 </div>
                 
                 <div class="settings-section">
-                    <h3>久坐提醒</h3>
+                    <h3>Posture Reminder</h3>
                     <div class="setting-item">
                         <label class="switch">
                             <input type="checkbox" id="posture-enabled" checked>
                             <span class="slider"></span>
                         </label>
                         <div class="setting-label">
-                            <span>启用久坐提醒</span>
-                            <small>提醒您定时起身活动</small>
+                            <span>Enable Posture Reminder</span>
+                            <small>Reminds you to take breaks from sitting</small>
                         </div>
                     </div>
                     <div class="setting-item">
-                        <label for="posture-interval">提醒间隔</label>
+                        <label for="posture-interval">Reminder Interval</label>
                         <div class="setting-control">
                             <input type="range" id="posture-interval-slider" min="15" max="120" value="60" step="5">
                             <div class="range-value">
-                                <input type="number" id="posture-interval" min="15" max="120" value="60"> 分钟
+                                <input type="number" id="posture-interval" min="15" max="120" value="60"> minutes
                             </div>
                         </div>
                     </div>
                     <div class="setting-item">
-                        <label for="posture-target">每日目标</label>
+                        <label for="posture-target">Daily Target</label>
                         <div class="setting-control">
-                            <input type="number" id="posture-target" min="1" max="20" value="8"> 次活动
+                            <input type="number" id="posture-target" min="1" max="20" value="8"> activities
                         </div>
                     </div>
                     <div class="setting-item">
@@ -194,22 +194,22 @@
                             <span class="slider"></span>
                         </label>
                         <div class="setting-label">
-                            <span>活动检测</span>
-                            <small>检测到活动时重置计时器</small>
+                            <span>Activity Detection</span>
+                            <small>Reset timer when activity is detected</small>
                         </div>
                     </div>
                 </div>
                 
                 <div class="settings-section">
-                    <h3>通知设置</h3>
+                    <h3>Notification Settings</h3>
                     <div class="setting-item">
                         <label class="switch">
                             <input type="checkbox" id="browser-notifications" checked>
                             <span class="slider"></span>
                         </label>
                         <div class="setting-label">
-                            <span>桌面通知</span>
-                            <small>在系统桌面显示通知</small>
+                            <span>Desktop Notifications</span>
+                            <small>Show notifications on system desktop</small>
                         </div>
                     </div>
                     <div class="setting-item">
@@ -218,84 +218,84 @@
                             <span class="slider"></span>
                         </label>
                         <div class="setting-label">
-                            <span>提示音</span>
-                            <small>播放提示音效</small>
+                            <span>Sound Alerts</span>
+                            <small>Play notification sounds</small>
                         </div>
                     </div>
                     <div class="setting-item">
-                        <label for="notification-style">通知样式</label>
+                        <label for="notification-style">Notification Style</label>
                         <div class="setting-control">
                             <select id="notification-style">
-                                <option value="standard">标准</option>
-                                <option value="minimal">简约</option>
-                                <option value="detailed">详细</option>
+                                <option value="standard">Standard</option>
+                                <option value="minimal">Minimal</option>
+                                <option value="detailed">Detailed</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 
                 <div class="settings-section">
-                    <h3>外观设置</h3>
+                    <h3>Appearance</h3>
                     <div class="setting-item">
-                        <label for="theme-selector">主题</label>
+                        <label for="theme-selector">Theme</label>
                         <div class="setting-control theme-selector" id="theme-selector">
                             <button class="theme-option active" data-theme="light">
                                 <div class="theme-preview light-theme"></div>
-                                <span>浅色</span>
+                                <span>Light</span>
                             </button>
                             <button class="theme-option" data-theme="dark">
                                 <div class="theme-preview dark-theme"></div>
-                                <span>深色</span>
+                                <span>Dark</span>
                             </button>
                             <button class="theme-option" data-theme="auto">
                                 <div class="theme-preview auto-theme"></div>
-                                <span>自动</span>
+                                <span>Auto</span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="settings-footer">
-                <button class="btn-secondary" id="reset-settings">重置</button>
-                <button class="btn-primary" id="save-settings">保存</button>
+                <button class="btn-secondary" id="reset-settings">Reset</button>
+                <button class="btn-primary" id="save-settings">Save</button>
             </div>
         </div>
 
-        <!-- 通知弹窗 -->
+        <!-- Notification Popup -->
         <div class="notification-overlay" id="notification-overlay">
             <div class="notification-modal">
-                <div class="notification-icon" id="notification-icon">💧</div>
+                <div class="notification-icon water-icon" id="notification-icon"></div>
                 <div class="notification-content">
-                    <h3 id="notification-title">喝水时间到了！</h3>
-                    <p id="notification-message">记得补充水分，保持身体健康</p>
+                    <h3 id="notification-title">Time to hydrate!</h3>
+                    <p id="notification-message">Remember to drink water for better health</p>
                 </div>
                 <div class="notification-actions">
-                    <button class="btn-primary" id="notification-confirm">已完成</button>
-                    <button class="btn-secondary" id="notification-snooze">稍后提醒</button>
+                    <button class="btn-primary" id="notification-confirm">Done</button>
+                    <button class="btn-secondary" id="notification-snooze">Remind Later</button>
                 </div>
             </div>
         </div>
 
-        <!-- 帮助面板 -->
+        <!-- Help Panel -->
         <div class="help-overlay" id="help-overlay">
             <div class="help-modal">
                 <div class="help-header">
-                    <h2>使用帮助</h2>
+                    <h2>Help Guide</h2>
                     <button class="btn-close" id="help-close">✕</button>
                 </div>
                 <div class="help-content">
-                    <h3>功能介绍</h3>
+                    <h3>Features</h3>
                     <ul>
-                        <li><strong>喝水提醒</strong>：定时提醒您补充水分</li>
-                        <li><strong>久坐提醒</strong>：提醒您起身活动，避免久坐危害</li>
-                        <li><strong>智能检测</strong>：自动检测您的活动状态</li>
+                        <li><strong>Water Reminder</strong>: Reminds you to stay hydrated</li>
+                        <li><strong>Posture Reminder</strong>: Reminds you to take breaks from sitting</li>
+                        <li><strong>Smart Detection</strong>: Automatically detects your activity status</li>
                     </ul>
                     
-                    <h3>使用方法</h3>
+                    <h3>How to Use</h3>
                     <ol>
-                        <li>点击"开始"按钮启动提醒</li>
-                        <li>在设置中调整提醒间隔</li>
-                        <li>收到提醒时点击"已完成"确认</li>
+                        <li>Click "Start" button to activate reminders</li>
+                        <li>Adjust reminder intervals in settings</li>
+                        <li>Click "Done" when you receive a reminder</li>
                     </ol>
                 </div>
             </div>
