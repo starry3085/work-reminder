@@ -1,40 +1,40 @@
 /**
- * 用户活动检测器 - 监测用户的鼠标和键盘活动
- * 负责检测用户是否在电脑前活动，用于智能暂停和恢复提醒功能
+ * User Activity Detector - Monitors user's mouse and keyboard activity
+ * Responsible for detecting if the user is active at the computer, used for smart pause and resume of reminder functions
  */
 class ActivityDetector {
     /**
-     * 创建活动检测器实例
-     * @param {Function} callback - 当用户活动状态变化时的回调函数
+     * Create activity detector instance
+     * @param {Function} callback - Callback function when user activity status changes
      */
     constructor(callback) {
         this.callback = callback;
         this.lastActivityTime = Date.now();
         this.isMonitoring = false;
-        this.awayThreshold = 5 * 60 * 1000; // 5分钟无活动视为离开
+        this.awayThreshold = 5 * 60 * 1000; // 5 minutes of inactivity is considered away
         this.checkInterval = null;
-        this.checkIntervalTime = 30000; // 每30秒检查一次状态
-        this.isAway = false; // 用户是否离开
+        this.checkIntervalTime = 30000; // Check status every 30 seconds
+        this.isAway = false; // Whether the user is away
         
-        // 绑定事件处理函数，确保this指向正确
+        // Bind event handlers to ensure correct 'this' reference
         this.handleActivity = this.handleActivity.bind(this);
         this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
         this.checkUserActivity = this.checkUserActivity.bind(this);
     }
 
     /**
-     * 开始监控用户活动
+     * Start monitoring user activity
      */
     startMonitoring() {
         if (this.isMonitoring) return;
         
-        // 添加鼠标和键盘事件监听
+        // Add mouse and keyboard event listeners
         document.addEventListener('mousemove', this.handleActivity);
         document.addEventListener('mousedown', this.handleActivity);
         document.addEventListener('keydown', this.handleActivity);
         document.addEventListener('scroll', this.handleActivity);
         
-        // 监听页面可见性变化
+        // Listen for page visibility changes
         document.addEventListener('visibilitychange', this.handleVisibilityChange);
         
         // 设置定期检查用户活动状态的定时器

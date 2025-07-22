@@ -1,26 +1,26 @@
 /**
- * 注册Service Worker
+ * Register Service Worker
  */
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/js/service-worker.js')
             .then(registration => {
-                console.log('Service Worker 注册成功:', registration.scope);
+                console.log('Service Worker registration successful:', registration.scope);
             })
             .catch(error => {
-                console.log('Service Worker 注册失败:', error);
+                console.log('Service Worker registration failed:', error);
             });
     });
 }
 
 /**
- * 主应用类 - 协调各个组件的工作
+ * Main Application Class - Coordinates the work of various components
  */
 class OfficeWellnessApp {
     constructor() {
         this.isInitialized = false;
         
-        // 组件实例
+        // Component instances
         this.errorHandler = null;
         this.mobileAdapter = null;
         this.storageManager = null;
@@ -31,7 +31,7 @@ class OfficeWellnessApp {
         this.postureReminder = null;
         this.uiController = null;
         
-        // 应用状态
+        // Application state
         this.appState = {
             isInitializing: false,
             isFirstUse: false,
@@ -41,63 +41,63 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 初始化应用
+     * Initialize application
      */
     async initialize() {
         try {
-            console.log('正在初始化办公族健康提醒应用...');
+            console.log('Initializing Office Wellness Reminder application...');
             this.appState.isInitializing = true;
             
-            // 初始化各个组件
+            // Initialize components
             await this.initializeComponents();
             
-            // 加载用户设置和状态
+            // Load user settings and state
             await this.loadSettingsAndState();
             
-            // 设置事件监听
+            // Set up event listeners
             this.setupEventListeners();
             
-            // 初始化UI
+            // Initialize UI
             this.initializeUI();
             
-            // 请求通知权限
+            // Request notification permission
             await this.requestNotificationPermission();
             
-            // 恢复上次会话状态
+            // Restore previous session state
             await this.restorePreviousState();
             
-            // 检查是否首次使用
+            // Check if first use
             if (this.appSettings.isFirstUse()) {
                 this.showFirstUseGuide();
             }
             
             this.isInitialized = true;
             this.appState.isInitializing = false;
-            console.log('应用初始化完成');
+            console.log('Application initialization complete');
             
-            // 记录会话开始时间
+            // Record session start time
             this.appState.lastSessionTime = Date.now();
             
         } catch (error) {
-            console.error('应用初始化失败:', error);
+            console.error('Application initialization failed:', error);
             this.appState.isInitializing = false;
             this.handleInitializationError(error);
         }
     }
 
     /**
-     * 初始化各个组件
+     * Initialize all components
      * @private
      */
     async initializeComponents() {
         try {
-            // 初始化错误处理器
+            // Initialize error handler
             this.errorHandler = new ErrorHandler();
             
-            // 初始化移动端适配器
+            // Initialize mobile adapter
             this.mobileAdapter = new MobileAdapter(this.errorHandler);
             
-            // 检查浏览器兼容性
+            // Check browser compatibility
             this.checkBrowserCompatibility();
             
             // 初始化存储管理器
@@ -111,7 +111,7 @@ class OfficeWellnessApp {
             
             // 初始化活动检测器（用于久坐提醒）
             this.activityDetector = new ActivityDetector((event) => {
-                console.log('用户活动状态变化:', event);
+                console.log('User activity status changed:', event);
                 // 活动检测器的回调会在ReminderManager中处理
                 
                 // 更新应用状态中的用户活动信息
@@ -149,12 +149,12 @@ class OfficeWellnessApp {
                 this.mobileAdapter.applyMobileAdaptation();
             }
         } catch (error) {
-            console.error('初始化组件失败:', error);
+            console.error('Failed to initialize components:', error);
             if (this.errorHandler) {
                 this.errorHandler.handleError({
                     type: 'initialization',
                     error: error,
-                    message: '初始化组件失败: ' + (error.message || '未知错误'),
+                    message: 'Failed to initialize components: ' + (error.message || 'Unknown error'),
                     timestamp: Date.now()
                 });
             }
@@ -192,12 +192,12 @@ class OfficeWellnessApp {
             
             return compatibilityResult;
         } catch (error) {
-            console.error('检查浏览器兼容性失败:', error);
+            console.error('Failed to check browser compatibility:', error);
             if (this.errorHandler) {
                 this.errorHandler.handleError({
                     type: 'compatibility',
                     error: error,
-                    message: '检查浏览器兼容性失败: ' + (error.message || '未知错误'),
+                    message: 'Failed to check browser compatibility: ' + (error.message || 'Unknown error'),
                     timestamp: Date.now()
                 });
             }
@@ -212,18 +212,18 @@ class OfficeWellnessApp {
         try {
             // 加载设置
             const settings = this.appSettings.loadSettings();
-            console.log('已加载用户设置:', settings);
+            console.log('User settings loaded:', settings);
             
-            // 加载应用状态
+            // Load application state
             const state = this.appSettings.loadState();
-            console.log('已加载应用状态:', state);
+            console.log('Application state loaded:', state);
             
             // 检查是否首次使用
             this.appState.isFirstUse = this.appSettings.isFirstUse();
             
             return { settings, state };
         } catch (error) {
-            console.warn('加载设置和状态失败:', error);
+            console.warn('Failed to load settings and state:', error);
             throw error;
         }
     }
@@ -236,7 +236,7 @@ class OfficeWellnessApp {
         try {
             const currentSettings = this.appSettings.getSettings();
             this.appSettings.saveSettings(currentSettings);
-            console.log('设置已保存');
+            console.log('Settings saved');
             return true;
         } catch (error) {
             console.error('保存设置失败:', error);
@@ -647,35 +647,35 @@ class OfficeWellnessApp {
             guideOverlay.innerHTML = `
                 <div class="guide-modal">
                     <div class="guide-header">
-                        <h2>欢迎使用办公族健康提醒</h2>
-                        <button class="btn-close" id="guide-close">✕</button>
+                        <h2>Welcome to Office Wellness Reminder</h2>
+                        <button class="btn-close" id="guide-close">X</button>
                     </div>
                     <div class="guide-content">
                         <div class="guide-step">
                             <div class="guide-step-number">1</div>
                             <div class="guide-step-content">
-                                <h3>设置提醒间隔</h3>
-                                <p>根据您的需要设置喝水和久坐提醒的时间间隔</p>
+                                <h3>Set Reminder Intervals</h3>
+                                <p>Set water and standup reminder intervals according to your needs</p>
                             </div>
                         </div>
                         <div class="guide-step">
                             <div class="guide-step-number">2</div>
                             <div class="guide-step-content">
-                                <h3>开启提醒</h3>
-                                <p>点击"开始"按钮启动提醒功能</p>
+                                <h3>Enable Reminders</h3>
+                                <p>Click the "Start" button to activate reminders</p>
                             </div>
                         </div>
                         <div class="guide-step">
                             <div class="guide-step-number">3</div>
                             <div class="guide-step-content">
-                                <h3>确认完成</h3>
-                                <p>收到提醒后，点击"已完成"按钮确认并重置计时器</p>
+                                <h3>Confirm Completion</h3>
+                                <p>After receiving a reminder, click the "Done" button to confirm and reset the timer</p>
                             </div>
                         </div>
                     </div>
                     <div class="guide-footer">
-                        <button class="btn-primary" id="guide-settings">设置提醒</button>
-                        <button class="btn-secondary" id="guide-start">直接开始</button>
+                        <button class="btn-primary" id="guide-settings">Configure Settings</button>
+                        <button class="btn-secondary" id="guide-start">Start Now</button>
                     </div>
                 </div>
             `;
@@ -729,13 +729,13 @@ class OfficeWellnessApp {
      */
     getErrorMessage(error) {
         if (error.message.includes('localStorage')) {
-            return '本地存储不可用，设置将无法保存';
+            return 'Local storage unavailable, settings cannot be saved';
         } else if (error.message.includes('notification')) {
-            return '通知功能不可用，将使用页面内提醒';
+            return 'Notification functionality unavailable, will use in-page alerts';
         } else if (error.message.includes('audio')) {
-            return '音频功能不可用，将使用静音提醒';
+            return 'Audio functionality unavailable, will use silent alerts';
         } else {
-            return '应用启动时遇到问题，部分功能可能不可用';
+            return 'The application encountered issues during startup, some features may be unavailable';
         }
     }
 

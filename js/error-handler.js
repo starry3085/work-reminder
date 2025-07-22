@@ -1,5 +1,5 @@
 /**
- * 全局错误处理器 - 处理应用中的各种错误和异常情况
+ * Global Error Handler - Handles various errors and exceptions in the application
  */
 class ErrorHandler {
     constructor() {
@@ -9,21 +9,21 @@ class ErrorHandler {
     }
 
     /**
-     * 设置全局错误处理
+     * Set up global error handling
      * @private
      */
     setupGlobalErrorHandling() {
-        // 处理未捕获的Promise错误
+        // Handle uncaught Promise errors
         window.addEventListener('unhandledrejection', (event) => {
             this.handleError({
                 type: 'promise',
                 error: event.reason,
-                message: event.reason?.message || '未处理的Promise错误',
+                message: event.reason?.message || 'Unhandled Promise error',
                 timestamp: Date.now()
             });
         });
 
-        // 处理全局JavaScript错误
+        // Handle global JavaScript errors
         window.addEventListener('error', (event) => {
             this.handleError({
                 type: 'runtime',
@@ -35,22 +35,22 @@ class ErrorHandler {
                 timestamp: Date.now()
             });
             
-            // 防止错误显示在控制台
+            // Prevent error from showing in console
             event.preventDefault();
         });
     }
 
     /**
-     * 处理错误
-     * @param {Object} errorInfo - 错误信息对象
+     * Handle error
+     * @param {Object} errorInfo - Error information object
      */
     handleError(errorInfo) {
-        console.error('应用错误:', errorInfo);
+        console.error('Application error:', errorInfo);
         
-        // 添加到错误日志
+        // Add to error log
         this.logError(errorInfo);
         
-        // 根据错误类型执行不同的处理
+        // Execute different handling based on error type
         switch (errorInfo.type) {
             case 'storage':
                 return this.handleStorageError(errorInfo);
@@ -70,129 +70,129 @@ class ErrorHandler {
     }
 
     /**
-     * 记录错误到日志
-     * @param {Object} errorInfo - 错误信息
+     * Log error to log
+     * @param {Object} errorInfo - Error information
      * @private
      */
     logError(errorInfo) {
-        // 限制日志大小
+        // Limit log size
         if (this.errorLog.length >= this.maxLogSize) {
-            this.errorLog.shift(); // 移除最旧的错误
+            this.errorLog.shift(); // Remove oldest error
         }
         
         this.errorLog.push(errorInfo);
         
-        // 尝试保存错误日志到本地存储
+        // Try to save error log to local storage
         try {
             localStorage.setItem('errorLog', JSON.stringify(this.errorLog));
         } catch (e) {
-            // 如果本地存储不可用，忽略错误
-            console.warn('无法保存错误日志到本地存储');
+            // If local storage is unavailable, ignore error
+            console.warn('Unable to save error log to local storage');
         }
     }
 
     /**
-     * 处理存储相关错误
-     * @param {Object} errorInfo - 错误信息
+     * Handle storage-related errors
+     * @param {Object} errorInfo - Error information
      * @private
      */
     handleStorageError(errorInfo) {
-        // 实现存储降级策略
-        console.warn('存储功能不可用，将使用内存存储');
+        // Implement storage fallback strategy
+        console.warn('Storage functionality unavailable, will use memory storage');
         
-        // 返回用户友好的错误信息
+        // Return user-friendly error message
         return {
-            title: '存储功能受限',
-            message: '本地存储不可用，您的设置将无法在会话结束后保存',
+            title: 'Storage Functionality Limited',
+            message: 'Local storage unavailable, your settings cannot be saved after the session ends',
             type: 'warning',
-            solution: '请检查浏览器设置，确保允许网站使用本地存储'
+            solution: 'Please check browser settings to ensure websites are allowed to use local storage'
         };
     }
 
     /**
-     * 处理通知相关错误
-     * @param {Object} errorInfo - 错误信息
+     * Handle notification-related errors
+     * @param {Object} errorInfo - Error information
      * @private
      */
     handleNotificationError(errorInfo) {
-        console.warn('通知功能不可用，将使用页面内通知');
+        console.warn('Notification functionality unavailable, will use in-page notifications');
         
         return {
-            title: '通知功能受限',
-            message: '系统通知功能不可用，将使用页面内通知代替',
+            title: 'Notification Functionality Limited',
+            message: 'System notification functionality unavailable, will use in-page notifications instead',
             type: 'info',
-            solution: '请检查浏览器通知权限设置'
+            solution: 'Please check browser notification permission settings'
         };
     }
 
     /**
-     * 处理音频相关错误
-     * @param {Object} errorInfo - 错误信息
+     * Handle audio-related errors
+     * @param {Object} errorInfo - Error information
      * @private
      */
     handleAudioError(errorInfo) {
-        console.warn('音频功能不可用，将使用静音通知');
+        console.warn('Audio functionality unavailable, will use silent notifications');
         
         return {
-            title: '音频功能受限',
-            message: '提醒音效无法播放，将使用静音通知',
+            title: 'Audio Functionality Limited',
+            message: 'Reminder sounds cannot be played, will use silent notifications',
             type: 'info',
-            solution: '请检查浏览器音频权限设置'
+            solution: 'Please check browser audio permission settings'
         };
     }
 
     /**
-     * 处理定时器相关错误
-     * @param {Object} errorInfo - 错误信息
+     * Handle timer-related errors
+     * @param {Object} errorInfo - Error information
      * @private
      */
     handleTimerError(errorInfo) {
-        console.warn('定时器错误，将重新初始化计时器');
+        console.warn('Timer error, will reinitialize timer');
         
         return {
-            title: '计时器错误',
-            message: '提醒计时器出现问题，已自动重置',
+            title: 'Timer Error',
+            message: 'Reminder timer encountered an issue and has been automatically reset',
             type: 'warning',
-            solution: '如果问题持续出现，请刷新页面'
+            solution: 'If the problem persists, please refresh the page'
         };
     }
 
     /**
-     * 处理兼容性相关错误
-     * @param {Object} errorInfo - 错误信息
+     * Handle compatibility-related errors
+     * @param {Object} errorInfo - Error information
      * @private
      */
     handleCompatibilityError(errorInfo) {
-        console.warn('浏览器兼容性问题:', errorInfo.message);
+        console.warn('Browser compatibility issue:', errorInfo.message);
         
         return {
-            title: '浏览器兼容性问题',
-            message: errorInfo.message || '您的浏览器可能不支持某些功能',
+            title: 'Browser Compatibility Issue',
+            message: errorInfo.message || 'Your browser may not support some features',
             type: 'warning',
-            solution: '请尝试使用最新版本的Chrome、Firefox、Safari或Edge浏览器'
+            solution: 'Please try using the latest version of Chrome, Firefox, Safari, or Edge'
         };
     }
 
     /**
-     * 处理通用错误
-     * @param {Object} errorInfo - 错误信息
+     * Handle generic errors
+     * @param {Object} errorInfo - Error information
      * @private
      */
     handleGenericError(errorInfo) {
-        console.error('未分类错误:', errorInfo);
+        console.error('Uncategorized error:', errorInfo);
         
         return {
-            title: '应用错误',
-            message: '应用遇到了一个问题',
+            title: 'Application Error',
+            message: 'The application encountered a problem',
             type: 'error',
-            solution: '请刷新页面重试，如果问题持续出现，请清除浏览器缓存'
+            solution: 'Please refresh the page and try again. If the problem persists, clear your browser cache'
         };
     }
 
     /**
-     * 获取用户友好的错误信息
-     * @param {Error} error - 错误对象
-     * @returns {Object} 用户友好的错误信息
+     * Get user-friendly error information
+     * @param {Error} error - Error object
+     * @returns {Object} User-friendly error information
      */
     getUserFriendlyError(error) {
         // 根据错误类型返回友好信息
@@ -208,30 +208,30 @@ class ErrorHandler {
             }
         }
         
-        // 默认错误信息
+        // Default error message
         return this.handleGenericError({ type: 'generic', error });
     }
 
     /**
-     * 获取错误日志
-     * @returns {Array} 错误日志数组
+     * Get error log
+     * @returns {Array} Error log array
      */
     getErrorLog() {
         return [...this.errorLog];
     }
 
     /**
-     * 清除错误日志
+     * Clear error log
      */
     clearErrorLog() {
         this.errorLog = [];
         try {
             localStorage.removeItem('errorLog');
         } catch (e) {
-            // 忽略错误
+            // Ignore errors
         }
     }
 }
 
-// 导出给其他脚本使用
+// Export for use by other scripts
 window.ErrorHandler = ErrorHandler;

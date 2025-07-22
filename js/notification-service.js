@@ -1,5 +1,5 @@
 /**
- * 通知服务 - 负责管理浏览器通知和页面内通知
+ * Notification Service - Manages browser notifications and in-page alerts
  */
 class NotificationService {
     constructor() {
@@ -31,12 +31,12 @@ class NotificationService {
             if (window.AudioContext || window.webkitAudioContext) {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
                 this.audioContext = new AudioContextClass();
-                console.log('音频上下文初始化成功');
+                console.log('Audio context initialized successfully');
             } else {
-                console.warn('浏览器不支持Web Audio API，将使用HTML5 Audio');
+                console.warn('Browser does not support Web Audio API, will use HTML5 Audio');
             }
         } catch (error) {
-            console.warn('初始化音频上下文失败:', error);
+            console.warn('Failed to initialize audio context:', error);
             this.audioContext = null;
         }
     }
@@ -47,7 +47,7 @@ class NotificationService {
      */
     async requestPermission() {
         if (!this.isSupported) {
-            console.warn('浏览器不支持通知功能');
+            console.warn('Browser does not support notifications');
             return false;
         }
 
@@ -56,14 +56,14 @@ class NotificationService {
             this.hasPermission = permission === 'granted';
             
             if (this.hasPermission) {
-                console.log('通知权限已获得');
+                console.log('Notification permission granted');
             } else {
-                console.warn('用户拒绝了通知权限');
+                console.warn('User denied notification permission');
             }
             
             return this.hasPermission;
         } catch (error) {
-            console.error('请求通知权限时出错:', error);
+            console.error('Error requesting notification permission:', error);
             return false;
         }
     }
@@ -103,12 +103,12 @@ class NotificationService {
      */
     showBrowserNotification(type, title, message) {
         if (!this.isSupported) {
-            console.warn('浏览器不支持通知功能，使用页面内通知');
+            console.warn('Browser does not support notifications, using in-page alerts');
             return false;
         }
 
         if (!this.hasPermission) {
-            console.warn('没有通知权限，使用页面内通知');
+            console.warn('No notification permission, using in-page alerts');
             return false;
         }
 
@@ -142,7 +142,7 @@ class NotificationService {
 
             return true;
         } catch (error) {
-            console.error('显示浏览器通知时出错:', error);
+            console.error('Error displaying browser notification:', error);
             return false;
         }
     }
@@ -181,10 +181,10 @@ class NotificationService {
                 </div>
                 <div class="notification-actions">
                     <button class="btn btn-primary mobile-touch-feedback" id="confirm-btn">
-                        ${type === 'water' ? '已喝水' : '已起身活动'}
+                        ${type === 'water' ? 'Hydrated' : 'Moved'}
                     </button>
                     <button class="btn btn-secondary mobile-touch-feedback" id="snooze-btn">
-                        稍后提醒
+                        Remind Later
                     </button>
                 </div>
             `;
@@ -202,10 +202,10 @@ class NotificationService {
                 </div>
                 <div class="notification-actions">
                     <button class="btn btn-primary" id="confirm-btn">
-                        ${type === 'water' ? '已喝水' : '已起身活动'}
+                        ${type === 'water' ? 'Hydrated' : 'Moved'}
                     </button>
                     <button class="btn btn-secondary" id="snooze-btn">
-                        稍后提醒
+                        Remind Later
                     </button>
                 </div>
             `;
@@ -262,7 +262,7 @@ class NotificationService {
             try {
                 navigator.vibrate([200, 100, 200]);
             } catch (e) {
-                console.warn('振动API不可用:', e);
+                console.warn('Vibration API not available:', e);
             }
         }
     }
@@ -283,7 +283,7 @@ class NotificationService {
                 this.playAudioFile(type);
             }
         } catch (error) {
-            console.warn('播放音效失败:', error);
+            console.warn('Failed to play sound:', error);
         }
     }
 
@@ -356,7 +356,7 @@ class NotificationService {
             if (!this.audioContext) {
                 this.initAudioContext();
                 if (!this.audioContext) {
-                    throw new Error('音频上下文不可用');
+                    throw new Error('Audio context not available');
                 }
             }
             
@@ -417,7 +417,7 @@ class NotificationService {
                 }, 200);
             }
         } catch (error) {
-            console.warn('Web Audio API不可用:', error);
+            console.warn('Web Audio API not available:', error);
             // 降级到HTML5 Audio
             this.playAudioFile(type);
         }
@@ -452,7 +452,7 @@ class NotificationService {
             audio.currentTime = 0;
             
             audio.play().catch(error => {
-                console.warn('播放音频失败:', error);
+                console.warn('Failed to play audio:', error);
                 
                 // 如果是自动播放策略问题，尝试创建新的音频对象
                 if (error.name === 'NotAllowedError') {
@@ -470,12 +470,12 @@ class NotificationService {
                     
                     // 尝试播放新创建的音频
                     newAudio.play().catch(e => {
-                        console.warn('二次尝试播放音频失败:', e);
+                        console.warn('Second attempt to play audio failed:', e);
                     });
                 }
             });
         } catch (error) {
-            console.warn('HTML5 Audio不可用:', error);
+            console.warn('HTML5 Audio not available:', error);
         }
     }
     
@@ -505,12 +505,12 @@ class NotificationService {
             <div class="prompt-content">
                 <div class="prompt-icon">🔔</div>
                 <div class="prompt-text">
-                    <h3>启用通知</h3>
-                    <p>为了更好地提醒您喝水和起身活动，请允许浏览器通知权限。</p>
+                    <h3>Enable Notifications</h3>
+                    <p>To better remind you to drink water and take breaks, please allow browser notifications.</p>
                 </div>
                 <div class="prompt-actions">
-                    <button class="btn btn-primary" id="request-permission-btn">允许通知</button>
-                    <button class="btn btn-secondary" id="dismiss-prompt-btn">稍后再说</button>
+                    <button class="btn btn-primary" id="request-permission-btn">Allow Notifications</button>
+                    <button class="btn btn-secondary" id="dismiss-prompt-btn">Maybe Later</button>
                 </div>
             </div>
         `;
