@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>页面未找到 - 办公族健康提醒</title>
+    <title>Page Not Found - Office Wellness Reminder</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -26,7 +26,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #4CAF50;
+            color: #2c3e50;
             margin-top: 0;
         }
         .error-code {
@@ -37,7 +37,7 @@
         }
         .btn {
             display: inline-block;
-            background-color: #4CAF50;
+            background-color: #2c3e50;
             color: white;
             padding: 10px 20px;
             border-radius: 4px;
@@ -46,7 +46,7 @@
             transition: background-color 0.3s;
         }
         .btn:hover {
-            background-color: #388E3C;
+            background-color: #34495e;
         }
         .illustration {
             font-size: 80px;
@@ -57,15 +57,15 @@
 <body>
     <div class="container">
         <p class="error-code">404</p>
-        <h1>页面未找到</h1>
-        <p>抱歉，您访问的页面不存在或已被移动。</p>
-        <div class="illustration">🔍</div>
-        <p>请检查URL是否正确，或返回首页继续浏览。</p>
-        <a href="/" class="btn">返回首页</a>
+        <h1>Page Not Found</h1>
+        <p>Sorry, the page you are looking for does not exist or has been moved.</p>
+        <div class="illustration"><span class="search-icon">!</span></div>
+        <p>Please check that the URL is correct or return to the homepage.</p>
+        <a href="/" class="btn">Return to Homepage</a>
     </div>
     
     <script>
-        // 自动重定向到首页（5秒后）
+        // Automatic redirect to homepage (after 5 seconds)
         setTimeout(function() {
             window.location.href = '/';
         }, 5000);

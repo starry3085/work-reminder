@@ -1,6 +1,6 @@
 /**
- * 部署验证脚本
- * 用于验证GitHub Pages部署后的功能完整性
+ * Deployment Verification Script
+ * Used to verify functionality after GitHub Pages deployment
  */
 class DeploymentVerification {
     constructor() {
@@ -13,46 +13,46 @@ class DeploymentVerification {
     }
 
     /**
-     * 添加测试用例
-     * @param {string} name - 测试名称
-     * @param {Function} testFn - 测试函数，应返回布尔值或Promise<boolean>
+     * Add test case
+     * @param {string} name - Test name
+     * @param {Function} testFn - Test function, should return boolean or Promise<boolean>
      */
     addTest(name, testFn) {
         this.tests.push({ name, testFn });
     }
 
     /**
-     * 运行所有测试
-     * @returns {Promise<Object>} 测试结果
+     * Run all tests
+     * @returns {Promise<Object>} Test results
      */
     async runTests() {
-        console.log('开始部署验证测试...');
+        console.log('Starting deployment verification tests...');
         this.results.total = this.tests.length;
         
         for (const test of this.tests) {
             try {
-                console.log(`运行测试: ${test.name}`);
+                console.log(`Running test: ${test.name}`);
                 const result = await test.testFn();
                 
                 if (result === true) {
-                    console.log(`✅ 测试通过: ${test.name}`);
+                    console.log(`✅ Test passed: ${test.name}`);
                     this.results.passed++;
                 } else {
-                    console.error(`❌ 测试失败: ${test.name}`);
+                    console.error(`❌ Test failed: ${test.name}`);
                     this.results.failed++;
                 }
             } catch (error) {
-                console.error(`❌ 测试出错: ${test.name}`, error);
+                console.error(`❌ Test error: ${test.name}`, error);
                 this.results.failed++;
             }
         }
         
-        console.log('测试完成:', this.results);
+        console.log('Tests completed:', this.results);
         return this.results;
     }
 
     /**
-     * 显示测试结果
+     * Display test results
      */
     displayResults() {
         const resultElement = document.createElement('div');
@@ -72,21 +72,21 @@ class DeploymentVerification {
         `;
         
         resultElement.innerHTML = `
-            <h3 style="margin-top: 0; color: #333;">部署验证结果</h3>
+            <h3 style="margin-top: 0; color: #333;">Deployment Verification Results</h3>
             <div style="margin-bottom: 10px;">
-                <div>总测试数: ${this.results.total}</div>
-                <div style="color: green;">通过: ${this.results.passed}</div>
-                <div style="color: red;">失败: ${this.results.failed}</div>
+                <div>Total Tests: ${this.results.total}</div>
+                <div style="color: green;">Passed: ${this.results.passed}</div>
+                <div style="color: red;">Failed: ${this.results.failed}</div>
             </div>
             <div style="text-align: right;">
                 <button id="close-verification" style="
-                    background: #4CAF50;
+                    background: #2c3e50;
                     color: white;
                     border: none;
                     padding: 5px 10px;
                     border-radius: 4px;
                     cursor: pointer;
-                ">关闭</button>
+                ">Close</button>
             </div>
         `;
         
@@ -99,14 +99,14 @@ class DeploymentVerification {
 }
 
 /**
- * 创建部署验证测试套件
- * @returns {DeploymentVerification} 测试套件实例
+ * Create deployment verification test suite
+ * @returns {DeploymentVerification} Test suite instance
  */
 function createDeploymentTests() {
     const verification = new DeploymentVerification();
     
-    // 测试1: 检查基本DOM元素是否存在
-    verification.addTest('基本DOM元素检查', () => {
+    // Test 1: Check if basic DOM elements exist
+    verification.addTest('Basic DOM Elements Check', () => {
         const requiredElements = [
             'app',
             'water-card',
@@ -118,7 +118,7 @@ function createDeploymentTests() {
         
         for (const id of requiredElements) {
             if (!document.getElementById(id)) {
-                console.error(`缺少必要DOM元素: ${id}`);
+                console.error(`Missing required DOM element: ${id}`);
                 return false;
             }
         }
@@ -126,15 +126,15 @@ function createDeploymentTests() {
         return true;
     });
     
-    // 测试2: 检查JavaScript组件是否正确加载
-    verification.addTest('JavaScript组件加载检查', () => {
-        // 检查全局应用实例
+    // Test 2: Check if JavaScript components are loaded correctly
+    verification.addTest('JavaScript Components Loading Check', () => {
+        // Check global app instance
         if (!window.app || !window.app.isInitialized) {
-            console.error('应用未正确初始化');
+            console.error('Application not properly initialized');
             return false;
         }
         
-        // 检查核心组件
+        // Check core components
         const requiredComponents = [
             'storageManager',
             'appSettings',
@@ -147,7 +147,7 @@ function createDeploymentTests() {
         
         for (const component of requiredComponents) {
             if (!window.app[component]) {
-                console.error(`缺少核心组件: ${component}`);
+                console.error(`Missing core component: ${component}`);
                 return false;
             }
         }
@@ -155,10 +155,10 @@ function createDeploymentTests() {
         return true;
     });
     
-    // 测试3: 检查本地存储功能
-    verification.addTest('本地存储功能检查', () => {
+    // Test 3: Check local storage functionality
+    verification.addTest('Local Storage Functionality Check', () => {
         try {
-            // 测试存储可用性
+            // Test storage availability
             const testKey = '_test_deployment_' + Date.now();
             localStorage.setItem(testKey, 'test');
             const testValue = localStorage.getItem(testKey);
@@ -166,14 +166,14 @@ function createDeploymentTests() {
             
             return testValue === 'test';
         } catch (error) {
-            console.error('本地存储测试失败:', error);
+            console.error('Local storage test failed:', error);
             return false;
         }
     });
     
-    // 测试4: 检查CSS样式是否正确加载
-    verification.addTest('CSS样式加载检查', () => {
-        // 检查一些关键样式是否应用
+    // Test 4: Check if CSS styles are loaded correctly
+    verification.addTest('CSS Styles Loading Check', () => {
+        // Check if key styles are applied
         const appElement = document.getElementById('app');
         if (!appElement) return false;
         
@@ -181,8 +181,8 @@ function createDeploymentTests() {
         return styles && styles.display !== 'none';
     });
     
-    // 测试5: 检查资源文件是否可访问
-    verification.addTest('资源文件访问检查', async () => {
+    // Test 5: Check if resource files are accessible
+    verification.addTest('Resource Files Accessibility Check', async () => {
         try {
             const resources = [
                 'assets/water-icon.png',
@@ -193,30 +193,30 @@ function createDeploymentTests() {
             for (const resource of resources) {
                 const response = await fetch(resource, { method: 'HEAD' });
                 if (!response.ok) {
-                    console.error(`资源文件不可访问: ${resource}`);
+                    console.error(`Resource file not accessible: ${resource}`);
                     return false;
                 }
             }
             
             return true;
         } catch (error) {
-            console.error('资源文件检查失败:', error);
+            console.error('Resource files check failed:', error);
             return false;
         }
     });
     
-    // 测试6: 检查Service Worker是否注册
-    verification.addTest('Service Worker检查', async () => {
+    // Test 6: Check if Service Worker is registered
+    verification.addTest('Service Worker Check', async () => {
         if (!('serviceWorker' in navigator)) {
-            console.warn('浏览器不支持Service Worker');
-            return true; // 不支持也算通过，因为这是增强功能
+            console.warn('Browser does not support Service Worker');
+            return true; // Still pass if not supported, as this is an enhancement feature
         }
         
         try {
             const registration = await navigator.serviceWorker.getRegistration();
             return !!registration;
         } catch (error) {
-            console.error('Service Worker检查失败:', error);
+            console.error('Service Worker check failed:', error);
             return false;
         }
     });
@@ -224,25 +224,25 @@ function createDeploymentTests() {
     return verification;
 }
 
-// 在URL中添加?verify=true参数时运行验证
+// Run verification when ?verify=true parameter is added to URL
 if (window.location.search.includes('verify=true')) {
     window.addEventListener('load', async () => {
-        // 等待应用初始化完成
+        // Wait for application initialization
         let attempts = 0;
         const maxAttempts = 10;
         
         const waitForApp = async () => {
             if (window.app && window.app.isInitialized) {
-                console.log('应用已初始化，开始验证');
+                console.log('Application initialized, starting verification');
                 const verification = createDeploymentTests();
                 await verification.runTests();
                 verification.displayResults();
             } else if (attempts < maxAttempts) {
                 attempts++;
-                console.log(`等待应用初始化... (${attempts}/${maxAttempts})`);
+                console.log(`Waiting for application initialization... (${attempts}/${maxAttempts})`);
                 setTimeout(waitForApp, 500);
             } else {
-                console.error('应用初始化超时，无法完成验证');
+                console.error('Application initialization timeout, unable to complete verification');
                 const verification = new DeploymentVerification();
                 verification.results.total = 1;
                 verification.results.failed = 1;

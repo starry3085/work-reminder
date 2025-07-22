@@ -1,7 +1,7 @@
 {
   "name": "office-wellness-reminder",
   "version": "1.0.0",
-  "description": "办公族健康提醒应用 - 帮助办公族养成健康工作习惯",
+  "description": "Office Wellness Reminder - Helping office workers develop healthy work habits",
   "main": "index.html",
   "scripts": {
     "start": "npx http-server . -o",
@@ -19,7 +19,7 @@
     "office",
     "wellness",
     "water",
-    "posture"
+    "standup"
   ],
   "author": "Your Name",
   "license": "MIT",

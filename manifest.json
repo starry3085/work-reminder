@@ -1,14 +1,14 @@
 {
   "name": "Office Wellness Reminder",
   "short_name": "Wellness",
-  "description": "An application to help office workers develop healthy work habits with water and posture reminders",
+  "description": "An application to help office workers develop healthy work habits with water and standup reminders",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2c3e50",
   "icons": [
     {
-      "src": "assets/posture-icon.png",
+      "src": "assets/standup-icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },

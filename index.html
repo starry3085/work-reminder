@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#2c3e50">
     <title>Office Wellness Reminder</title>
-    <meta name="description" content="An application to help office workers develop healthy work habits with water and posture reminders">
+    <meta name="description" content="An application to help office workers develop healthy work habits with water and standup reminders">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
-    <link rel="apple-touch-icon" href="assets/posture-icon.png">
+    <link rel="apple-touch-icon" href="assets/standup-icon.png">
     <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -60,7 +60,7 @@
                 <div class="reminder-card" id="posture-card">
                     <div class="card-header">
                         <div class="card-icon posture-icon"></div>
-                        <h3>Posture Reminder</h3>
+                        <h3>Standup Reminder</h3>
                         <div class="status-badge" id="posture-status-badge">Inactive</div>
                     </div>
                     <div class="card-content">
@@ -129,7 +129,7 @@
         <div class="settings-panel" id="settings-panel">
             <div class="settings-header">
                 <h2>Settings</h2>
-                <button class="btn-close" id="settings-close">✕</button>
+                <button class="btn-close" id="settings-close">X</button>
             </div>
             <div class="settings-content">
                 <div class="settings-section">
@@ -162,14 +162,14 @@
                 </div>
                 
                 <div class="settings-section">
-                    <h3>Posture Reminder</h3>
+                    <h3>Standup Reminder</h3>
                     <div class="setting-item">
                         <label class="switch">
                             <input type="checkbox" id="posture-enabled" checked>
                             <span class="slider"></span>
                         </label>
                         <div class="setting-label">
-                            <span>Enable Posture Reminder</span>
+                            <span>Enable Standup Reminder</span>
                             <small>Reminds you to take breaks from sitting</small>
                         </div>
                     </div>
@@ -281,13 +281,13 @@
             <div class="help-modal">
                 <div class="help-header">
                     <h2>Help Guide</h2>
-                    <button class="btn-close" id="help-close">✕</button>
+                    <button class="btn-close" id="help-close">X</button>
                 </div>
                 <div class="help-content">
                     <h3>Features</h3>
                     <ul>
                         <li><strong>Water Reminder</strong>: Reminds you to stay hydrated</li>
-                        <li><strong>Posture Reminder</strong>: Reminds you to take breaks from sitting</li>
+                        <li><strong>Standup Reminder</strong>: Reminds you to take breaks from sitting</li>
                         <li><strong>Smart Detection</strong>: Automatically detects your activity status</li>
                     </ul>
                     
@@ -302,7 +302,7 @@
         </div>
     </div>
 
-    <!-- JavaScript 文件 -->
+    <!-- JavaScript Files -->
     <script src="js/error-handler.js"></script>
     <script src="js/storage-manager.js"></script>
     <script src="js/app-settings.js"></script>
@@ -310,7 +310,7 @@
     <script src="js/activity-detector.js"></script>
     <script src="js/reminder-manager.js"></script>
     <script src="js/water-reminder.js"></script>
-    <script src="js/posture-reminder.js"></script>
+    <script src="js/standup-reminder.js"></script>
     <script src="js/mobile-adapter.js"></script>
     <script src="js/ui-controller.js"></script>
     <script src="js/app.js"></script>
