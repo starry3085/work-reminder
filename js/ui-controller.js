@@ -1,5 +1,5 @@
 /**
- * UI控制器 - 管理用户界面的状态和交互
+ * UI Controller - Manages user interface state and interactions
  */
 class UIController {
     constructor() {
@@ -11,14 +11,14 @@ class UIController {
             water: {
                 isActive: false,
                 timeRemaining: 0,
-                status: '未启动',
+                status: 'Inactive',
                 completedToday: 0,
                 targetToday: 8
             },
             posture: {
                 isActive: false,
                 timeRemaining: 0,
-                status: '未启动',
+                status: 'Inactive',
                 completedToday: 0,
                 targetToday: 8
             },
@@ -30,7 +30,7 @@ class UIController {
             }
         };
         
-        // 绑定方法
+        // Bind methods
         this.bindEvents = this.bindEvents.bind(this);
         this.handleSettingsToggle = this.handleSettingsToggle.bind(this);
         this.handleHelpToggle = this.handleHelpToggle.bind(this);
@@ -39,10 +39,10 @@ class UIController {
     }
 
     /**
-     * 初始化UI控制器
+     * Initialize UI controller
      */
     initialize() {
-        console.log('初始化UI控制器...');
+        console.log('Initializing UI controller...');
         this.cacheElements();
         this.bindEvents();
         this.setupInitialState();
@@ -50,13 +50,13 @@ class UIController {
     }
 
     /**
-     * 缓存DOM元素引用
+     * Cache DOM element references
      * @private
      */
     cacheElements() {
-        // 主要控制元素
+        // Main control elements
         this.elements = {
-            // 应用容器
+            // App container
             appContainer: document.getElementById('app'),
             
             // 应用状态摘要
@@ -76,7 +76,7 @@ class UIController {
             waterProgress: document.getElementById('water-progress'),
             waterCount: document.getElementById('water-count'),
             
-            // 久坐提醒相关
+            // Standup reminder related
             postureCard: document.getElementById('posture-card'),
             postureStatus: document.getElementById('posture-status'),
             postureStatusBadge: document.getElementById('posture-status-badge'),
@@ -110,7 +110,7 @@ class UIController {
             waterIntervalSlider: document.getElementById('water-interval-slider'),
             waterTarget: document.getElementById('water-target'),
             
-            // 设置项 - 久坐提醒
+            // Settings - Standup reminder
             postureEnabled: document.getElementById('posture-enabled'),
             postureInterval: document.getElementById('posture-interval'),
             postureIntervalSlider: document.getElementById('posture-interval-slider'),
@@ -191,7 +191,7 @@ class UIController {
             this.triggerEvent('waterDrink');
         });
         
-        // 久坐提醒控制按钮
+        // Standup reminder control buttons
         this.addEventHandler('postureToggle', 'click', () => {
             this.triggerEvent('postureToggle', { isActive: !this.uiState.posture.isActive });
         });
@@ -341,13 +341,13 @@ class UIController {
         this.updateReminderStatus('water', {
             isActive: false,
             timeRemaining: 0,
-            status: '未启动'
+            status: 'Inactive'
         });
         
         this.updateReminderStatus('posture', {
             isActive: false,
             timeRemaining: 0,
-            status: '未启动'
+            status: 'Inactive'
         });
         
         // 初始化进度条
@@ -455,12 +455,12 @@ class UIController {
             card.classList.remove('active');
         }
         
-        // 更新状态文本
-        statusElement.textContent = status.status || (status.isActive ? '运行中' : '未启动');
+        // Update status text
+        statusElement.textContent = status.status || (status.isActive ? 'Active' : 'Inactive');
         
-        // 更新状态徽章
+        // Update status badge
         if (statusBadge) {
-            statusBadge.textContent = status.isActive ? '运行中' : '未启动';
+            statusBadge.textContent = status.isActive ? 'Active' : 'Inactive';
             if (status.isActive) {
                 statusBadge.classList.add('active');
             } else {
@@ -498,11 +498,11 @@ class UIController {
         // 更新UI状态
         if (type === 'water') {
             this.uiState.water.isActive = status.isActive;
-            this.uiState.water.status = status.status || (status.isActive ? '运行中' : '未启动');
+            this.uiState.water.status = status.status || (status.isActive ? 'Active' : 'Inactive');
             this.uiState.water.timeRemaining = status.timeRemaining || 0;
         } else if (type === 'posture') {
             this.uiState.posture.isActive = status.isActive;
-            this.uiState.posture.status = status.status || (status.isActive ? '运行中' : '未启动');
+            this.uiState.posture.status = status.status || (status.isActive ? 'Active' : 'Inactive');
             this.uiState.posture.timeRemaining = status.timeRemaining || 0;
         }
     }
@@ -539,7 +539,7 @@ class UIController {
         }
         
         if (this.elements.notificationConfirm) {
-            this.elements.notificationConfirm.textContent = type === 'water' ? '已喝水' : '已起身活动';
+            this.elements.notificationConfirm.textContent = type === 'water' ? 'Hydrated' : 'Moved';
         }
         
         // 显示通知弹窗
@@ -715,7 +715,7 @@ class UIController {
             }
         }
         
-        // 应用久坐提醒设置
+        // Apply standup reminder settings
         if (settings.posture) {
             if (this.elements.postureEnabled) {
                 this.elements.postureEnabled.checked = settings.posture.enabled !== false;
@@ -829,8 +829,8 @@ class UIController {
         if (statsElement) {
             const statsText = statsElement.querySelector('.stats-text');
             if (statsText) {
-                const unit = type === 'water' ? '杯' : '次活动';
-                statsText.textContent = `今日: ${current}/${target} ${unit}`;
+                const unit = type === 'water' ? 'glasses' : 'activities';
+                statsText.textContent = `Today: ${current}/${target} ${unit}`;
             }
         }
         
@@ -863,8 +863,8 @@ class UIController {
                 <button class="btn-close">✕</button>
             </div>
             <div class="notification-actions">
-                <button class="btn btn-primary">${type === 'water' ? '已喝水' : '已起身活动'}</button>
-                <button class="btn btn-secondary">稍后提醒</button>
+                <button class="btn btn-primary">${type === 'water' ? 'Hydrated' : 'Moved'}</button>
+                <button class="btn btn-secondary">Remind Later</button>
             </div>
         `;
         
@@ -1043,7 +1043,7 @@ class UIController {
             this.elements.appStatusText.textContent = '健康提醒已启动';
         } else {
             this.elements.appStatusIndicator.classList.remove('active');
-            this.elements.appStatusText.textContent = '健康提醒未启动';
+            this.elements.appStatusText.textContent = 'Wellness Reminders Inactive';
         }
     }
     
@@ -1088,7 +1088,7 @@ class UIController {
     /**
      * 更新健康评分
      * @param {number} waterCompletionRate - 喝水完成率 (0-1)
-     * @param {number} postureCompletionRate - 久坐提醒完成率 (0-1)
+     * @param {number} postureCompletionRate - Standup reminder completion rate (0-1)
      */
     updateHealthScore(waterCompletionRate, postureCompletionRate) {
         if (!this.elements.healthScore) {
