@@ -127,6 +127,12 @@
         </div>
         
         <div class="test-section">
+            <h2>完整功能集成测试</h2>
+            <button onclick="runCompleteIntegrationTests()">运行完整功能集成测试</button>
+            <div id="completeIntegrationOutput" class="output" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
             <h2>全部测试</h2>
             <button onclick="runAllTests()">运行所有测试</button>
             <button onclick="clearAllOutputs()">清除输出</button>
@@ -151,6 +157,7 @@
     <script src="user-flow-integration.test.js"></script>
     <script src="browser-compatibility.test.js"></script>
     <script src="responsive-design.test.js"></script>
+    <script src="complete-integration.test.js"></script>
 
     <script>
         // 重定向console输出到页面
@@ -375,6 +382,9 @@
             await new Promise(resolve => setTimeout(resolve, 500));
             
             await runResponsiveDesignTests();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await runCompleteIntegrationTests();
             
             console.log('\n🎉 所有测试运行完成！');
         }
@@ -451,6 +461,30 @@
             }
         }
 
+        async function runCompleteIntegrationTests() {
+            const redirector = createConsoleRedirector('completeIntegrationOutput');
+            
+            try {
+                redirector.start();
+                console.log('=== 完整功能集成测试 ===\n');
+                
+                const tests = new CompleteIntegrationTests();
+                const success = tests.runAllTests();
+                
+                console.log('\n=== 测试完成 ===');
+                if (success) {
+                    console.log('✅ 所有测试通过！');
+                } else {
+                    console.log('❌ 部分测试失败');
+                }
+                
+            } catch (error) {
+                console.error('测试运行出错:', error);
+            } finally {
+                redirector.stop();
+            }
+        }
+
         function clearAllOutputs() {
             const outputs = [
                 'storageOutput', 
@@ -460,7 +494,8 @@
                 'integrationOutput',
                 'userFlowOutput',
                 'compatibilityOutput',
-                'responsiveOutput'
+                'responsiveOutput',
+                'completeIntegrationOutput'
             ];
             outputs.forEach(id => {
                 const element = document.getElementById(id);
