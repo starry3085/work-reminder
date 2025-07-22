@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://office-wellness-reminder.example.com/sitemap.xml
