@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-07-22T03:21:06.940Z",
+  "originalSize": "71.49 MB",
+  "optimizedSize": "162.52 KB",
+  "savings": "71.33 MB",
+  "savingsPercentage": "99.78%",
+  "configuration": {
+    "addHash": true,
+    "generateSourcemap": false,
+    "generateGzip": true,
+    "generateServiceWorker": true
+  }
+}
