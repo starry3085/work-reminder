@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "PROMPT Documentation Updater",
+  "description": "Monitors PROMPT files and automatically checks if related documentation needs to be updated, then performs the updates",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*PROMPT*",
+      "*prompt*",
+      "*.prompt",
+      "PROMPT.*",
+      "prompt.*"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A PROMPT file has been modified. Please check if any related documentation files (README.md, DEPLOYMENT.md, or other documentation) need to be updated based on the changes made to the PROMPT file. If updates are needed, please update the relevant documentation files accordingly. Focus on keeping documentation synchronized with the PROMPT changes."
+  }
+}

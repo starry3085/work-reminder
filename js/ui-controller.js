@@ -29,7 +29,7 @@ class UIController {
                 isOpen: false
             }
         };
-        
+
         // Bind methods
         this.bindEvents = this.bindEvents.bind(this);
         this.handleSettingsToggle = this.handleSettingsToggle.bind(this);
@@ -58,12 +58,12 @@ class UIController {
         this.elements = {
             // App container
             appContainer: document.getElementById('app'),
-            
-            // 应用状态摘要
+
+            // App status summary
             appStatusIndicator: document.getElementById('app-status-indicator'),
             appStatusText: document.getElementById('app-status-text'),
-            
-            // 喝水提醒相关
+
+            // Water reminder related
             waterCard: document.getElementById('water-card'),
             waterStatus: document.getElementById('water-status'),
             waterStatusBadge: document.getElementById('water-status-badge'),
@@ -75,7 +75,7 @@ class UIController {
             waterStats: document.getElementById('water-stats'),
             waterProgress: document.getElementById('water-progress'),
             waterCount: document.getElementById('water-count'),
-            
+
             // Standup reminder related
             postureCard: document.getElementById('posture-card'),
             postureStatus: document.getElementById('posture-status'),
@@ -89,196 +89,196 @@ class UIController {
             postureProgress: document.getElementById('posture-progress'),
             postureCount: document.getElementById('posture-count'),
             activityStatusValue: document.getElementById('activity-status-value'),
-            
-            // 快速操作按钮
+
+            // Quick action buttons
             startAllBtn: document.getElementById('start-all-btn'),
             pauseAllBtn: document.getElementById('pause-all-btn'),
-            
-            // 健康评分
+
+            // Health score
             healthScore: document.getElementById('health-score'),
-            
-            // 设置面板
+
+            // Settings panel
             settingsBtn: document.getElementById('settings-btn'),
             settingsPanel: document.getElementById('settings-panel'),
             settingsClose: document.getElementById('settings-close'),
             saveSettings: document.getElementById('save-settings'),
             resetSettings: document.getElementById('reset-settings'),
-            
-            // 设置项 - 喝水提醒
+
+            // Settings - Water reminder
             waterEnabled: document.getElementById('water-enabled'),
             waterInterval: document.getElementById('water-interval'),
             waterIntervalSlider: document.getElementById('water-interval-slider'),
             waterTarget: document.getElementById('water-target'),
-            
+
             // Settings - Standup reminder
             postureEnabled: document.getElementById('posture-enabled'),
             postureInterval: document.getElementById('posture-interval'),
             postureIntervalSlider: document.getElementById('posture-interval-slider'),
             postureTarget: document.getElementById('posture-target'),
             activityDetection: document.getElementById('activity-detection'),
-            
-            // 设置项 - 通知
+
+            // Settings - Notifications
             browserNotifications: document.getElementById('browser-notifications'),
             soundEnabled: document.getElementById('sound-enabled'),
             notificationStyle: document.getElementById('notification-style'),
-            
-            // 设置项 - 外观
+
+            // Settings - Appearance
             themeSelector: document.getElementById('theme-selector'),
-            
-            // 通知弹窗
+
+            // Notification popup
             notificationOverlay: document.getElementById('notification-overlay'),
             notificationIcon: document.getElementById('notification-icon'),
             notificationTitle: document.getElementById('notification-title'),
             notificationMessage: document.getElementById('notification-message'),
             notificationConfirm: document.getElementById('notification-confirm'),
             notificationSnooze: document.getElementById('notification-snooze'),
-            
-            // 帮助面板
+
+            // Help panel
             helpBtn: document.getElementById('help-btn'),
             helpOverlay: document.getElementById('help-overlay'),
             helpClose: document.getElementById('help-close')
         };
-        
-        // 检查必要元素是否存在
+
+        // Check if required elements exist
         const requiredElements = ['waterCard', 'postureCard', 'settingsPanel'];
         const missingElements = requiredElements.filter(id => !this.elements[id]);
-        
+
         if (missingElements.length > 0) {
-            console.error('UI初始化错误: 缺少必要DOM元素', missingElements);
+            console.error('UI initialization error: Missing required DOM elements', missingElements);
         }
     }
 
     /**
-     * 绑定事件监听器
+     * Bind event listeners
      * @private
      */
     bindEvents() {
-        // 设置面板事件
+        // Settings panel events
         this.addEventHandler('settingsBtn', 'click', this.handleSettingsToggle);
         this.addEventHandler('settingsClose', 'click', this.handleSettingsToggle);
         this.addEventHandler('saveSettings', 'click', this.handleSaveSettings.bind(this));
         this.addEventHandler('resetSettings', 'click', this.handleResetSettings.bind(this));
-        
-        // 帮助面板事件
+
+        // Help panel events
         this.addEventHandler('helpBtn', 'click', this.handleHelpToggle);
         this.addEventHandler('helpClose', 'click', this.handleHelpToggle);
-        
-        // 通知弹窗事件
+
+        // Notification popup events
         this.addEventHandler('notificationConfirm', 'click', () => {
             this.hideNotificationModal();
             if (this.currentNotification && this.currentNotification.onConfirm) {
                 this.currentNotification.onConfirm();
             }
         });
-        
+
         this.addEventHandler('notificationSnooze', 'click', () => {
             this.hideNotificationModal();
             if (this.currentNotification && this.currentNotification.onSnooze) {
                 this.currentNotification.onSnooze();
             }
         });
-        
-        // 喝水提醒控制按钮
+
+        // Water reminder control buttons
         this.addEventHandler('waterToggle', 'click', () => {
             this.triggerEvent('waterToggle', { isActive: !this.uiState.water.isActive });
         });
-        
+
         this.addEventHandler('waterReset', 'click', () => {
             this.triggerEvent('waterReset');
         });
-        
+
         this.addEventHandler('waterDrink', 'click', () => {
             this.triggerEvent('waterDrink');
         });
-        
+
         // Standup reminder control buttons
         this.addEventHandler('postureToggle', 'click', () => {
             this.triggerEvent('postureToggle', { isActive: !this.uiState.posture.isActive });
         });
-        
+
         this.addEventHandler('postureReset', 'click', () => {
             this.triggerEvent('postureReset');
         });
-        
+
         this.addEventHandler('postureActivity', 'click', () => {
             this.triggerEvent('postureActivity');
         });
-        
-        // 全局控制按钮
+
+        // Global control buttons
         this.addEventHandler('startAllBtn', 'click', () => {
             this.triggerEvent('startAll');
         });
-        
+
         this.addEventHandler('pauseAllBtn', 'click', () => {
             this.triggerEvent('pauseAll');
         });
-        
-        // 设置面板滑块联动
+
+        // Settings panel slider linkage
         if (this.elements.waterIntervalSlider && this.elements.waterInterval) {
             this.elements.waterIntervalSlider.addEventListener('input', () => {
                 this.elements.waterInterval.value = this.elements.waterIntervalSlider.value;
             });
-            
+
             this.elements.waterInterval.addEventListener('change', () => {
                 this.elements.waterIntervalSlider.value = this.elements.waterInterval.value;
             });
         }
-        
+
         if (this.elements.postureIntervalSlider && this.elements.postureInterval) {
             this.elements.postureIntervalSlider.addEventListener('input', () => {
                 this.elements.postureInterval.value = this.elements.postureIntervalSlider.value;
             });
-            
+
             this.elements.postureInterval.addEventListener('change', () => {
                 this.elements.postureIntervalSlider.value = this.elements.postureInterval.value;
             });
         }
-        
-        // 主题选择器
+
+        // Theme selector
         if (this.elements.themeSelector) {
             const themeOptions = this.elements.themeSelector.querySelectorAll('.theme-option');
             themeOptions.forEach(option => {
                 option.addEventListener('click', () => {
-                    // 移除所有active类
+                    // Remove all active classes
                     themeOptions.forEach(opt => opt.classList.remove('active'));
-                    // 添加当前选中的active类
+                    // Add active class to selected option
                     option.classList.add('active');
-                    // 应用主题
+                    // Apply theme
                     const theme = option.getAttribute('data-theme');
                     this.applyTheme(theme);
                 });
             });
         }
     }
-    
+
     /**
-     * 添加事件处理器并跟踪
-     * @param {string} elementId - 元素ID
-     * @param {string} eventType - 事件类型
-     * @param {Function} handler - 处理函数
+     * Add event handler and track it
+     * @param {string} elementId - Element ID
+     * @param {string} eventType - Event type
+     * @param {Function} handler - Handler function
      * @private
      */
     addEventHandler(elementId, eventType, handler) {
         const element = this.elements[elementId];
         if (!element) return;
-        
-        // 存储事件处理器引用以便后续可能的移除
+
+        // Store event handler reference for possible future removal
         if (!this.eventListeners[elementId]) {
             this.eventListeners[elementId] = {};
         }
-        
+
         if (!this.eventListeners[elementId][eventType]) {
             this.eventListeners[elementId][eventType] = [];
         }
-        
+
         this.eventListeners[elementId][eventType].push(handler);
         element.addEventListener(eventType, handler);
     }
-    
+
     /**
-     * 移除事件处理器
-     * @param {string} elementId - 元素ID
-     * @param {string} eventType - 事件类型
+     * Remove event handlers
+     * @param {string} elementId - Element ID
+     * @param {string} eventType - Event type
      * @private
      */
     removeEventHandlers(elementId, eventType) {
@@ -286,99 +286,99 @@ class UIController {
         if (!element || !this.eventListeners[elementId] || !this.eventListeners[elementId][eventType]) {
             return;
         }
-        
+
         this.eventListeners[elementId][eventType].forEach(handler => {
             element.removeEventListener(eventType, handler);
         });
-        
+
         this.eventListeners[elementId][eventType] = [];
     }
-    
+
     /**
-     * 注册自定义事件回调
-     * @param {string} eventName - 事件名称
-     * @param {Function} callback - 回调函数
+     * Register custom event callback
+     * @param {string} eventName - Event name
+     * @param {Function} callback - Callback function
      */
     on(eventName, callback) {
         if (!this.eventListeners._custom) {
             this.eventListeners._custom = {};
         }
-        
+
         if (!this.eventListeners._custom[eventName]) {
             this.eventListeners._custom[eventName] = [];
         }
-        
+
         this.eventListeners._custom[eventName].push(callback);
     }
-    
+
     /**
-     * 触发自定义事件
-     * @param {string} eventName - 事件名称
-     * @param {*} data - 事件数据
+     * Trigger custom event
+     * @param {string} eventName - Event name
+     * @param {*} data - Event data
      */
     triggerEvent(eventName, data = null) {
         if (!this.eventListeners._custom || !this.eventListeners._custom[eventName]) {
             return;
         }
-        
+
         this.eventListeners._custom[eventName].forEach(callback => {
             try {
                 callback(data);
             } catch (error) {
-                console.error(`事件处理错误 (${eventName}):`, error);
+                console.error(`Event handling error (${eventName}):`, error);
             }
         });
     }
 
     /**
-     * 设置初始UI状态
+     * Set initial UI state
      * @private
      */
     setupInitialState() {
-        console.log('设置UI初始状态...');
-        
-        // 设置初始状态显示
+        console.log('Setting up initial UI state...');
+
+        // Set initial status display
         this.updateReminderStatus('water', {
             isActive: false,
             timeRemaining: 0,
             status: 'Inactive'
         });
-        
+
         this.updateReminderStatus('posture', {
             isActive: false,
             timeRemaining: 0,
             status: 'Inactive'
         });
-        
-        // 初始化进度条
+
+        // Initialize progress bars
         this.updateDailyProgress('water', 0, 8);
         this.updateDailyProgress('posture', 0, 8);
-        
-        // 设置应用状态摘要
+
+        // Set application status summary
         this.updateAppStatusSummary(false);
-        
-        // 设置下次提醒时间
+
+        // Set next reminder time
         this.updateNextReminderTime('water', null);
         this.updateNextReminderTime('posture', null);
-        
-        // 设置活动状态
+
+        // Set activity status
         this.updateActivityStatus(true);
-        
-        // 设置健康评分
+
+        // Set health score
         this.updateHealthScore(0, 0);
-        
-        // 隐藏设置面板
+
+        // Hide settings panel
         this.hideSettings();
-        
-        // 设置主题
+
+        // Set theme
         this.applyTheme('light');
-        
-        // 检查移动设备
+
+        // Check for mobile device
         this.checkMobileDevice();
     }
-    
+
     /**
-     * 检查是否为移动设备并应用相应样式
+     * Check if device is mobile and apply appropriate styles
      * @private
      */
     checkMobileDevice() {
@@ -388,8 +388,8 @@ class UIController {
         } else {
             document.body.classList.remove('mobile-device');
         }
-        
-        // 监听窗口大小变化
+
+        // Listen for window resize events
         window.addEventListener('resize', () => {
             if (window.innerWidth < 768) {
                 document.body.classList.add('mobile-device');
@@ -398,22 +398,22 @@ class UIController {
             }
         });
     }
-    
+
     /**
-     * 应用主题
-     * @param {string} theme - 主题名称 ('light' | 'dark' | 'auto')
+     * Apply theme
+     * @param {string} theme - Theme name ('light' | 'dark' | 'auto')
      */
     applyTheme(theme) {
         if (theme === 'auto') {
-            // 根据系统偏好设置自动选择主题
+            // Automatically select theme based on system preference
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (prefersDark) {
                 document.body.classList.add('dark-theme');
             } else {
                 document.body.classList.remove('dark-theme');
             }
-            
-            // 监听系统主题变化
+
+            // Listen for system theme changes
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
                 if (this.getSettingsFromUI().appearance.theme === 'auto') {
                     if (e.matches) {
@@ -431,9 +431,9 @@ class UIController {
     }
 
     /**
-     * 更新提醒状态显示
+     * Update reminder status display
      * @param {string} type - 'water' | 'posture'
-     * @param {Object} status - 状态对象
+     * @param {Object} status - Status object
      */
     updateReminderStatus(type, status) {
         const card = this.elements[`${type}Card`];
@@ -443,21 +443,21 @@ class UIController {
         const toggleButton = this.elements[`${type}Toggle`];
         const resetButton = this.elements[`${type}Reset`];
         const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'postureActivity'}`];
-        
+
         if (!card || !statusElement || !timeElement || !toggleButton) {
             return;
         }
-        
-        // 更新卡片状态样式
+
+        // Update card status style
         if (status.isActive) {
             card.classList.add('active');
         } else {
             card.classList.remove('active');
         }
-        
+
         // Update status text
         statusElement.textContent = status.status || (status.isActive ? 'Active' : 'Inactive');
-        
+
         // Update status badge
         if (statusBadge) {
             statusBadge.textContent = status.isActive ? 'Active' : 'Inactive';
@@ -467,17 +467,17 @@ class UIController {
                 statusBadge.classList.remove('active');
             }
         }
-        
-        // 更新剩余时间显示
+
+        // Update remaining time display
         if (status.isActive && status.timeRemaining > 0) {
-            timeElement.textContent = this.formatTime(status.timeRemaining);
+            this.updateTimeDisplay(timeElement, status.timeRemaining, type);
             timeElement.style.display = 'block';
         } else {
             timeElement.textContent = '';
             timeElement.style.display = 'none';
         }
-        
-        // 更新按钮状态
+
+        // Update button states
         if (status.isActive) {
             toggleButton.textContent = 'Pause';
             toggleButton.className = 'btn-secondary';
@@ -489,13 +489,13 @@ class UIController {
             if (resetButton) resetButton.style.display = 'none';
             if (actionButton) actionButton.style.display = 'none';
         }
-        
-        // 更新应用状态摘要
+
+        // Update application status summary
         this.updateAppStatusSummary(
             this.uiState.water.isActive || this.uiState.posture.isActive
         );
-        
-        // 更新UI状态
+
+        // Update UI state
         if (type === 'water') {
             this.uiState.water.isActive = status.isActive;
             this.uiState.water.status = status.status || (status.isActive ? 'Active' : 'Inactive');
@@ -508,15 +508,15 @@ class UIController {
     }
 
     /**
-     * 显示通知弹窗
-     * @param {string} type - 通知类型
-     * @param {string} title - 标题
-     * @param {string} message - 消息
-     * @param {Function} onConfirm - 确认回调
-     * @param {Function} onSnooze - 稍后提醒回调
+     * Show notification modal
+     * @param {string} type - Notification type
+     * @param {string} title - Title
+     * @param {string} message - Message
+     * @param {Function} onConfirm - Confirm callback
+     * @param {Function} onSnooze - Snooze callback
      */
     showNotificationModal(type, title, message, onConfirm, onSnooze) {
-        // 保存当前通知信息
+        // Save current notification information
         this.currentNotification = {
             type,
             title,
@@ -524,60 +524,60 @@ class UIController {
             onConfirm,
             onSnooze
         };
-        
-        // 设置通知内容
+
+        // Set notification content
         if (this.elements.notificationIcon) {
             this.elements.notificationIcon.textContent = type === 'water' ? '💧' : '🧘';
         }
-        
+
         if (this.elements.notificationTitle) {
             this.elements.notificationTitle.textContent = title;
         }
-        
+
         if (this.elements.notificationMessage) {
             this.elements.notificationMessage.textContent = message;
         }
-        
+
         if (this.elements.notificationConfirm) {
             this.elements.notificationConfirm.textContent = type === 'water' ? 'Hydrated' : 'Moved';
         }
-        
-        // 显示通知弹窗
+
+        // Show notification popup
         if (this.elements.notificationOverlay) {
             this.elements.notificationOverlay.classList.add('show');
-            
-            // 添加键盘事件监听
+
+            // Add keyboard event listener
             document.addEventListener('keydown', this.handleNotificationKeydown);
         }
     }
 
     /**
-     * 隐藏通知弹窗
+     * Hide notification modal
      */
     hideNotificationModal() {
         if (this.elements.notificationOverlay) {
             this.elements.notificationOverlay.classList.remove('show');
-            
-            // 移除键盘事件监听
+
+            // Remove keyboard event listener
             document.removeEventListener('keydown', this.handleNotificationKeydown);
         }
-        
-        // 清除当前通知信息
+
+        // Clear current notification information
         this.currentNotification = null;
     }
-    
+
     /**
-     * 处理通知弹窗的键盘事件
-     * @param {KeyboardEvent} event - 键盘事件
+     * Handle notification modal keyboard events
+     * @param {KeyboardEvent} event - Keyboard event
      * @private
      */
     handleNotificationKeydown = (event) => {
-        // 按下Escape键关闭通知
+        // Close notification when Escape key is pressed
         if (event.key === 'Escape') {
             this.hideNotificationModal();
         }
-        
-        // 按下Enter键确认通知
+
+        // Confirm notification when Enter key is pressed
         if (event.key === 'Enter' && this.currentNotification && this.currentNotification.onConfirm) {
             this.hideNotificationModal();
             this.currentNotification.onConfirm();
@@ -585,7 +585,7 @@ class UIController {
     }
 
     /**
-     * 切换设置面板显示状态
+     * Toggle settings panel display
      */
     toggleSettings() {
         if (this.isSettingsOpen) {
@@ -596,40 +596,40 @@ class UIController {
     }
 
     /**
-     * 显示设置面板
+     * Show settings panel
      */
     showSettings() {
         if (this.elements.settingsPanel) {
             this.elements.settingsPanel.classList.add('open');
             this.isSettingsOpen = true;
-            
-            // 添加键盘事件监听
+
+            // Add keyboard event listener
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape') {
                     this.hideSettings();
                 }
             });
-            
-            // 添加点击外部关闭事件
+
+            // Add click outside event to close
             document.addEventListener('click', this.handleOutsideClick);
         }
     }
 
     /**
-     * 隐藏设置面板
+     * Hide settings panel
      */
     hideSettings() {
         if (this.elements.settingsPanel) {
             this.elements.settingsPanel.classList.remove('open');
             this.isSettingsOpen = false;
-            
-            // 移除点击外部关闭事件
+
+            // Remove click outside event listener
             document.removeEventListener('click', this.handleOutsideClick);
         }
     }
 
     /**
-     * 切换帮助面板显示状态
+     * Toggle help panel display
      */
     toggleHelp() {
         if (this.elements.helpOverlay) {
@@ -640,27 +640,27 @@ class UIController {
             }
         }
     }
-    
+
     /**
-     * 处理点击外部关闭设置面板
-     * @param {MouseEvent} event - 鼠标事件
+     * Handle click outside to close settings panel
+     * @param {MouseEvent} event - Mouse event
      * @private
      */
     handleOutsideClick = (event) => {
-        if (this.isSettingsOpen && 
-            this.elements.settingsPanel && 
-            !this.elements.settingsPanel.contains(event.target) && 
+        if (this.isSettingsOpen &&
+            this.elements.settingsPanel &&
+            !this.elements.settingsPanel.contains(event.target) &&
             event.target !== this.elements.settingsBtn) {
             this.hideSettings();
         }
     }
 
     /**
-     * 从UI获取当前设置
-     * @returns {Object} 设置对象
+     * Get current settings from UI
+     * @returns {Object} Settings object
      */
     getSettingsFromUI() {
-        // 获取当前选中的主题
+        // Get currently selected theme
         let selectedTheme = 'light';
         if (this.elements.themeSelector) {
             const activeTheme = this.elements.themeSelector.querySelector('.theme-option.active');
@@ -668,7 +668,7 @@ class UIController {
                 selectedTheme = activeTheme.getAttribute('data-theme');
             }
         }
-        
+
         return {
             water: {
                 enabled: this.elements.waterEnabled ? this.elements.waterEnabled.checked : true,
@@ -693,13 +693,13 @@ class UIController {
     }
 
     /**
-     * 将设置应用到UI
-     * @param {Object} settings - 设置对象
+     * Apply settings to UI
+     * @param {Object} settings - Settings object
      */
     applySettingsToUI(settings) {
         if (!settings) return;
-        
-        // 应用喝水提醒设置
+
+        // Apply water reminder settings
         if (settings.water) {
             if (this.elements.waterEnabled) {
                 this.elements.waterEnabled.checked = settings.water.enabled !== false;
@@ -714,7 +714,7 @@ class UIController {
                 this.elements.waterTarget.value = settings.water.target || 8;
             }
         }
-        
+
         // Apply standup reminder settings
         if (settings.posture) {
             if (this.elements.postureEnabled) {
@@ -733,8 +733,8 @@ class UIController {
                 this.elements.activityDetection.checked = settings.posture.activityDetection !== false;
             }
         }
-        
-        // 应用通知设置
+
+        // Apply notification settings
         if (settings.notifications) {
             if (this.elements.browserNotifications) {
                 this.elements.browserNotifications.checked = settings.notifications.browserNotifications !== false;
@@ -746,12 +746,12 @@ class UIController {
                 this.elements.notificationStyle.value = settings.notifications.style || 'standard';
             }
         }
-        
-        // 应用外观设置
+
+        // Apply appearance settings
         if (settings.appearance && settings.appearance.theme) {
             this.applyTheme(settings.appearance.theme);
-            
-            // 更新主题选择器UI
+
+            // Update theme selector UI
             if (this.elements.themeSelector) {
                 const themeOptions = this.elements.themeSelector.querySelectorAll('.theme-option');
                 themeOptions.forEach(option => {
@@ -765,7 +765,7 @@ class UIController {
     }
 
     /**
-     * 处理设置切换
+     * Handle settings toggle
      * @private
      */
     handleSettingsToggle() {
@@ -773,7 +773,7 @@ class UIController {
     }
 
     /**
-     * 处理帮助切换
+     * Handle help toggle
      * @private
      */
     handleHelpToggle() {
@@ -781,7 +781,7 @@ class UIController {
     }
 
     /**
-     * 处理保存设置
+     * Handle save settings
      * @private
      */
     handleSaveSettings() {
@@ -789,7 +789,7 @@ class UIController {
     }
 
     /**
-     * 处理重置设置
+     * Handle reset settings
      * @private
      */
     handleResetSettings() {
@@ -797,18 +797,18 @@ class UIController {
     }
 
     /**
-     * 格式化时间显示
-     * @param {number} seconds - 秒数
-     * @returns {string} 格式化的时间字符串
+     * Format time display
+     * @param {number} seconds - Seconds
+     * @returns {string} Formatted time string
      * @private
      */
     formatTime(seconds) {
         if (seconds <= 0) return '';
-        
+
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
-        
+
         if (hours > 0) {
             return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         } else {
@@ -817,15 +817,103 @@ class UIController {
     }
 
     /**
-     * 更新每日进度显示
+     * Update time display with editable functionality
+     * @param {HTMLElement} timeElement - Time display element
+     * @param {number} timeRemaining - Time remaining in milliseconds
+     * @param {string} type - Reminder type ('water' | 'posture')
+     * @private
+     */
+    updateTimeDisplay(timeElement, timeRemaining, type) {
+        const seconds = Math.floor(timeRemaining / 1000);
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+
+        // Create editable time display
+        if (!timeElement.querySelector('.editable-time')) {
+            this.createEditableTimeDisplay(timeElement, type);
+        }
+
+        const hourInput = timeElement.querySelector('.time-hour');
+        const minuteInput = timeElement.querySelector('.time-minute');
+
+        if (hourInput && minuteInput) {
+            hourInput.value = hours.toString().padStart(2, '0');
+            minuteInput.value = minutes.toString().padStart(2, '0');
+        }
+    }
+
+    /**
+     * Create editable time display
+     * @param {HTMLElement} timeElement - Time display element
+     * @param {string} type - Reminder type
+     * @private
+     */
+    createEditableTimeDisplay(timeElement, type) {
+        timeElement.innerHTML = `
+            <div class="editable-time">
+                <input type="number" class="time-hour" min="0" max="23" value="00">
+                <span class="time-separator">:</span>
+                <input type="number" class="time-minute" min="0" max="59" value="00">
+                <button class="time-update-btn" data-type="${type}">Update</button>
+            </div>
+        `;
+
+        // Add event listeners for time update
+        const updateBtn = timeElement.querySelector('.time-update-btn');
+        const hourInput = timeElement.querySelector('.time-hour');
+        const minuteInput = timeElement.querySelector('.time-minute');
+
+        if (updateBtn) {
+            updateBtn.addEventListener('click', () => {
+                this.handleTimeUpdate(type, hourInput.value, minuteInput.value);
+            });
+        }
+
+        // Format inputs on blur
+        [hourInput, minuteInput].forEach(input => {
+            if (input) {
+                input.addEventListener('blur', () => {
+                    const value = parseInt(input.value) || 0;
+                    const max = input.classList.contains('time-hour') ? 23 : 59;
+                    input.value = Math.min(Math.max(value, 0), max).toString().padStart(2, '0');
+                });
+
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        updateBtn.click();
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Handle time update
+     * @param {string} type - Reminder type
+     * @param {string} hours - Hours value
+     * @param {string} minutes - Minutes value
+     * @private
+     */
+    handleTimeUpdate(type, hours, minutes) {
+        const totalMinutes = (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+        if (totalMinutes > 0) {
+            this.triggerEvent('timeUpdate', {
+                type: type,
+                minutes: totalMinutes
+            });
+        }
+    }
+
+    /**
+     * Update daily progress display
      * @param {string} type - 'water' | 'posture'
-     * @param {number} current - 当前完成次数
-     * @param {number} target - 目标次数
+     * @param {number} current - Current completion count
+     * @param {number} target - Target count
      */
     updateDailyProgress(type, current, target) {
         const statsElement = this.elements[`${type}Stats`];
         const progressElement = this.elements[`${type}Progress`];
-        
+
         if (statsElement) {
             const statsText = statsElement.querySelector('.stats-text');
             if (statsText) {
@@ -833,7 +921,7 @@ class UIController {
                 statsText.textContent = `Today: ${current}/${target} ${unit}`;
             }
         }
-        
+
         if (progressElement) {
             const percentage = Math.min((current / target) * 100, 100);
             progressElement.style.width = `${percentage}%`;
@@ -852,7 +940,7 @@ class UIController {
         // 创建通知元素
         const notification = document.createElement('div');
         notification.className = `notification-alert notification-${type}`;
-        
+
         notification.innerHTML = `
             <div class="notification-content">
                 <div class="notification-icon">${type === 'water' ? '💧' : '🧘'}</div>
@@ -867,20 +955,20 @@ class UIController {
                 <button class="btn btn-secondary">Remind Later</button>
             </div>
         `;
-        
+
         // 添加到页面
         document.body.appendChild(notification);
-        
+
         // 显示动画
         setTimeout(() => {
             notification.classList.add('show');
         }, 100);
-        
+
         // 绑定事件
         const confirmBtn = notification.querySelector('.btn-primary');
         const snoozeBtn = notification.querySelector('.btn-secondary');
         const closeBtn = notification.querySelector('.btn-close');
-        
+
         const removeNotification = () => {
             notification.classList.remove('show');
             setTimeout(() => {
@@ -889,25 +977,25 @@ class UIController {
                 }
             }, 300);
         };
-        
+
         if (confirmBtn) {
             confirmBtn.addEventListener('click', () => {
                 removeNotification();
                 if (onConfirm) onConfirm();
             });
         }
-        
+
         if (snoozeBtn) {
             snoozeBtn.addEventListener('click', () => {
                 removeNotification();
                 if (onSnooze) onSnooze();
             });
         }
-        
+
         if (closeBtn) {
             closeBtn.addEventListener('click', removeNotification);
         }
-        
+
         // 自动关闭
         setTimeout(removeNotification, 10000);
     }
@@ -921,7 +1009,7 @@ class UIController {
         // 创建权限提示元素
         const prompt = document.createElement('div');
         prompt.className = 'permission-prompt';
-        
+
         prompt.innerHTML = `
             <div class="prompt-content">
                 <div class="prompt-icon">🔔</div>
@@ -935,19 +1023,19 @@ class UIController {
                 </div>
             </div>
         `;
-        
+
         // 添加到页面
         document.body.appendChild(prompt);
-        
+
         // 显示动画
         setTimeout(() => {
             prompt.classList.add('show');
         }, 100);
-        
+
         // 绑定事件
         const allowBtn = prompt.querySelector('.btn-primary');
         const denyBtn = prompt.querySelector('.btn-secondary');
-        
+
         const removePrompt = () => {
             prompt.classList.remove('show');
             setTimeout(() => {
@@ -956,14 +1044,14 @@ class UIController {
                 }
             }, 400);
         };
-        
+
         if (allowBtn) {
             allowBtn.addEventListener('click', () => {
                 removePrompt();
                 if (onAllow) onAllow();
             });
         }
-        
+
         if (denyBtn) {
             denyBtn.addEventListener('click', () => {
                 removePrompt();
@@ -1028,7 +1116,7 @@ class UIController {
             element.classList.remove(className);
         }
     }
-    
+
     /**
      * 更新应用状态摘要
      * @param {boolean} isActive - 是否有活跃的提醒
@@ -1037,16 +1125,16 @@ class UIController {
         if (!this.elements.appStatusIndicator || !this.elements.appStatusText) {
             return;
         }
-        
+
         if (isActive) {
             this.elements.appStatusIndicator.classList.add('active');
-            this.elements.appStatusText.textContent = '健康提醒已启动';
+            this.elements.appStatusText.textContent = 'Wellness Reminders Active';
         } else {
             this.elements.appStatusIndicator.classList.remove('active');
             this.elements.appStatusText.textContent = 'Wellness Reminders Inactive';
         }
     }
-    
+
     /**
      * 更新下次提醒时间
      * @param {string} type - 'water' | 'posture'
@@ -1057,7 +1145,7 @@ class UIController {
         if (!nextTimeElement) {
             return;
         }
-        
+
         if (nextTime && nextTime instanceof Date) {
             const hours = nextTime.getHours().toString().padStart(2, '0');
             const minutes = nextTime.getMinutes().toString().padStart(2, '0');
@@ -1066,7 +1154,7 @@ class UIController {
             nextTimeElement.textContent = '--:--';
         }
     }
-    
+
     /**
      * 更新活动状态
      * @param {boolean} isActive - 用户是否活跃
@@ -1075,7 +1163,7 @@ class UIController {
         if (!this.elements.activityStatusValue) {
             return;
         }
-        
+
         if (isActive) {
             this.elements.activityStatusValue.textContent = 'Active';
             this.elements.activityStatusValue.classList.remove('inactive');
@@ -1084,7 +1172,7 @@ class UIController {
             this.elements.activityStatusValue.classList.add('inactive');
         }
     }
-    
+
     /**
      * 更新健康评分
      * @param {number} waterCompletionRate - 喝水完成率 (0-1)
@@ -1094,10 +1182,10 @@ class UIController {
         if (!this.elements.healthScore) {
             return;
         }
-        
+
         // 简单计算健康评分 (满分100)
         const score = Math.round((waterCompletionRate * 0.5 + postureCompletionRate * 0.5) * 100);
-        
+
         // 根据分数设置不同颜色
         let scoreClass = '';
         if (score >= 80) {
@@ -1109,15 +1197,15 @@ class UIController {
         } else {
             scoreClass = 'score-poor';
         }
-        
+
         // 移除所有可能的分数类
         this.elements.healthScore.classList.remove(
             'score-excellent', 'score-good', 'score-average', 'score-poor'
         );
-        
+
         // 添加当前分数类
         this.elements.healthScore.classList.add(scoreClass);
-        
+
         // 设置分数文本
         this.elements.healthScore.textContent = score;
     }

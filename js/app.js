@@ -100,21 +100,21 @@ class OfficeWellnessApp {
             // Check browser compatibility
             this.checkBrowserCompatibility();
             
-            // 初始化存储管理器
+            // Initialize storage manager
             this.storageManager = new StorageManager();
             
-            // 初始化应用设置管理器
+            // Initialize app settings manager
             this.appSettings = new AppSettings(this.storageManager);
             
-            // 初始化通知服务
+            // Initialize notification service
             this.notificationService = new NotificationService();
             
-            // 初始化活动检测器（用于久坐提醒）
+            // Initialize activity detector (for posture reminders)
             this.activityDetector = new ActivityDetector((event) => {
                 console.log('User activity status changed:', event);
-                // 活动检测器的回调会在ReminderManager中处理
+                // Activity detector callback will be handled in ReminderManager
                 
-                // 更新应用状态中的用户活动信息
+                // Update user activity information in app state
                 if (this.appSettings) {
                     const currentState = this.appSettings.getState();
                     currentState.userActivity = {
@@ -126,10 +126,10 @@ class OfficeWellnessApp {
                 }
             });
             
-            // 获取当前设置
+            // Get current settings
             const currentSettings = this.appSettings.getSettings();
             
-            // 初始化提醒管理器
+            // Initialize reminder managers
             this.waterReminder = new WaterReminder(
                 currentSettings.water, 
                 this.notificationService
@@ -138,13 +138,13 @@ class OfficeWellnessApp {
             this.postureReminder = new PostureReminder(
                 currentSettings.posture, 
                 this.notificationService,
-                this.activityDetector // 将活动检测器传递给久坐提醒
+                this.activityDetector // Pass activity detector to posture reminder
             );
             
-            // 初始化UI控制器
+            // Initialize UI controller
             this.uiController = new UIController();
             
-            // 应用移动端适配
+            // Apply mobile adaptation
             if (this.mobileAdapter) {
                 this.mobileAdapter.applyMobileAdaptation();
             }
