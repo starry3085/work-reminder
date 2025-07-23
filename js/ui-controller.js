@@ -810,6 +810,40 @@ class UIController {
         const secs = seconds % 60;
 
         if (hours > 0) {
+            return `${hours} hours ${minutes} minutes`;
+        } else {
+            return `${minutes} minutes`;
+        }
+    }
+
+    /**
+     * Update time display
+     * @param {HTMLElement} element - Time display element
+     * @param {number} timeRemaining - Time remaining in seconds
+     * @param {string} type - Reminder type
+     * @private
+     */
+    updateTimeDisplay(element, timeRemaining, type) {
+        if (!element) return;
+        
+        // Format time as "XX hours XX minutes" or "XX minutes"
+        element.textContent = this.formatTime(timeRemaining);
+    }
+
+    /**
+     * Format time display in HH:MM:SS format (for backward compatibility)
+     * @param {number} seconds - Seconds
+     * @returns {string} Formatted time string
+     * @private
+     */
+    formatTimeHHMMSS(seconds) {
+        if (seconds <= 0) return '';
+
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        if (hours > 0) {
             return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         } else {
             return `${minutes}:${secs.toString().padStart(2, '0')}`;
