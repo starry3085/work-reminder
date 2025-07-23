@@ -1,14 +1,14 @@
 /**
- * 提醒管理器 - 管理喝水和久坐提醒的核心类
- * 负责定时器管理、状态跟踪、提醒触发和持久化保存
+ * Reminder Manager - Core class for managing water and posture reminders
+ * Responsible for timer management, status tracking, reminder triggering and persistent storage
  */
 class ReminderManager {
     /**
-     * 创建提醒管理器实例
-     * @param {string} type - 提醒类型 ('water' | 'posture')
-     * @param {Object} settings - 提醒设置
-     * @param {NotificationService} notificationService - 通知服务实例
-     * @param {ActivityDetector} activityDetector - 活动检测器实例（仅久坐提醒需要）
+     * Create reminder manager instance
+     * @param {string} type - Reminder type ('water' | 'posture')
+     * @param {Object} settings - Reminder settings
+     * @param {NotificationService} notificationService - Notification service instance
+     * @param {ActivityDetector} activityDetector - Activity detector instance (only needed for posture reminders)
      */
     constructor(type, settings, notificationService, activityDetector = null) {
         this.type = type;
@@ -16,7 +16,7 @@ class ReminderManager {
         this.notificationService = notificationService;
         this.activityDetector = activityDetector;
         
-        // 状态管理
+        // State management
         this.isActive = false;
         this.isPaused = false;
         this.timer = null;
@@ -25,47 +25,47 @@ class ReminderManager {
         this.nextReminderTime = null;
         this.timeRemaining = 0;
         
-        // 回调函数
+        // Callback functions
         this.statusChangeCallback = null;
         this.timeUpdateCallback = null;
         
-        // 定时器更新间隔（1秒）
+        // Timer update interval (1 second)
         this.updateInterval = 1000;
         this.updateTimer = null;
         
-        // 如果是久坐提醒，设置活动检测器回调
+        // If posture reminder, set up activity detector callback
         if (this.type === 'posture' && this.activityDetector) {
             this.setupActivityDetection();
         }
         
-        console.log(`${this.type}提醒管理器已创建`);
+        console.log(`${this.type} reminder manager created`);
     }
 
     /**
-     * 设置活动检测（仅久坐提醒）
+     * Set up activity detection (posture reminders only)
      * @private
      */
     setupActivityDetection() {
         if (!this.activityDetector) return;
         
-        // 保存原始回调
+        // Save original callback
         const originalCallback = this.activityDetector.callback;
         
-        // 设置新的回调，包含原始回调和我们的处理
+        // Set new callback, including original callback and our handling
         this.activityDetector.callback = (event) => {
-            // 调用原始回调
+            // Call original callback
             if (originalCallback) {
                 originalCallback(event);
             }
             
-            // 处理活动检测事件
+            // Handle activity detection event
             this.handleActivityEvent(event);
         };
     }
 
     /**
-     * 处理用户活动事件（仅久坐提醒）
-     * @param {Object} event - 活动事件
+     * Handle user activity events (posture reminders only)
+     * @param {Object} event - Activity event
      * @private
      */
     handleActivityEvent(event) {
@@ -73,48 +73,48 @@ class ReminderManager {
         
         switch (event.type) {
             case 'user-away':
-                // 用户离开，自动暂停久坐提醒
+                // User away, auto-pause posture reminder
                 if (this.isActive && !this.isPaused) {
-                    this.pause(true); // true表示自动暂停
+                    this.pause(true); // true means auto-pause
                 }
                 break;
                 
             case 'user-return':
-                // 用户返回，自动恢复久坐提醒
+                // User returned, auto-resume posture reminder
                 if (this.isActive && this.isPaused) {
-                    this.resume(true); // true表示自动恢复
+                    this.resume(true); // true means auto-resume
                 }
                 break;
         }
     }
 
     /**
-     * 启动提醒
+     * Start reminder
      */
     start() {
         if (this.isActive) {
-            console.warn(`${this.type}提醒已经在运行中`);
+            console.warn(`${this.type} reminder is already running`);
             return;
         }
         
         this.isActive = true;
         this.isPaused = false;
         this.startTime = Date.now();
-        this.timeRemaining = this.settings.interval * 60 * 1000; // 转换为毫秒
+        this.timeRemaining = this.settings.interval * 60 * 1000; // Convert to milliseconds
         this.nextReminderTime = this.startTime + this.timeRemaining;
         
-        // 启动定时器
+        // Start timer
         this.startTimer();
         
-        // 启动时间更新定时器
+        // Start time update timer
         this.startUpdateTimer();
         
-        // 如果是久坐提醒，启动活动检测
+        // If posture reminder, start activity detection
         if (this.type === 'posture' && this.activityDetector) {
             this.activityDetector.startMonitoring();
         }
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'started',
             isActive: true,
@@ -122,34 +122,34 @@ class ReminderManager {
             timeRemaining: this.timeRemaining
         });
         
-        console.log(`${this.type}提醒已启动，间隔: ${this.settings.interval}分钟`);
+        console.log(`${this.type} reminder started, interval: ${this.settings.interval} minutes`);
     }
 
     /**
-     * 停止提醒
+     * Stop reminder
      */
     stop() {
         if (!this.isActive) {
-            console.warn(`${this.type}提醒未在运行`);
+            console.warn(`${this.type} reminder is not running`);
             return;
         }
         
         this.isActive = false;
         this.isPaused = false;
         
-        // 清除定时器
+        // Clear timers
         this.clearTimer();
         this.clearUpdateTimer();
         
-        // 如果是久坐提醒，停止活动检测
+        // If posture reminder, stop activity detection
         if (this.type === 'posture' && this.activityDetector) {
             this.activityDetector.stopMonitoring();
         }
         
-        // 重置状态
+        // Reset state
         this.resetState();
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'stopped',
             isActive: false,
@@ -157,17 +157,17 @@ class ReminderManager {
             timeRemaining: 0
         });
         
-        console.log(`${this.type}提醒已停止`);
+        console.log(`${this.type} reminder stopped`);
     }
 
     /**
-     * 暂停提醒
-     * @param {boolean} isAuto - 是否为自动暂停（由活动检测触发）
+     * Pause reminder
+     * @param {boolean} isAuto - Whether it's auto-pause (triggered by activity detection)
      */
     pause(isAuto = false) {
         if (!this.isActive || this.isPaused) {
             if (!isAuto) {
-                console.warn(`${this.type}提醒未在运行或已暂停`);
+                console.warn(`${this.type} reminder is not running or already paused`);
             }
             return;
         }
@@ -175,14 +175,14 @@ class ReminderManager {
         this.isPaused = true;
         this.pauseTime = Date.now();
         
-        // 计算剩余时间
+        // Calculate remaining time
         const elapsed = this.pauseTime - this.startTime;
         this.timeRemaining = Math.max(0, this.timeRemaining - elapsed);
         
-        // 清除定时器
+        // Clear timer
         this.clearTimer();
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'paused',
             isActive: true,
@@ -191,17 +191,17 @@ class ReminderManager {
             isAuto: isAuto
         });
         
-        console.log(`${this.type}提醒已${isAuto ? '自动' : '手动'}暂停`);
+        console.log(`${this.type} reminder ${isAuto ? 'auto' : 'manually'} paused`);
     }
 
     /**
-     * 恢复提醒
-     * @param {boolean} isAuto - 是否为自动恢复（由活动检测触发）
+     * Resume reminder
+     * @param {boolean} isAuto - Whether it's auto-resume (triggered by activity detection)
      */
     resume(isAuto = false) {
         if (!this.isActive || !this.isPaused) {
             if (!isAuto) {
-                console.warn(`${this.type}提醒未暂停`);
+                console.warn(`${this.type} reminder is not paused`);
             }
             return;
         }
@@ -210,10 +210,10 @@ class ReminderManager {
         this.startTime = Date.now();
         this.nextReminderTime = this.startTime + this.timeRemaining;
         
-        // 重新启动定时器
+        // Restart timer
         this.startTimer();
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'resumed',
             isActive: true,
@@ -222,48 +222,48 @@ class ReminderManager {
             isAuto: isAuto
         });
         
-        console.log(`${this.type}提醒已${isAuto ? '自动' : '手动'}恢复`);
+        console.log(`${this.type} reminder ${isAuto ? 'auto' : 'manually'} resumed`);
     }
 
     /**
-     * 重置提醒计时器
+     * Reset reminder timer
      */
     reset() {
         const wasActive = this.isActive;
         
         if (this.isActive) {
-            // 清除定时器
+            // Clear timers
             this.clearTimer();
             this.clearUpdateTimer();
         }
         
-        // 重置状态
+        // Reset state
         this.resetState();
         
         if (wasActive) {
-            // 如果之前是活跃状态，重新启动
+            // If previously active, restart
             this.start();
         }
         
-        console.log(`${this.type}提醒已重置`);
+        console.log(`${this.type} reminder reset`);
     }
 
     /**
-     * 确认提醒（用户已执行相应动作）
+     * Acknowledge reminder (user has performed the corresponding action)
      */
     acknowledge() {
         if (!this.isActive) {
-            console.warn(`${this.type}提醒未在运行`);
+            console.warn(`${this.type} reminder is not running`);
             return;
         }
         
-        // 更新最后提醒时间
+        // Update last reminder time
         this.settings.lastReminder = Date.now();
         
-        // 重置计时器
+        // Reset timer
         this.reset();
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'acknowledged',
             isActive: true,
@@ -271,46 +271,46 @@ class ReminderManager {
             timeRemaining: this.timeRemaining
         });
         
-        console.log(`${this.type}提醒已确认`);
+        console.log(`${this.type} reminder acknowledged`);
     }
 
     /**
-     * 更新设置
-     * @param {Object} newSettings - 新的设置
+     * Update settings
+     * @param {Object} newSettings - New settings
      */
     updateSettings(newSettings) {
         const oldInterval = this.settings.interval;
         
-        // 更新设置
+        // Update settings
         this.settings = { ...this.settings, ...newSettings };
         
-        // 如果间隔时间改变且提醒正在运行，需要重新计算
+        // If interval changed and reminder is running, need to recalculate
         if (newSettings.interval && newSettings.interval !== oldInterval && this.isActive) {
             const newIntervalMs = newSettings.interval * 60 * 1000;
             
             if (!this.isPaused) {
-                // 如果没有暂停，重新计算剩余时间
+                // If not paused, recalculate remaining time
                 const elapsed = Date.now() - this.startTime;
                 const progress = elapsed / (oldInterval * 60 * 1000);
                 this.timeRemaining = Math.max(0, newIntervalMs * (1 - progress));
                 this.nextReminderTime = Date.now() + this.timeRemaining;
                 
-                // 重新启动定时器
+                // Restart timer
                 this.clearTimer();
                 this.startTimer();
             } else {
-                // 如果暂停中，按比例调整剩余时间
+                // If paused, adjust remaining time proportionally
                 const progress = 1 - (this.timeRemaining / (oldInterval * 60 * 1000));
                 this.timeRemaining = Math.max(0, newIntervalMs * (1 - progress));
             }
         }
         
-        console.log(`${this.type}提醒设置已更新:`, this.settings);
+        console.log(`${this.type} reminder settings updated:`, this.settings);
     }
 
     /**
-     * 获取当前状态
-     * @returns {Object} 当前状态信息
+     * Get current status
+     * @returns {Object} Current status information
      */
     getCurrentStatus() {
         return {
@@ -325,23 +325,23 @@ class ReminderManager {
     }
 
     /**
-     * 设置状态变化回调
-     * @param {Function} callback - 回调函数
+     * Set status change callback
+     * @param {Function} callback - Callback function
      */
     setStatusChangeCallback(callback) {
         this.statusChangeCallback = callback;
     }
 
     /**
-     * 设置时间更新回调
-     * @param {Function} callback - 回调函数
+     * Set time update callback
+     * @param {Function} callback - Callback function
      */
     setTimeUpdateCallback(callback) {
         this.timeUpdateCallback = callback;
     }
 
     /**
-     * 启动定时器
+     * Start timer
      * @private
      */
     startTimer() {
@@ -355,7 +355,7 @@ class ReminderManager {
     }
 
     /**
-     * 清除定时器
+     * Clear timer
      * @private
      */
     clearTimer() {
@@ -366,7 +366,7 @@ class ReminderManager {
     }
 
     /**
-     * 启动时间更新定时器
+     * Start time update timer
      * @private
      */
     startUpdateTimer() {
@@ -380,7 +380,7 @@ class ReminderManager {
     }
 
     /**
-     * 清除时间更新定时器
+     * Clear time update timer
      * @private
      */
     clearUpdateTimer() {
@@ -391,7 +391,7 @@ class ReminderManager {
     }
 
     /**
-     * 更新剩余时间
+     * Update remaining time
      * @private
      */
     updateTimeRemaining() {
@@ -402,7 +402,7 @@ class ReminderManager {
         const now = Date.now();
         this.timeRemaining = Math.max(0, this.nextReminderTime - now);
         
-        // 触发时间更新回调
+        // Trigger time update callback
         if (this.timeUpdateCallback) {
             this.timeUpdateCallback({
                 type: this.type,
@@ -414,27 +414,27 @@ class ReminderManager {
     }
 
     /**
-     * 触发提醒
+     * Trigger reminder
      * @private
      */
     triggerReminder() {
         if (!this.isActive) return;
         
-        const title = this.type === 'water' ? '💧 喝水时间到了！' : '🧘 该起身活动了！';
+        const title = this.type === 'water' ? '💧 Time to Hydrate!' : '🧘 Time to Stand Up!';
         const message = this.type === 'water' 
-            ? '长时间工作容易脱水，记得补充水分哦！' 
-            : '久坐对身体不好，起来活动一下吧！';
+            ? 'Long work sessions can lead to dehydration, remember to drink water!' 
+            : 'Sitting too long is bad for your health, get up and move around!';
         
-        // 显示通知
+        // Show notification
         this.notificationService.showNotification(
             this.type,
             title,
             message,
-            () => this.acknowledge(), // 确认回调
-            () => this.snooze()       // 稍后提醒回调
+            () => this.acknowledge(), // Confirm callback
+            () => this.snooze()       // Snooze callback
         );
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'triggered',
             isActive: true,
@@ -442,32 +442,32 @@ class ReminderManager {
             timeRemaining: 0
         });
         
-        // 自动重置计时器（如果用户没有手动确认）
+        // Auto-reset timer (if user doesn't manually confirm)
         setTimeout(() => {
             if (this.isActive && this.timeRemaining === 0) {
                 this.reset();
             }
-        }, 60000); // 1分钟后自动重置
+        }, 60000); // Auto-reset after 1 minute
         
-        console.log(`${this.type}提醒已触发`);
+        console.log(`${this.type} reminder triggered`);
     }
 
     /**
-     * 稍后提醒（延迟5分钟）
+     * Snooze reminder (delay 5 minutes)
      */
     snooze() {
         if (!this.isActive) return;
         
-        const snoozeTime = 5 * 60 * 1000; // 5分钟
+        const snoozeTime = 5 * 60 * 1000; // 5 minutes
         this.timeRemaining = snoozeTime;
         this.startTime = Date.now();
         this.nextReminderTime = this.startTime + this.timeRemaining;
         
-        // 重新启动定时器
+        // Restart timer
         this.clearTimer();
         this.startTimer();
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'snoozed',
             isActive: true,
@@ -475,11 +475,11 @@ class ReminderManager {
             timeRemaining: this.timeRemaining
         });
         
-        console.log(`${this.type}提醒已延迟5分钟`);
+        console.log(`${this.type} reminder snoozed for 5 minutes`);
     }
 
     /**
-     * 重置状态
+     * Reset state
      * @private
      */
     resetState() {
@@ -490,8 +490,8 @@ class ReminderManager {
     }
 
     /**
-     * 触发状态变化回调
-     * @param {Object} status - 状态信息
+     * Trigger status change callback
+     * @param {Object} status - Status information
      * @private
      */
     triggerStatusChange(status) {
@@ -505,18 +505,18 @@ class ReminderManager {
     }
 
     /**
-     * 恢复保存的状态
-     * @param {Object} state - 要恢复的状态
+     * Restore saved state
+     * @param {Object} state - State to restore
      */
     restoreState(state) {
         if (!state) return;
         
         try {
-            // 恢复活动状态
+            // Restore activity status
             this.isActive = state.isActive || false;
             this.isPaused = state.isPaused || false;
             
-            // 恢复时间信息
+            // Restore time information
             if (state.timeRemaining) {
                 this.timeRemaining = state.timeRemaining;
             }
@@ -527,18 +527,18 @@ class ReminderManager {
                 this.nextReminderTime = Date.now() + this.timeRemaining;
             }
             
-            // 如果是活动状态，启动定时器
+            // If active, start timers
             if (this.isActive && !this.isPaused) {
                 this.startTime = Date.now();
                 this.startTimer();
                 this.startUpdateTimer();
                 
-                // 如果是久坐提醒，启动活动检测
+                // If posture reminder, start activity detection
                 if (this.type === 'posture' && this.activityDetector) {
                     this.activityDetector.startMonitoring();
                 }
                 
-                // 触发状态变化回调
+                // Trigger status change callback
                 this.triggerStatusChange({
                     status: 'restored',
                     isActive: true,
@@ -546,7 +546,7 @@ class ReminderManager {
                     timeRemaining: this.timeRemaining
                 });
             } else if (this.isActive && this.isPaused) {
-                // 如果是暂停状态，只触发状态变化回调
+                // If paused, only trigger status change callback
                 this.pauseTime = Date.now();
                 
                 this.triggerStatusChange({
@@ -557,7 +557,7 @@ class ReminderManager {
                 });
             }
             
-            console.log(`${this.type}提醒状态已恢复:`, {
+            console.log(`${this.type} reminder state restored:`, {
                 isActive: this.isActive,
                 isPaused: this.isPaused,
                 timeRemaining: this.timeRemaining
@@ -565,31 +565,31 @@ class ReminderManager {
             
             return true;
         } catch (error) {
-            console.error(`恢复${this.type}提醒状态失败:`, error);
+            console.error(`Failed to restore ${this.type} reminder state:`, error);
             return false;
         }
     }
 
     /**
-     * 销毁提醒管理器
+     * Destroy reminder manager
      */
     destroy() {
         this.stop();
         
-        // 清除所有回调
+        // Clear all callbacks
         this.statusChangeCallback = null;
         this.timeUpdateCallback = null;
         
-        // 如果是久坐提醒，清理活动检测器
+        // If posture reminder, clean up activity detector
         if (this.type === 'posture' && this.activityDetector) {
             this.activityDetector.stopMonitoring();
         }
         
-        console.log(`${this.type}提醒管理器已销毁`);
+        console.log(`${this.type} reminder manager destroyed`);
     }
 }
 
-// 导出类供其他模块使用
+// Export class for use by other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ReminderManager;
 }

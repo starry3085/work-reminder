@@ -2,12 +2,12 @@
 const CACHE_VERSION = '2';
 const CACHE_NAME = 'office-wellness-reminder-v' + CACHE_VERSION;
 
-// 资源分类
+// Resource categories
 const STATIC_CACHE = 'static-cache-v' + CACHE_VERSION;
 const DYNAMIC_CACHE = 'dynamic-cache-v' + CACHE_VERSION;
 const ASSETS_CACHE = 'assets-cache-v' + CACHE_VERSION;
 
-// 需要缓存的静态资源
+// Static resources to cache
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -16,7 +16,7 @@ const STATIC_ASSETS = [
   '/favicon.ico'
 ];
 
-// 需要缓存的JS文件
+// JS files to cache
 const JS_ASSETS = [
   '/js/app.js',
   '/js/activity-detector.js',
@@ -31,7 +31,7 @@ const JS_ASSETS = [
   '/js/water-reminder.js'
 ];
 
-// 需要缓存的媒体资源
+// Media assets to cache
 const MEDIA_ASSETS = [
   '/assets/default-icon.png',
   '/assets/favicon.ico',
@@ -42,55 +42,55 @@ const MEDIA_ASSETS = [
   '/assets/water-reminder.mp3'
 ];
 
-// 安装事件 - 缓存核心资源
+// Install event - cache core resources
 self.addEventListener('install', event => {
-  console.log('[Service Worker] 安装中...');
+  console.log('[Service Worker] Installing...');
   
-  // 跳过等待，立即激活
+  // Skip waiting, activate immediately
   self.skipWaiting();
   
   event.waitUntil(
     Promise.all([
-      // 缓存静态资源
+      // Cache static resources
       caches.open(STATIC_CACHE).then(cache => {
-        console.log('[Service Worker] 缓存静态资源');
+        console.log('[Service Worker] Caching static resources');
         return cache.addAll(STATIC_ASSETS);
       }),
       
-      // 缓存JS资源
+      // Cache JS resources
       caches.open(STATIC_CACHE).then(cache => {
-        console.log('[Service Worker] 缓存JS资源');
+        console.log('[Service Worker] Caching JS resources');
         return cache.addAll(JS_ASSETS);
       }),
       
-      // 缓存媒体资源
+      // Cache media resources
       caches.open(ASSETS_CACHE).then(cache => {
-        console.log('[Service Worker] 缓存媒体资源');
+        console.log('[Service Worker] Caching media resources');
         return cache.addAll(MEDIA_ASSETS);
       })
     ])
   );
 });
 
-// 激活事件 - 清理旧缓存
+// Activate event - clean up old caches
 self.addEventListener('activate', event => {
-  console.log('[Service Worker] 激活中...');
+  console.log('[Service Worker] Activating...');
   
-  // 立即接管所有客户端
+  // Immediately take control of all clients
   event.waitUntil(clients.claim());
   
-  // 清理旧版本缓存
+  // Clean up old version caches
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          // 删除不在当前版本的缓存
+          // Delete caches not in current version
           if (
             cacheName !== STATIC_CACHE &&
             cacheName !== DYNAMIC_CACHE &&
             cacheName !== ASSETS_CACHE
           ) {
-            console.log('[Service Worker] 删除旧缓存:', cacheName);
+            console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -99,11 +99,11 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 获取请求的缓存策略
+// Get cache strategy for request
 function getCacheStrategy(url) {
   const requestURL = new URL(url);
   
-  // 静态资源使用缓存优先策略
+  // Static resources use cache-first strategy
   if (STATIC_ASSETS.includes(requestURL.pathname)) {
     return {
       cacheName: STATIC_CACHE,
@@ -111,7 +111,7 @@ function getCacheStrategy(url) {
     };
   }
   
-  // JS文件使用缓存优先策略
+  // JS files use cache-first strategy
   if (JS_ASSETS.includes(requestURL.pathname) || requestURL.pathname.endsWith('.js')) {
     return {
       cacheName: STATIC_CACHE,
@@ -119,7 +119,7 @@ function getCacheStrategy(url) {
     };
   }
   
-  // 媒体文件使用缓存优先策略
+  // Media files use cache-first strategy
   if (
     MEDIA_ASSETS.includes(requestURL.pathname) ||
     requestURL.pathname.endsWith('.png') ||
@@ -134,14 +134,14 @@ function getCacheStrategy(url) {
     };
   }
   
-  // 其他资源使用网络优先策略
+  // Other resources use network-first strategy
   return {
     cacheName: DYNAMIC_CACHE,
     strategy: 'network-first'
   };
 }
 
-// 缓存优先策略
+// Cache-first strategy
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cachedResponse = await cache.match(request);
@@ -151,37 +151,37 @@ async function cacheFirst(request, cacheName) {
   }
   
   try {
-    // 如果缓存中没有，则从网络获取
+    // If not in cache, fetch from network
     const networkResponse = await fetch(request);
     
-    // 检查响应是否有效
+    // Check if response is valid
     if (networkResponse && networkResponse.status === 200) {
-      // 将响应克隆一份存入缓存
-      // 因为响应流只能使用一次
+      // Clone response and store in cache
+      // Because response stream can only be used once
       const clonedResponse = networkResponse.clone();
       cache.put(request, clonedResponse);
     }
     
     return networkResponse;
   } catch (error) {
-    console.error('[Service Worker] 缓存优先策略失败:', error);
-    // 如果网络请求失败，返回一个离线页面或错误响应
-    return new Response('网络请求失败，无法获取资源', {
+    console.error('[Service Worker] Cache-first strategy failed:', error);
+    // If network request fails, return offline page or error response
+    return new Response('Network request failed, unable to get resource', {
       status: 408,
       headers: { 'Content-Type': 'text/plain' }
     });
   }
 }
 
-// 网络优先策略
+// Network-first strategy
 async function networkFirst(request, cacheName) {
   try {
-    // 先尝试从网络获取
+    // Try to fetch from network first
     const networkResponse = await fetch(request);
     
-    // 检查响应是否有效
+    // Check if response is valid
     if (networkResponse && networkResponse.status === 200) {
-      // 将响应克隆一份存入缓存
+      // Clone response and store in cache
       const cache = await caches.open(cacheName);
       const clonedResponse = networkResponse.clone();
       cache.put(request, clonedResponse);
@@ -189,9 +189,9 @@ async function networkFirst(request, cacheName) {
     
     return networkResponse;
   } catch (error) {
-    console.log('[Service Worker] 网络请求失败，尝试从缓存获取');
+    console.log('[Service Worker] Network request failed, trying cache');
     
-    // 如果网络请求失败，尝试从缓存获取
+    // If network request fails, try to get from cache
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
     
@@ -199,15 +199,15 @@ async function networkFirst(request, cacheName) {
       return cachedResponse;
     }
     
-    // 如果缓存中也没有，返回一个离线页面或错误响应
-    return new Response('您当前处于离线状态，无法获取资源', {
+    // If not in cache either, return offline page or error response
+    return new Response('You are currently offline, unable to get resource', {
       status: 503,
       headers: { 'Content-Type': 'text/plain' }
     });
   }
 }
 
-// 拦截请求事件
+// Intercept fetch events
 self.addEventListener('fetch', event => {
   const strategy = getCacheStrategy(event.request.url);
   
@@ -218,19 +218,19 @@ self.addEventListener('fetch', event => {
   }
 });
 
-// 后台同步事件 - 用于离线操作后的数据同步
+// Background sync event - for data sync after offline operations
 self.addEventListener('sync', event => {
-  console.log('[Service Worker] 后台同步事件:', event.tag);
+  console.log('[Service Worker] Background sync event:', event.tag);
   
   if (event.tag === 'sync-settings') {
-    // 这里可以实现设置同步逻辑
-    console.log('[Service Worker] 同步用户设置');
+    // Settings sync logic can be implemented here
+    console.log('[Service Worker] Syncing user settings');
   }
 });
 
-// 推送通知事件
+// Push notification event
 self.addEventListener('push', event => {
-  console.log('[Service Worker] 收到推送消息:', event.data.text());
+  console.log('[Service Worker] Received push message:', event.data.text());
   
   const data = JSON.parse(event.data.text());
   
@@ -246,11 +246,11 @@ self.addEventListener('push', event => {
     actions: [
       {
         action: 'confirm',
-        title: data.type === 'water' ? '已喝水' : '已起身活动'
+        title: data.type === 'water' ? 'Drank Water' : 'Moved'
       },
       {
         action: 'snooze',
-        title: '稍后提醒'
+        title: 'Remind Later'
       }
     ]
   };
@@ -260,27 +260,27 @@ self.addEventListener('push', event => {
   );
 });
 
-// 通知点击事件
+// Notification click event
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   
   if (event.action === 'confirm') {
-    // 处理确认操作
-    console.log('[Service Worker] 用户确认了提醒:', event.notification.data.type);
+    // Handle confirm action
+    console.log('[Service Worker] User confirmed reminder:', event.notification.data.type);
   } else if (event.action === 'snooze') {
-    // 处理稍后提醒操作
-    console.log('[Service Worker] 用户选择稍后提醒:', event.notification.data.type);
+    // Handle snooze action
+    console.log('[Service Worker] User chose to snooze:', event.notification.data.type);
   } else {
-    // 默认操作 - 打开应用
+    // Default action - open app
     event.waitUntil(
       clients.matchAll({ type: 'window' }).then(clientList => {
-        // 如果已经有打开的窗口，则聚焦到该窗口
+        // If there's already an open window, focus on it
         for (const client of clientList) {
           if (client.url === '/' && 'focus' in client) {
             return client.focus();
           }
         }
-        // 如果没有打开的窗口，则打开一个新窗口
+        // If no open window, open a new one
         if (clients.openWindow) {
           return clients.openWindow('/');
         }

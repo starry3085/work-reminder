@@ -929,15 +929,15 @@ class UIController {
     }
 
     /**
-     * 显示页面内通知
-     * @param {string} type - 通知类型
-     * @param {string} title - 标题
-     * @param {string} message - 消息
-     * @param {Function} onConfirm - 确认回调
-     * @param {Function} onSnooze - 稍后提醒回调
+     * Show in-page notification
+     * @param {string} type - Notification type
+     * @param {string} title - Title
+     * @param {string} message - Message
+     * @param {Function} onConfirm - Confirm callback
+     * @param {Function} onSnooze - Snooze callback
      */
     showInPageNotification(type, title, message, onConfirm, onSnooze) {
-        // 创建通知元素
+        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification-alert notification-${type}`;
 
@@ -956,15 +956,15 @@ class UIController {
             </div>
         `;
 
-        // 添加到页面
+        // Add to page
         document.body.appendChild(notification);
 
-        // 显示动画
+        // Show animation
         setTimeout(() => {
             notification.classList.add('show');
         }, 100);
 
-        // 绑定事件
+        // Bind events
         const confirmBtn = notification.querySelector('.btn-primary');
         const snoozeBtn = notification.querySelector('.btn-secondary');
         const closeBtn = notification.querySelector('.btn-close');
@@ -996,17 +996,17 @@ class UIController {
             closeBtn.addEventListener('click', removeNotification);
         }
 
-        // 自动关闭
+        // Auto close
         setTimeout(removeNotification, 10000);
     }
 
     /**
-     * 显示权限请求提示
-     * @param {Function} onAllow - 允许回调
-     * @param {Function} onDeny - 拒绝回调
+     * Show permission request prompt
+     * @param {Function} onAllow - Allow callback
+     * @param {Function} onDeny - Deny callback
      */
     showPermissionPrompt(onAllow, onDeny) {
-        // 创建权限提示元素
+        // Create permission prompt element
         const prompt = document.createElement('div');
         prompt.className = 'permission-prompt';
 
@@ -1014,25 +1014,25 @@ class UIController {
             <div class="prompt-content">
                 <div class="prompt-icon">🔔</div>
                 <div class="prompt-text">
-                    <h3>启用通知权限</h3>
-                    <p>允许发送桌面通知，即使在其他标签页也能收到提醒</p>
+                    <h3>Enable Notification Permission</h3>
+                    <p>Allow desktop notifications so you can receive reminders even in other tabs</p>
                 </div>
                 <div class="prompt-actions">
-                    <button class="btn-primary">允许通知</button>
-                    <button class="btn-secondary">暂不开启</button>
+                    <button class="btn-primary">Allow Notifications</button>
+                    <button class="btn-secondary">Not Now</button>
                 </div>
             </div>
         `;
 
-        // 添加到页面
+        // Add to page
         document.body.appendChild(prompt);
 
-        // 显示动画
+        // Show animation
         setTimeout(() => {
             prompt.classList.add('show');
         }, 100);
 
-        // 绑定事件
+        // Bind events
         const allowBtn = prompt.querySelector('.btn-primary');
         const denyBtn = prompt.querySelector('.btn-secondary');
 
@@ -1061,18 +1061,18 @@ class UIController {
     }
 
     /**
-     * 获取UI元素
-     * @param {string} elementId - 元素ID
-     * @returns {HTMLElement|null} DOM元素
+     * Get UI elements
+     * @param {string} elementId - Element ID
+     * @returns {HTMLElement|null} DOM element
      */
     getElement(elementId) {
         return this.elements[elementId] || document.getElementById(elementId);
     }
 
     /**
-     * 设置元素可见性
-     * @param {string} elementId - 元素ID
-     * @param {boolean} visible - 是否可见
+     * Set element visibility
+     * @param {string} elementId - Element ID
+     * @param {boolean} visible - Whether visible
      */
     setElementVisibility(elementId, visible) {
         const element = this.getElement(elementId);
@@ -1082,9 +1082,9 @@ class UIController {
     }
 
     /**
-     * 设置元素文本内容
-     * @param {string} elementId - 元素ID
-     * @param {string} text - 文本内容
+     * Set element text content
+     * @param {string} elementId - Element ID
+     * @param {string} text - Text content
      */
     setElementText(elementId, text) {
         const element = this.getElement(elementId);
@@ -1094,9 +1094,9 @@ class UIController {
     }
 
     /**
-     * 添加元素CSS类
-     * @param {string} elementId - 元素ID
-     * @param {string} className - CSS类名
+     * Add CSS class to element
+     * @param {string} elementId - Element ID
+     * @param {string} className - CSS class name
      */
     addElementClass(elementId, className) {
         const element = this.getElement(elementId);
@@ -1106,9 +1106,9 @@ class UIController {
     }
 
     /**
-     * 移除元素CSS类
-     * @param {string} elementId - 元素ID
-     * @param {string} className - CSS类名
+     * Remove CSS class from element
+     * @param {string} elementId - Element ID
+     * @param {string} className - CSS class name
      */
     removeElementClass(elementId, className) {
         const element = this.getElement(elementId);
@@ -1118,8 +1118,8 @@ class UIController {
     }
 
     /**
-     * 更新应用状态摘要
-     * @param {boolean} isActive - 是否有活跃的提醒
+     * Update application status summary
+     * @param {boolean} isActive - Whether any reminder is active
      */
     updateAppStatusSummary(isActive) {
         if (!this.elements.appStatusIndicator || !this.elements.appStatusText) {
@@ -1136,9 +1136,9 @@ class UIController {
     }
 
     /**
-     * 更新下次提醒时间
+     * Update next reminder time
      * @param {string} type - 'water' | 'posture'
-     * @param {Date|null} nextTime - 下次提醒时间
+     * @param {Date|null} nextTime - Next reminder time
      */
     updateNextReminderTime(type, nextTime) {
         const nextTimeElement = this.elements[`${type}NextTime`];
@@ -1156,8 +1156,8 @@ class UIController {
     }
 
     /**
-     * 更新活动状态
-     * @param {boolean} isActive - 用户是否活跃
+     * Update activity status
+     * @param {boolean} isActive - Whether user is active
      */
     updateActivityStatus(isActive) {
         if (!this.elements.activityStatusValue) {
@@ -1174,8 +1174,8 @@ class UIController {
     }
 
     /**
-     * 更新健康评分
-     * @param {number} waterCompletionRate - 喝水完成率 (0-1)
+     * Update health score
+     * @param {number} waterCompletionRate - Water reminder completion rate (0-1)
      * @param {number} postureCompletionRate - Standup reminder completion rate (0-1)
      */
     updateHealthScore(waterCompletionRate, postureCompletionRate) {
@@ -1183,10 +1183,10 @@ class UIController {
             return;
         }
 
-        // 简单计算健康评分 (满分100)
+        // Simple health score calculation (max 100)
         const score = Math.round((waterCompletionRate * 0.5 + postureCompletionRate * 0.5) * 100);
 
-        // 根据分数设置不同颜色
+        // Set different colors based on score
         let scoreClass = '';
         if (score >= 80) {
             scoreClass = 'score-excellent';
@@ -1198,15 +1198,15 @@ class UIController {
             scoreClass = 'score-poor';
         }
 
-        // 移除所有可能的分数类
+        // Remove all possible score classes
         this.elements.healthScore.classList.remove(
             'score-excellent', 'score-good', 'score-average', 'score-poor'
         );
 
-        // 添加当前分数类
+        // Add current score class
         this.elements.healthScore.classList.add(scoreClass);
 
-        // 设置分数文本
+        // Set score text
         this.elements.healthScore.textContent = score;
     }
 }
