@@ -283,6 +283,8 @@ body {
 .next-reminder-time {
     font-weight: 500;
     color: var(--text-primary);
+    min-width: 150px; /* Make wider to fit "XX hours XX minutes" format */
+    display: inline-block; /* Ensure the width is applied */
 }
 
 .activity-status {

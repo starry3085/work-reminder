@@ -825,7 +825,7 @@ class UIController {
      */
     updateTimeDisplay(element, timeRemaining, type) {
         if (!element) return;
-        
+
         // Format time as "XX hours XX minutes" or "XX minutes"
         element.textContent = this.formatTime(timeRemaining);
     }
@@ -1181,11 +1181,33 @@ class UIController {
         }
 
         if (nextTime && nextTime instanceof Date) {
-            const hours = nextTime.getHours().toString().padStart(2, '0');
-            const minutes = nextTime.getMinutes().toString().padStart(2, '0');
-            nextTimeElement.textContent = `${hours}:${minutes}`;
+            // Get the interval from settings
+            const settings = this.getSettingsFromUI();
+            const intervalMinutes = type === 'water' ? settings.water.interval : settings.posture.interval;
+
+            // Convert to hours and minutes format
+            const hours = Math.floor(intervalMinutes / 60);
+            const minutes = intervalMinutes % 60;
+
+            if (hours > 0) {
+                nextTimeElement.textContent = `${hours} hours ${minutes} minutes`;
+            } else {
+                nextTimeElement.textContent = `${minutes} minutes`;
+            }
         } else {
-            nextTimeElement.textContent = '--:--';
+            // Get the interval from settings
+            const settings = this.getSettingsFromUI();
+            const intervalMinutes = type === 'water' ? settings.water.interval : settings.posture.interval;
+
+            // Convert to hours and minutes format
+            const hours = Math.floor(intervalMinutes / 60);
+            const minutes = intervalMinutes % 60;
+
+            if (hours > 0) {
+                nextTimeElement.textContent = `${hours} hours ${minutes} minutes`;
+            } else {
+                nextTimeElement.textContent = `${minutes} minutes`;
+            }
         }
     }
 
