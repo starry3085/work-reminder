@@ -456,7 +456,11 @@ class UIController {
         }
 
         // Update status text
-        statusElement.textContent = status.status || (status.isActive ? 'Active' : 'Inactive');
+        let statusText = status.status || (status.isActive ? 'Active' : 'Inactive');
+        if (statusText === 'started') {
+            statusText = 'Active';
+        }
+        statusElement.textContent = statusText;
 
         // Update status badge
         if (statusBadge) {
@@ -798,16 +802,16 @@ class UIController {
 
     /**
      * Format time display
-     * @param {number} seconds - Seconds
+     * @param {number} timeRemaining - Time remaining in milliseconds
      * @returns {string} Formatted time string
      * @private
      */
-    formatTime(seconds) {
-        if (seconds <= 0) return '';
+    formatTime(timeRemaining) {
+        if (timeRemaining <= 0) return '';
 
+        const seconds = Math.floor(timeRemaining / 1000);
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
 
         if (hours > 0) {
             return `${hours} hours ${minutes} minutes`;
@@ -850,93 +854,7 @@ class UIController {
         }
     }
 
-    /**
-     * Update time display with editable functionality
-     * @param {HTMLElement} timeElement - Time display element
-     * @param {number} timeRemaining - Time remaining in milliseconds
-     * @param {string} type - Reminder type ('water' | 'posture')
-     * @private
-     */
-    updateTimeDisplay(timeElement, timeRemaining, type) {
-        const seconds = Math.floor(timeRemaining / 1000);
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
 
-        // Create editable time display
-        if (!timeElement.querySelector('.editable-time')) {
-            this.createEditableTimeDisplay(timeElement, type);
-        }
-
-        const hourInput = timeElement.querySelector('.time-hour');
-        const minuteInput = timeElement.querySelector('.time-minute');
-
-        if (hourInput && minuteInput) {
-            hourInput.value = hours.toString().padStart(2, '0');
-            minuteInput.value = minutes.toString().padStart(2, '0');
-        }
-    }
-
-    /**
-     * Create editable time display
-     * @param {HTMLElement} timeElement - Time display element
-     * @param {string} type - Reminder type
-     * @private
-     */
-    createEditableTimeDisplay(timeElement, type) {
-        timeElement.innerHTML = `
-            <div class="editable-time">
-                <input type="number" class="time-hour" min="0" max="23" value="00">
-                <span class="time-separator">:</span>
-                <input type="number" class="time-minute" min="0" max="59" value="00">
-                <button class="time-update-btn" data-type="${type}">Update</button>
-            </div>
-        `;
-
-        // Add event listeners for time update
-        const updateBtn = timeElement.querySelector('.time-update-btn');
-        const hourInput = timeElement.querySelector('.time-hour');
-        const minuteInput = timeElement.querySelector('.time-minute');
-
-        if (updateBtn) {
-            updateBtn.addEventListener('click', () => {
-                this.handleTimeUpdate(type, hourInput.value, minuteInput.value);
-            });
-        }
-
-        // Format inputs on blur
-        [hourInput, minuteInput].forEach(input => {
-            if (input) {
-                input.addEventListener('blur', () => {
-                    const value = parseInt(input.value) || 0;
-                    const max = input.classList.contains('time-hour') ? 23 : 59;
-                    input.value = Math.min(Math.max(value, 0), max).toString().padStart(2, '0');
-                });
-
-                input.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        updateBtn.click();
-                    }
-                });
-            }
-        });
-    }
-
-    /**
-     * Handle time update
-     * @param {string} type - Reminder type
-     * @param {string} hours - Hours value
-     * @param {string} minutes - Minutes value
-     * @private
-     */
-    handleTimeUpdate(type, hours, minutes) {
-        const totalMinutes = (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
-        if (totalMinutes > 0) {
-            this.triggerEvent('timeUpdate', {
-                type: type,
-                minutes: totalMinutes
-            });
-        }
-    }
 
     /**
      * Update daily progress display
