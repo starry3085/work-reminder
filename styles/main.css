@@ -554,6 +554,37 @@ input[type="number"] {
     -moz-appearance: textfield !important;
 }
 
+/* 针对时间显示中的输入框 */
+.time-hour::-webkit-outer-spin-button,
+.time-hour::-webkit-inner-spin-button,
+.time-minute::-webkit-outer-spin-button,
+.time-minute::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+.time-hour,
+.time-minute {
+    -moz-appearance: textfield !important;
+}
+
+/* 更广泛的选择器，针对所有可能的时间输入框 */
+.editable-time input[type="number"]::-webkit-outer-spin-button,
+.editable-time input[type="number"]::-webkit-inner-spin-button,
+.time-remaining input[type="number"]::-webkit-outer-spin-button,
+.time-remaining input[type="number"]::-webkit-inner-spin-button,
+.card-content input[type="number"]::-webkit-outer-spin-button,
+.card-content input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+.editable-time input[type="number"],
+.time-remaining input[type="number"],
+.card-content input[type="number"] {
+    -moz-appearance: textfield !important;
+}
+
 .setting-item input[type="range"] {
     width: 150px;
     margin-right: 10px;
