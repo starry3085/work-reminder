@@ -523,6 +523,17 @@ body {
     text-align: center;
 }
 
+/* 隐藏时间输入框的上下箭头 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 .setting-item input[type="range"] {
     width: 150px;
     margin-right: 10px;
