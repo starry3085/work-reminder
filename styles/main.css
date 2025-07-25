@@ -526,12 +526,32 @@ body {
 /* 隐藏时间输入框的上下箭头 */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+    -webkit-appearance: none !important;
+    margin: 0 !important;
 }
 
 input[type="number"] {
-    -moz-appearance: textfield;
+    -moz-appearance: textfield !important;
+}
+
+/* 针对特定ID的输入框 */
+#water-interval::-webkit-outer-spin-button,
+#water-interval::-webkit-inner-spin-button,
+#water-target::-webkit-outer-spin-button,
+#water-target::-webkit-inner-spin-button,
+#posture-interval::-webkit-outer-spin-button,
+#posture-interval::-webkit-inner-spin-button,
+#posture-target::-webkit-outer-spin-button,
+#posture-target::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+#water-interval,
+#water-target,
+#posture-interval,
+#posture-target {
+    -moz-appearance: textfield !important;
 }
 
 .setting-item input[type="range"] {
