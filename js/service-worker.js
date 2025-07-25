@@ -1,5 +1,5 @@
 // Service Worker for Office Wellness Reminder
-const CACHE_VERSION = '2';
+const CACHE_VERSION = '3';
 const CACHE_NAME = 'office-wellness-reminder-v' + CACHE_VERSION;
 
 // Resource categories
