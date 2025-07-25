@@ -681,7 +681,7 @@ class UIController {
             },
             posture: {
                 enabled: this.elements.postureEnabled ? this.elements.postureEnabled.checked : true,
-                interval: this.elements.postureInterval ? parseInt(this.elements.postureInterval.value) : 60,
+                interval: this.elements.postureInterval ? parseInt(this.elements.postureInterval.value) : 30,
                 target: this.elements.postureTarget ? parseInt(this.elements.postureTarget.value) : 8,
                 activityDetection: this.elements.activityDetection ? this.elements.activityDetection.checked : true
             },
@@ -725,10 +725,10 @@ class UIController {
                 this.elements.postureEnabled.checked = settings.posture.enabled !== false;
             }
             if (this.elements.postureInterval) {
-                this.elements.postureInterval.value = settings.posture.interval || 60;
+                this.elements.postureInterval.value = settings.posture.interval || 30;
             }
             if (this.elements.postureIntervalSlider) {
-                this.elements.postureIntervalSlider.value = settings.posture.interval || 60;
+                this.elements.postureIntervalSlider.value = settings.posture.interval || 30;
             }
             if (this.elements.postureTarget) {
                 this.elements.postureTarget.value = settings.posture.target || 8;
@@ -814,9 +814,9 @@ class UIController {
         const minutes = Math.floor((seconds % 3600) / 60);
 
         if (hours > 0) {
-            return `${hours} hours ${minutes} minutes`;
+            return `${hours} hours ${minutes} mins`;
         } else {
-            return `${minutes} minutes`;
+            return `${minutes} mins`;
         }
     }
 
@@ -1108,9 +1108,9 @@ class UIController {
             const minutes = intervalMinutes % 60;
 
             if (hours > 0) {
-                nextTimeElement.textContent = `${hours} hours ${minutes} minutes`;
+                nextTimeElement.textContent = `${hours} hours ${minutes} mins`;
             } else {
-                nextTimeElement.textContent = `${minutes} minutes`;
+                nextTimeElement.textContent = `${minutes} mins`;
             }
         } else {
             // Get the interval from settings
@@ -1122,9 +1122,9 @@ class UIController {
             const minutes = intervalMinutes % 60;
 
             if (hours > 0) {
-                nextTimeElement.textContent = `${hours} hours ${minutes} minutes`;
+                nextTimeElement.textContent = `${hours} hours ${minutes} mins`;
             } else {
-                nextTimeElement.textContent = `${minutes} minutes`;
+                nextTimeElement.textContent = `${minutes} mins`;
             }
         }
     }
