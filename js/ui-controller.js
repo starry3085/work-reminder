@@ -218,6 +218,9 @@ class UIController {
                 if (this.elements.waterIntervalDisplay) {
                     this.elements.waterIntervalDisplay.value = this.elements.waterIntervalSlider.value;
                 }
+                // Trigger interval change event for real-time updates
+                const value = parseInt(this.elements.waterIntervalSlider.value);
+                this.triggerEvent('waterIntervalChanged', { interval: value });
             });
 
             this.elements.waterInterval.addEventListener('change', () => {
@@ -225,6 +228,9 @@ class UIController {
                 if (this.elements.waterIntervalDisplay) {
                     this.elements.waterIntervalDisplay.value = this.elements.waterInterval.value;
                 }
+                // Trigger interval change event
+                const value = parseInt(this.elements.waterInterval.value);
+                this.triggerEvent('waterIntervalChanged', { interval: value });
             });
         }
 
@@ -234,6 +240,9 @@ class UIController {
                 if (this.elements.postureIntervalDisplay) {
                     this.elements.postureIntervalDisplay.value = this.elements.postureIntervalSlider.value;
                 }
+                // Trigger interval change event for real-time updates
+                const value = parseInt(this.elements.postureIntervalSlider.value);
+                this.triggerEvent('postureIntervalChanged', { interval: value });
             });
 
             this.elements.postureInterval.addEventListener('change', () => {
@@ -241,6 +250,9 @@ class UIController {
                 if (this.elements.postureIntervalDisplay) {
                     this.elements.postureIntervalDisplay.value = this.elements.postureInterval.value;
                 }
+                // Trigger interval change event
+                const value = parseInt(this.elements.postureInterval.value);
+                this.triggerEvent('postureIntervalChanged', { interval: value });
             });
         }
 
@@ -248,7 +260,7 @@ class UIController {
         if (this.elements.waterIntervalDisplay) {
             this.elements.waterIntervalDisplay.addEventListener('change', () => {
                 const value = parseInt(this.elements.waterIntervalDisplay.value);
-                if (value >= 5 && value <= 120) {
+                if (value >= 1 && value <= 60) {
                     if (this.elements.waterInterval) {
                         this.elements.waterInterval.value = value;
                     }
@@ -257,8 +269,22 @@ class UIController {
                     }
                     this.triggerEvent('waterIntervalChanged', { interval: value });
                 } else {
-                    // Reset to previous valid value
-                    this.elements.waterIntervalDisplay.value = this.elements.waterInterval ? this.elements.waterInterval.value : 30;
+                    // Reset to valid range
+                    let validValue = 30; // default
+                    if (value < 1) {
+                        validValue = 1; // minimum
+                    } else if (value > 60) {
+                        validValue = 60; // maximum
+                    }
+
+                    this.elements.waterIntervalDisplay.value = validValue;
+                    if (this.elements.waterInterval) {
+                        this.elements.waterInterval.value = validValue;
+                    }
+                    if (this.elements.waterIntervalSlider) {
+                        this.elements.waterIntervalSlider.value = validValue;
+                    }
+                    this.triggerEvent('waterIntervalChanged', { interval: validValue });
                 }
             });
         }
@@ -266,7 +292,7 @@ class UIController {
         if (this.elements.postureIntervalDisplay) {
             this.elements.postureIntervalDisplay.addEventListener('change', () => {
                 const value = parseInt(this.elements.postureIntervalDisplay.value);
-                if (value >= 15 && value <= 120) {
+                if (value >= 1 && value <= 60) {
                     if (this.elements.postureInterval) {
                         this.elements.postureInterval.value = value;
                     }
@@ -275,8 +301,22 @@ class UIController {
                     }
                     this.triggerEvent('postureIntervalChanged', { interval: value });
                 } else {
-                    // Reset to previous valid value
-                    this.elements.postureIntervalDisplay.value = this.elements.postureInterval ? this.elements.postureInterval.value : 30;
+                    // Reset to valid range
+                    let validValue = 30; // default
+                    if (value < 1) {
+                        validValue = 1; // minimum
+                    } else if (value > 60) {
+                        validValue = 60; // maximum
+                    }
+
+                    this.elements.postureIntervalDisplay.value = validValue;
+                    if (this.elements.postureInterval) {
+                        this.elements.postureInterval.value = validValue;
+                    }
+                    if (this.elements.postureIntervalSlider) {
+                        this.elements.postureIntervalSlider.value = validValue;
+                    }
+                    this.triggerEvent('postureIntervalChanged', { interval: validValue });
                 }
             });
         }

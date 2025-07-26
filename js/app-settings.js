@@ -270,8 +270,8 @@ class AppSettings {
             // 验证水提醒设置
             if (settings.water) {
                 if (typeof settings.water.interval !== 'number' || 
-                    settings.water.interval < 5 || 
-                    settings.water.interval > 120) {
+                    settings.water.interval < 1 || 
+                    settings.water.interval > 60) {
                     console.warn('无效的水提醒间隔设置');
                     return false;
                 }
@@ -287,8 +287,8 @@ class AppSettings {
             // 验证久坐提醒设置
             if (settings.posture) {
                 if (typeof settings.posture.interval !== 'number' || 
-                    settings.posture.interval < 15 || 
-                    settings.posture.interval > 120) {
+                    settings.posture.interval < 1 || 
+                    settings.posture.interval > 60) {
                     console.warn('无效的久坐提醒间隔设置');
                     return false;
                 }

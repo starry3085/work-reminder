@@ -38,7 +38,7 @@
                         <div class="status-info">
                             <span class="next-reminder-label">Remind every:</span>
                             <div class="time-remaining" id="water-time">
-                                <input type="number" id="water-interval-display" min="5" max="120" value="30" class="interval-input"> mins
+                                <input type="number" id="water-interval-display" min="1" max="60" value="30" class="interval-input"> mins
                             </div>
                         </div>
                         <div class="daily-stats" id="water-stats">
@@ -66,7 +66,7 @@
                         <div class="status-info">
                             <span class="next-reminder-label">Remind every:</span>
                             <div class="time-remaining" id="posture-time">
-                                <input type="number" id="posture-interval-display" min="15" max="120" value="30" class="interval-input"> mins
+                                <input type="number" id="posture-interval-display" min="1" max="60" value="30" class="interval-input"> mins
                             </div>
                         </div>
                         <div class="daily-stats" id="posture-stats">
@@ -142,9 +142,9 @@
                     <div class="setting-item">
                         <label for="water-interval">Reminder Interval</label>
                         <div class="setting-control">
-                            <input type="range" id="water-interval-slider" min="5" max="120" value="30" step="5">
+                            <input type="range" id="water-interval-slider" min="1" max="60" value="30" step="1">
                             <div class="range-value">
-                                <input type="number" id="water-interval" min="5" max="120" value="30" style="width: 90px;"> minutes
+                                <input type="number" id="water-interval" min="1" max="60" value="30" style="width: 90px;"> minutes
                             </div>
                         </div>
                     </div>
@@ -171,9 +171,9 @@
                     <div class="setting-item">
                         <label for="posture-interval">Reminder Interval</label>
                         <div class="setting-control">
-                            <input type="range" id="posture-interval-slider" min="15" max="120" value="30" step="5">
+                            <input type="range" id="posture-interval-slider" min="1" max="60" value="30" step="1">
                             <div class="range-value">
-                                <input type="number" id="posture-interval" min="15" max="120" value="30" style="width: 90px;"> minutes
+                                <input type="number" id="posture-interval" min="1" max="60" value="30" style="width: 90px;"> minutes
                             </div>
                         </div>
                     </div>
