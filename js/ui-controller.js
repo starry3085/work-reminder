@@ -1074,47 +1074,7 @@ class UIController {
         }
     }
 
-    /**
-     * Update next reminder time
-     * @param {string} type - 'water' | 'posture'
-     * @param {Date|null} nextTime - Next reminder time
-     */
-    updateNextReminderTime(type, nextTime) {
-        const nextTimeElement = this.elements[`${type}NextTime`];
-        if (!nextTimeElement) {
-            return;
-        }
 
-        if (nextTime && nextTime instanceof Date) {
-            // Get the interval from settings
-            const settings = this.getSettingsFromUI();
-            const intervalMinutes = type === 'water' ? settings.water.interval : settings.posture.interval;
-
-            // Convert to hours and minutes format
-            const hours = Math.floor(intervalMinutes / 60);
-            const minutes = intervalMinutes % 60;
-
-            if (hours > 0) {
-                nextTimeElement.textContent = `${hours} hours ${minutes} mins`;
-            } else {
-                nextTimeElement.textContent = `${minutes} mins`;
-            }
-        } else {
-            // Get the interval from settings
-            const settings = this.getSettingsFromUI();
-            const intervalMinutes = type === 'water' ? settings.water.interval : settings.posture.interval;
-
-            // Convert to hours and minutes format
-            const hours = Math.floor(intervalMinutes / 60);
-            const minutes = intervalMinutes % 60;
-
-            if (hours > 0) {
-                nextTimeElement.textContent = `${hours} hours ${minutes} mins`;
-            } else {
-                nextTimeElement.textContent = `${minutes} mins`;
-            }
-        }
-    }
 
 
 
