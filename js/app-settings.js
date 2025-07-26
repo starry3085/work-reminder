@@ -19,7 +19,7 @@ class AppSettings {
             },
             posture: {
                 enabled: true,
-                interval: 60, // 分钟
+                interval: 30, // 分钟
                 sound: true,
                 lastReminder: null,
                 activityThreshold: 5, // 分钟

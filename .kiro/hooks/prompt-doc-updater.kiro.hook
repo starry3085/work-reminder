@@ -1,20 +1,13 @@
 {
   "enabled": true,
   "name": "PROMPT Documentation Updater",
-  "description": "Monitors PROMPT files and automatically checks if related documentation needs to be updated, then performs the updates",
-  "version": "1",
+  "description": "When user sends a prompt/message, automatically checks if related documentation needs to be updated",
+  "version": "2",
   "when": {
-    "type": "fileEdited",
-    "patterns": [
-      "*PROMPT*",
-      "*prompt*",
-      "*.prompt",
-      "PROMPT.*",
-      "prompt.*"
-    ]
+    "type": "userMessage"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "A PROMPT file has been modified. Please check if any related documentation files (README.md, DEPLOYMENT.md, or other documentation) need to be updated based on the changes made to the PROMPT file. If updates are needed, please update the relevant documentation files accordingly. Focus on keeping documentation synchronized with the PROMPT changes."
+    "prompt": "The user has sent a message/prompt. After completing the user's request, please check if any related documentation files (README.md, API documentation, user guides, or other project documentation) need to be updated based on the changes made or information discussed. If updates are needed, please update the relevant documentation files accordingly to keep them synchronized with the current state of the project. Also, if significant code changes were made, consider updating any relevant comments or inline documentation."
   }
 }

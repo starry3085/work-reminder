@@ -1,30 +1,30 @@
 /**
- * 喝水提醒类 - 专门处理喝水提醒的逻辑
- * 继承自ReminderManager，添加喝水特定的功能
+ * Water Reminder Class - Handles water reminder logic
+ * Extends ReminderManager, adds water-specific functionality
  */
 class WaterReminder extends ReminderManager {
     /**
-     * 创建喝水提醒实例
-     * @param {Object} settings - 喝水提醒设置
-     * @param {NotificationService} notificationService - 通知服务实例
+     * Create water reminder instance
+     * @param {Object} settings - Water reminder settings
+     * @param {NotificationService} notificationService - Notification service instance
      */
     constructor(settings, notificationService) {
         super('water', settings, notificationService);
         
-        // 喝水特定的状态
+        // Water-specific state
         this.dailyWaterCount = 0;
-        this.dailyGoal = 8; // 每日喝水目标（杯）
+        this.dailyGoal = 8; // Daily water goal (glasses)
         this.lastDrinkTime = null;
-        this.drinkHistory = []; // 今日喝水记录
+        this.drinkHistory = []; // Today's water intake records
         
-        // 从本地存储加载今日数据
+        // Load today's data from local storage
         this.loadDailyData();
         
-        console.log('喝水提醒器已创建');
+        console.log('Water reminder created');
     }
 
     /**
-     * 加载今日喝水数据
+     * Load today's water intake data
      * @private
      */
     loadDailyData() {
@@ -35,24 +35,24 @@ class WaterReminder extends ReminderManager {
             if (savedData) {
                 const data = JSON.parse(savedData);
                 
-                // 检查是否是今天的数据
+                // Check if data is from today
                 if (data.date === today) {
                     this.dailyWaterCount = data.count || 0;
                     this.drinkHistory = data.history || [];
                     this.lastDrinkTime = data.lastDrinkTime || null;
                 } else {
-                    // 新的一天，重置数据
+                    // New day, reset data
                     this.resetDailyData();
                 }
             }
         } catch (error) {
-            console.warn('加载今日喝水数据失败:', error);
+            console.warn('Failed to load today\'s water data:', error);
             this.resetDailyData();
         }
     }
 
     /**
-     * 保存今日喝水数据
+     * Save today's water intake data
      * @private
      */
     saveDailyData() {
@@ -67,12 +67,12 @@ class WaterReminder extends ReminderManager {
             
             localStorage.setItem('waterReminder_dailyData', JSON.stringify(data));
         } catch (error) {
-            console.warn('保存今日喝水数据失败:', error);
+            console.warn('Failed to save today\'s water data:', error);
         }
     }
 
     /**
-     * 重置今日数据
+     * Reset today's data
      * @private
      */
     resetDailyData() {
@@ -83,13 +83,13 @@ class WaterReminder extends ReminderManager {
     }
 
     /**
-     * 用户已喝水确认
-     * @param {number} amount - 喝水量（毫升），可选
+     * User confirms water intake
+     * @param {number} amount - Water amount (ml), optional
      */
     confirmDrink(amount = 250) {
         const now = Date.now();
         
-        // 记录喝水
+        // Record water intake
         this.dailyWaterCount++;
         this.lastDrinkTime = now;
         this.drinkHistory.push({
@@ -97,19 +97,19 @@ class WaterReminder extends ReminderManager {
             amount: amount
         });
         
-        // 更新最后提醒时间
+        // Update last reminder time
         this.settings.lastReminder = now;
         
-        // 保存数据
+        // Save data
         this.saveDailyData();
         
-        // 重置计时器
+        // Reset timer
         this.reset();
         
-        // 显示确认消息
+        // Show confirmation message
         this.showDrinkConfirmation();
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'drink-confirmed',
             isActive: true,
@@ -120,39 +120,39 @@ class WaterReminder extends ReminderManager {
             lastDrinkTime: this.lastDrinkTime
         });
         
-        console.log(`已确认喝水，今日第${this.dailyWaterCount}杯`);
+        console.log(`Water confirmed, ${this.dailyWaterCount} glasses today`);
     }
 
     /**
-     * 显示喝水确认消息
+     * Show water confirmation message
      * @private
      */
     showDrinkConfirmation() {
         const progress = Math.min(this.dailyWaterCount / this.dailyGoal, 1);
         const progressPercent = Math.round(progress * 100);
         
-        let message = `很好！今日已喝水 ${this.dailyWaterCount} 杯`;
+        let message = `Great! You've had ${this.dailyWaterCount} glasses today`;
         
         if (this.dailyWaterCount >= this.dailyGoal) {
-            message += `\n🎉 恭喜！您已完成今日喝水目标！`;
+            message += `\n🎉 Congratulations! You've reached your daily water goal!`;
         } else {
             const remaining = this.dailyGoal - this.dailyWaterCount;
-            message += `\n还需 ${remaining} 杯即可完成今日目标 (${progressPercent}%)`;
+            message += `\nNeed ${remaining} more glasses to reach today's goal (${progressPercent}%)`;
         }
         
-        // 显示页面内通知
+        // Show in-page notification
         this.notificationService.showInPageAlert('success', {
-            title: '💧 喝水确认',
+            title: '💧 Water Confirmed',
             message: message,
             duration: 3000
         });
         
-        // 如果完成目标，显示庆祝通知
+        // If goal reached, show celebration notification
         if (this.dailyWaterCount === this.dailyGoal) {
             setTimeout(() => {
                 this.notificationService.showInPageAlert('celebration', {
-                    title: '🎉 目标达成！',
-                    message: '恭喜您完成今日喝水目标！保持良好的习惯！',
+                    title: '🎉 Goal Reached!',
+                    message: 'Congratulations on reaching your daily water goal! Keep up the good habits!',
                     duration: 5000
                 });
             }, 1000);
@@ -160,49 +160,49 @@ class WaterReminder extends ReminderManager {
     }
 
     /**
-     * 触发喝水提醒
+     * Trigger water reminder
      * @private
      */
     triggerReminder() {
         if (!this.isActive) return;
         
-        const title = '💧 喝水时间到了！';
-        let message = '长时间工作容易脱水，记得补充水分哦！';
+        const title = '💧 Time to Hydrate!';
+        let message = 'Long work sessions can lead to dehydration, remember to drink water!';
         
-        // 根据今日进度调整消息
+        // Adjust message based on today's progress
         if (this.dailyWaterCount > 0) {
             const remaining = Math.max(0, this.dailyGoal - this.dailyWaterCount);
             if (remaining > 0) {
-                message += `\n今日已喝 ${this.dailyWaterCount} 杯，还需 ${remaining} 杯完成目标`;
+                message += `\nToday: ${this.dailyWaterCount} glasses, need ${remaining} more to reach goal`;
             } else {
-                message = '继续保持良好的喝水习惯！';
+                message = 'Keep up the great hydration habits!';
             }
         }
         
-        // 显示通知，提供确认和稍后提醒选项
+        // Show notification with confirm and snooze options
         this.notificationService.showNotification(
             'water',
             title,
             message,
-            () => this.confirmDrink(), // 确认喝水回调
-            () => this.snooze(),       // 稍后提醒回调
+            () => this.confirmDrink(), // Confirm drink callback
+            () => this.snooze(),       // Snooze callback
             {
                 actions: [
                     {
                         action: 'drink',
-                        title: '已喝水',
+                        title: 'I Drank Water',
                         icon: '💧'
                     },
                     {
                         action: 'snooze',
-                        title: '5分钟后提醒',
+                        title: 'Remind in 5 min',
                         icon: '⏰'
                     }
                 ]
             }
         );
         
-        // 触发状态变化回调
+        // Trigger status change callback
         this.triggerStatusChange({
             status: 'triggered',
             isActive: true,
@@ -212,19 +212,19 @@ class WaterReminder extends ReminderManager {
             dailyGoal: this.dailyGoal
         });
         
-        // 自动重置计时器（如果用户没有手动确认）
+        // Auto-reset timer (if user doesn't manually confirm)
         setTimeout(() => {
             if (this.isActive && this.timeRemaining === 0) {
                 this.reset();
             }
-        }, 60000); // 1分钟后自动重置
+        }, 60000); // Auto-reset after 1 minute
         
-        console.log('喝水提醒已触发');
+        console.log('Water reminder triggered');
     }
 
     /**
-     * 获取今日喝水统计
-     * @returns {Object} 今日喝水统计信息
+     * Get today's water intake statistics
+     * @returns {Object} Today's water intake statistics
      */
     getDailyStats() {
         const totalAmount = this.drinkHistory.reduce((sum, record) => sum + record.amount, 0);
@@ -243,60 +243,60 @@ class WaterReminder extends ReminderManager {
     }
 
     /**
-     * 设置每日目标
-     * @param {number} goal - 每日喝水目标（杯数）
+     * Set daily goal
+     * @param {number} goal - Daily water goal (glasses)
      */
     setDailyGoal(goal) {
-        if (goal > 0 && goal <= 20) { // 合理范围
+        if (goal > 0 && goal <= 20) { // Reasonable range
             this.dailyGoal = goal;
             this.saveDailyData();
             
-            console.log(`每日喝水目标已设置为 ${goal} 杯`);
+            console.log(`Daily water goal set to ${goal} glasses`);
         } else {
-            console.warn('每日目标应在1-20杯之间');
+            console.warn('Daily goal should be between 1-20 glasses');
         }
     }
 
     /**
-     * 获取喝水建议
-     * @returns {string} 个性化的喝水建议
+     * Get drinking suggestion
+     * @returns {string} Personalized drinking suggestion
      */
     getDrinkingSuggestion() {
         const now = new Date();
         const hour = now.getHours();
         const progress = this.dailyWaterCount / this.dailyGoal;
         
-        // 根据时间和进度给出建议
+        // Give suggestions based on time and progress
         if (hour < 9) {
-            return '早晨起床后喝一杯温水，有助于唤醒身体机能';
+            return 'Drink a glass of warm water after waking up to help activate your body functions';
         } else if (hour < 12) {
             if (progress < 0.3) {
-                return '上午工作时间，记得多补充水分保持精力充沛';
+                return 'During morning work hours, remember to drink more water to stay energized';
             } else {
-                return '上午的喝水量不错，继续保持！';
+                return 'Your morning water intake is good, keep it up!';
             }
         } else if (hour < 14) {
-            return '午餐时间，适量饮水有助于消化';
+            return 'Lunchtime - moderate water intake helps with digestion';
         } else if (hour < 18) {
             if (progress < 0.6) {
-                return '下午容易疲劳，多喝水有助于保持注意力';
+                return 'Afternoons can be tiring, drinking more water helps maintain focus';
             } else {
-                return '下午的水分补充很及时！';
+                return 'Your afternoon hydration is timely!';
             }
         } else if (hour < 20) {
             if (progress < 0.8) {
-                return '晚餐前适量补水，但不要过量影响食欲';
+                return 'Moderate water intake before dinner, but not too much to affect appetite';
             } else {
-                return '今日喝水量很棒，晚上适量即可';
+                return 'Today\'s water intake is great, moderate amounts in the evening are fine';
             }
         } else {
-            return '睡前1-2小时减少饮水，避免影响睡眠质量';
+            return 'Reduce water intake 1-2 hours before bed to avoid affecting sleep quality';
         }
     }
 
     /**
-     * 获取当前状态（重写父类方法）
-     * @returns {Object} 当前状态信息
+     * Get current status (override parent method)
+     * @returns {Object} Current status information
      */
     getCurrentStatus() {
         const baseStatus = super.getCurrentStatus();
@@ -309,12 +309,12 @@ class WaterReminder extends ReminderManager {
     }
 
     /**
-     * 重置提醒计时器（重写父类方法，添加喝水特定逻辑）
+     * Reset reminder timer (override parent method, add water-specific logic)
      */
     reset() {
         super.reset();
         
-        // 检查是否需要重置每日数据（新的一天）
+        // Check if daily data needs to be reset (new day)
         const today = new Date().toDateString();
         const savedData = localStorage.getItem('waterReminder_dailyData');
         
@@ -325,26 +325,26 @@ class WaterReminder extends ReminderManager {
                     this.resetDailyData();
                 }
             } catch (error) {
-                console.warn('检查日期数据失败:', error);
+                console.warn('Failed to check date data:', error);
             }
         }
     }
 
     /**
-     * 销毁喝水提醒器（重写父类方法）
+     * Destroy water reminder (override parent method)
      */
     destroy() {
-        // 保存数据
+        // Save data
         this.saveDailyData();
         
-        // 调用父类销毁方法
+        // Call parent destroy method
         super.destroy();
         
-        console.log('喝水提醒器已销毁');
+        console.log('Water reminder destroyed');
     }
 }
 
-// 导出类供其他模块使用
+// Export class for use by other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = WaterReminder;
 }

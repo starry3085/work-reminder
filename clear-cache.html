@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Cache</title>
+</head>
+<body>
+    <h1>Clear Application Cache</h1>
+    <button onclick="clearCache()">Clear All Caches</button>
+    <div id="status"></div>
+
+    <script>
+        async function clearCache() {
+            const status = document.getElementById('status');
+            status.innerHTML = 'Clearing caches...';
+            
+            try {
+                // Clear all caches
+                const cacheNames = await caches.keys();
+                await Promise.all(
+                    cacheNames.map(cacheName => caches.delete(cacheName))
+                );
+                
+                // Unregister service worker
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(
+                        registrations.map(registration => registration.unregister())
+                    );
+                }
+                
+                // Clear local storage
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                status.innerHTML = 'Cache cleared successfully! Please refresh the main page.';
+            } catch (error) {
+                status.innerHTML = 'Error clearing cache: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

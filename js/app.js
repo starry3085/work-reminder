@@ -314,14 +314,14 @@ class OfficeWellnessApp {
                     this.uiController.updateReminderStatus('posture', status);
                 }
                 
-                // 如果是自动暂停或恢复，显示提示
+                // If auto-pause or resume, show notification
                 if (status.isAuto) {
                     const message = status.status === 'paused' 
-                        ? '检测到您已离开，久坐提醒已自动暂停' 
-                        : '检测到您已返回，久坐提醒已自动恢复';
+                        ? 'Detected you are away, standup reminder auto-paused' 
+                        : 'Detected you have returned, standup reminder auto-resumed';
                     
                     this.notificationService.showInPageAlert('info', {
-                        title: '活动检测',
+                        title: 'Activity Detection',
                         message: message
                     });
                 }
@@ -451,20 +451,20 @@ class OfficeWellnessApp {
                 this.postureReminder.updateSettings(newSettings.posture);
             }
             
-            // 显示保存成功提示
+            // Show save success notification
             this.notificationService.showInPageAlert('success', {
-                title: '设置已保存',
-                message: '您的设置已成功保存并应用'
+                title: 'Settings Saved',
+                message: 'Your settings have been successfully saved and applied'
             });
             
             // 关闭设置面板
             this.uiController.hideSettings();
             
         } catch (error) {
-            console.error('保存设置失败:', error);
+            console.error('Failed to save settings:', error);
             this.notificationService.showInPageAlert('error', {
-                title: '保存失败',
-                message: '设置保存失败，请重试'
+                title: 'Save Failed',
+                message: 'Failed to save settings, please try again'
             });
         }
     }
@@ -489,17 +489,17 @@ class OfficeWellnessApp {
                 this.postureReminder.updateSettings(defaultSettings.posture);
             }
             
-            // 显示重置成功提示
+            // Show reset success notification
             this.notificationService.showInPageAlert('success', {
-                title: '设置已重置',
-                message: '所有设置已恢复为默认值'
+                title: 'Settings Reset',
+                message: 'All settings have been restored to default values'
             });
             
         } catch (error) {
-            console.error('重置设置失败:', error);
+            console.error('Failed to reset settings:', error);
             this.notificationService.showInPageAlert('error', {
-                title: '重置失败',
-                message: '设置重置失败，请重试'
+                title: 'Reset Failed',
+                message: 'Failed to reset settings, please try again'
             });
         }
     }

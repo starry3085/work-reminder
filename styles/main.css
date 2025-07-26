@@ -283,6 +283,8 @@ body {
 .next-reminder-time {
     font-weight: 500;
     color: var(--text-primary);
+    min-width: 180px; /* Make wider to fit "XX hours XX mins" format */
+    display: inline-block; /* Ensure the width is applied */
 }
 
 .activity-status {
@@ -512,13 +514,75 @@ body {
 }
 
 .setting-item input[type="number"] {
-    width: 60px;
+    width: 90px;
     padding: 0.5rem;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     background: var(--background-primary);
     color: var(--text-primary);
     text-align: center;
+}
+
+/* 隐藏时间输入框的上下箭头 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield !important;
+}
+
+/* 针对特定ID的输入框 */
+#water-interval::-webkit-outer-spin-button,
+#water-interval::-webkit-inner-spin-button,
+#water-target::-webkit-outer-spin-button,
+#water-target::-webkit-inner-spin-button,
+#posture-interval::-webkit-outer-spin-button,
+#posture-interval::-webkit-inner-spin-button,
+#posture-target::-webkit-outer-spin-button,
+#posture-target::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+#water-interval,
+#water-target,
+#posture-interval,
+#posture-target {
+    -moz-appearance: textfield !important;
+}
+
+/* 针对时间显示中的输入框 */
+.time-hour::-webkit-outer-spin-button,
+.time-hour::-webkit-inner-spin-button,
+.time-minute::-webkit-outer-spin-button,
+.time-minute::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+.time-hour,
+.time-minute {
+    -moz-appearance: textfield !important;
+}
+
+/* 更广泛的选择器，针对所有可能的时间输入框 */
+.editable-time input[type="number"]::-webkit-outer-spin-button,
+.editable-time input[type="number"]::-webkit-inner-spin-button,
+.time-remaining input[type="number"]::-webkit-outer-spin-button,
+.time-remaining input[type="number"]::-webkit-inner-spin-button,
+.card-content input[type="number"]::-webkit-outer-spin-button,
+.card-content input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+}
+
+.editable-time input[type="number"],
+.time-remaining input[type="number"],
+.card-content input[type="number"] {
+    -moz-appearance: textfield !important;
 }
 
 .setting-item input[type="range"] {

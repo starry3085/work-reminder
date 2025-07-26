@@ -18,6 +18,7 @@
 - **存储**: localStorage API
 - **通知**: Web Notifications API
 - **部署**: GitHub Pages
+- **开发工具**: Kiro AI Assistant with automated documentation updates
 
 ## 项目结构
 
@@ -34,6 +35,9 @@ office-wellness-reminder/
 │   ├── ui-controller.js        # UI控制器
 │   └── app.js                  # 主应用文件
 ├── assets/                # 静态资源
+├── .kiro/                 # Kiro AI Assistant 配置
+│   ├── hooks/             # 自动化钩子
+│   └── specs/             # 项目规格文档
 └── README.md              # 项目说明
 ```
 
@@ -44,6 +48,13 @@ office-wellness-reminder/
 - 可直接部署到 GitHub Pages
 - 使用现代 Web 技术栈
 - 注重用户体验和可访问性
+
+### 开发自动化
+
+项目使用 Kiro AI Assistant 进行开发辅助，包含以下自动化功能：
+- **文档同步**: 自动检测代码变更并更新相关文档
+- **代码注释**: 自动维护内联文档和代码注释的一致性
+- **开发工作流**: 智能提示和代码质量检查
 
 ## 浏览器支持
 
