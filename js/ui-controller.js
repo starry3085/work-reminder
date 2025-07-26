@@ -65,7 +65,6 @@ class UIController {
 
             // Water reminder related
             waterCard: document.getElementById('water-card'),
-            waterStatus: document.getElementById('water-status'),
             waterStatusBadge: document.getElementById('water-status-badge'),
             waterTime: document.getElementById('water-time'),
             waterNextTime: document.getElementById('water-next-time'),
@@ -78,7 +77,6 @@ class UIController {
 
             // Standup reminder related
             postureCard: document.getElementById('posture-card'),
-            postureStatus: document.getElementById('posture-status'),
             postureStatusBadge: document.getElementById('posture-status-badge'),
             postureTime: document.getElementById('posture-time'),
             postureNextTime: document.getElementById('posture-next-time'),
@@ -88,7 +86,7 @@ class UIController {
             postureStats: document.getElementById('posture-stats'),
             postureProgress: document.getElementById('posture-progress'),
             postureCount: document.getElementById('posture-count'),
-            activityStatusValue: document.getElementById('activity-status-value'),
+
 
             // Quick action buttons
             startAllBtn: document.getElementById('start-all-btn'),
@@ -361,8 +359,7 @@ class UIController {
         this.updateNextReminderTime('water', null);
         this.updateNextReminderTime('posture', null);
 
-        // Set activity status
-        this.updateActivityStatus(true);
+
 
         // Set health score
         this.updateHealthScore(0, 0);
@@ -437,14 +434,13 @@ class UIController {
      */
     updateReminderStatus(type, status) {
         const card = this.elements[`${type}Card`];
-        const statusElement = this.elements[`${type}Status`];
         const statusBadge = this.elements[`${type}StatusBadge`];
         const timeElement = this.elements[`${type}Time`];
         const toggleButton = this.elements[`${type}Toggle`];
         const resetButton = this.elements[`${type}Reset`];
         const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'postureActivity'}`];
 
-        if (!card || !statusElement || !timeElement || !toggleButton) {
+        if (!card || !timeElement || !toggleButton) {
             return;
         }
 
@@ -455,12 +451,7 @@ class UIController {
             card.classList.remove('active');
         }
 
-        // Update status text
-        let statusText = status.status || (status.isActive ? 'Active' : 'Inactive');
-        if (statusText === 'started') {
-            statusText = 'Active';
-        }
-        statusElement.textContent = statusText;
+        // Update status text (removed left status display, only keep badge)
 
         // Update status badge
         if (statusBadge) {
@@ -1129,23 +1120,7 @@ class UIController {
         }
     }
 
-    /**
-     * Update activity status
-     * @param {boolean} isActive - Whether user is active
-     */
-    updateActivityStatus(isActive) {
-        if (!this.elements.activityStatusValue) {
-            return;
-        }
 
-        if (isActive) {
-            this.elements.activityStatusValue.textContent = 'Active';
-            this.elements.activityStatusValue.classList.remove('inactive');
-        } else {
-            this.elements.activityStatusValue.textContent = 'Away';
-            this.elements.activityStatusValue.classList.add('inactive');
-        }
-    }
 
     /**
      * Update health score
