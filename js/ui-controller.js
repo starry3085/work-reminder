@@ -67,7 +67,6 @@ class UIController {
             waterCard: document.getElementById('water-card'),
             waterStatusBadge: document.getElementById('water-status-badge'),
             waterTime: document.getElementById('water-time'),
-            waterNextTime: document.getElementById('water-next-time'),
             waterToggle: document.getElementById('water-toggle'),
             waterReset: document.getElementById('water-reset'),
             waterDrink: document.getElementById('waterDrink'),
@@ -79,7 +78,6 @@ class UIController {
             postureCard: document.getElementById('posture-card'),
             postureStatusBadge: document.getElementById('posture-status-badge'),
             postureTime: document.getElementById('posture-time'),
-            postureNextTime: document.getElementById('posture-next-time'),
             postureToggle: document.getElementById('posture-toggle'),
             postureReset: document.getElementById('posture-reset'),
             postureActivity: document.getElementById('postureActivity'),
@@ -355,9 +353,7 @@ class UIController {
         // Set application status summary
         this.updateAppStatusSummary(false);
 
-        // Set next reminder time
-        this.updateNextReminderTime('water', null);
-        this.updateNextReminderTime('posture', null);
+        // Next reminder time elements removed
 
 
 
