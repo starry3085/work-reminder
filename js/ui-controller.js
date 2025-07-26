@@ -515,6 +515,17 @@ class UIController {
     }
 
     /**
+     * Update reminder time display
+     * @param {string} type - 'water' | 'posture'
+     * @param {Object} timeInfo - Time information object
+     */
+    updateReminderTime(type, timeInfo) {
+        // This method is called by reminder managers to update time display
+        // For now, we don't need to do anything special as time is handled in updateReminderStatus
+        console.log(`${type} reminder time updated:`, timeInfo);
+    }
+
+    /**
      * Update reminder status display
      * @param {string} type - 'water' | 'posture'
      * @param {Object} status - Status object
