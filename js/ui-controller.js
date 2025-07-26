@@ -67,7 +67,6 @@ class UIController {
             waterCard: document.getElementById('water-card'),
             waterStatusBadge: document.getElementById('water-status-badge'),
             waterTime: document.getElementById('water-time'),
-            waterNextTime: document.getElementById('water-next-time'),
             waterToggle: document.getElementById('water-toggle'),
             waterReset: document.getElementById('water-reset'),
             waterDrink: document.getElementById('waterDrink'),
@@ -79,7 +78,6 @@ class UIController {
             postureCard: document.getElementById('posture-card'),
             postureStatusBadge: document.getElementById('posture-status-badge'),
             postureTime: document.getElementById('posture-time'),
-            postureNextTime: document.getElementById('posture-next-time'),
             postureToggle: document.getElementById('posture-toggle'),
             postureReset: document.getElementById('posture-reset'),
             postureActivity: document.getElementById('postureActivity'),
@@ -355,9 +353,7 @@ class UIController {
         // Set application status summary
         this.updateAppStatusSummary(false);
 
-        // Set next reminder time
-        this.updateNextReminderTime('water', null);
-        this.updateNextReminderTime('posture', null);
+        // Next reminder time elements removed
 
 
 
@@ -1078,47 +1074,7 @@ class UIController {
         }
     }
 
-    /**
-     * Update next reminder time
-     * @param {string} type - 'water' | 'posture'
-     * @param {Date|null} nextTime - Next reminder time
-     */
-    updateNextReminderTime(type, nextTime) {
-        const nextTimeElement = this.elements[`${type}NextTime`];
-        if (!nextTimeElement) {
-            return;
-        }
 
-        if (nextTime && nextTime instanceof Date) {
-            // Get the interval from settings
-            const settings = this.getSettingsFromUI();
-            const intervalMinutes = type === 'water' ? settings.water.interval : settings.posture.interval;
-
-            // Convert to hours and minutes format
-            const hours = Math.floor(intervalMinutes / 60);
-            const minutes = intervalMinutes % 60;
-
-            if (hours > 0) {
-                nextTimeElement.textContent = `${hours} hours ${minutes} mins`;
-            } else {
-                nextTimeElement.textContent = `${minutes} mins`;
-            }
-        } else {
-            // Get the interval from settings
-            const settings = this.getSettingsFromUI();
-            const intervalMinutes = type === 'water' ? settings.water.interval : settings.posture.interval;
-
-            // Convert to hours and minutes format
-            const hours = Math.floor(intervalMinutes / 60);
-            const minutes = intervalMinutes % 60;
-
-            if (hours > 0) {
-                nextTimeElement.textContent = `${hours} hours ${minutes} mins`;
-            } else {
-                nextTimeElement.textContent = `${minutes} mins`;
-            }
-        }
-    }
 
 
 
