@@ -54,7 +54,7 @@ class OfficeWellnessApp {
             // Load user settings and state
             await this.loadSettingsAndState();
             
-            // Set up event listeners
+            // Set up event listeners (for reminder callbacks)
             this.setupEventListeners();
             
             // Initialize UI

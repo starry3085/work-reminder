@@ -347,7 +347,10 @@ class UIController {
      */
     addEventHandler(elementId, eventType, handler) {
         const element = this.elements[elementId];
-        if (!element) return;
+        if (!element) {
+            console.warn(`Element not found: ${elementId}`);
+            return;
+        }
 
         // Store event handler reference for possible future removal
         if (!this.eventListeners[elementId]) {

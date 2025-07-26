@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Button Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Simple Button Test</h1>
+    
+    <button id="water-toggle" class="btn-primary">Water Start</button>
+    <button id="posture-toggle" class="btn-primary">Posture Start</button>
+    
+    <div class="log" id="log">Click buttons to test...</div>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message) {
+            log.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + message;
+        }
+        
+        // Test if buttons exist and can be clicked
+        const waterBtn = document.getElementById('water-toggle');
+        const postureBtn = document.getElementById('posture-toggle');
+        
+        if (waterBtn) {
+            waterBtn.addEventListener('click', () => {
+                addLog('Water button clicked!');
+            });
+            addLog('Water button found and event listener added');
+        } else {
+            addLog('ERROR: Water button not found');
+        }
+        
+        if (postureBtn) {
+            postureBtn.addEventListener('click', () => {
+                addLog('Posture button clicked!');
+            });
+            addLog('Posture button found and event listener added');
+        } else {
+            addLog('ERROR: Posture button not found');
+        }
+    </script>
+</body>
+</html>
