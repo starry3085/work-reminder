@@ -206,10 +206,17 @@ body {
 .status-info {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
+    gap: 0.5rem;
 }
 
 
+
+.next-reminder-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
 
 .time-remaining {
     font-size: 1.1rem;
@@ -218,6 +225,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-align: right;
 }
 
 .time-remaining .time-icon {
