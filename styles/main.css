@@ -228,6 +228,29 @@ body {
     text-align: right;
 }
 
+.interval-input {
+    width: 50px;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    background: var(--background-primary);
+    text-align: center;
+    transition: var(--transition);
+}
+
+.interval-input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.interval-input:hover {
+    border-color: var(--secondary-color);
+}
+
 .time-remaining .time-icon {
     font-size: 0.9rem;
     opacity: 0.7;
