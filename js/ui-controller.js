@@ -67,6 +67,7 @@ class UIController {
             waterCard: document.getElementById('water-card'),
             waterStatusBadge: document.getElementById('water-status-badge'),
             waterTime: document.getElementById('water-time'),
+            waterIntervalDisplay: document.getElementById('water-interval-display'),
             waterToggle: document.getElementById('water-toggle'),
             waterReset: document.getElementById('water-reset'),
             waterDrink: document.getElementById('waterDrink'),
@@ -78,6 +79,7 @@ class UIController {
             postureCard: document.getElementById('posture-card'),
             postureStatusBadge: document.getElementById('posture-status-badge'),
             postureTime: document.getElementById('posture-time'),
+            postureIntervalDisplay: document.getElementById('posture-interval-display'),
             postureToggle: document.getElementById('posture-toggle'),
             postureReset: document.getElementById('posture-reset'),
             postureActivity: document.getElementById('postureActivity'),
@@ -213,20 +215,69 @@ class UIController {
         if (this.elements.waterIntervalSlider && this.elements.waterInterval) {
             this.elements.waterIntervalSlider.addEventListener('input', () => {
                 this.elements.waterInterval.value = this.elements.waterIntervalSlider.value;
+                if (this.elements.waterIntervalDisplay) {
+                    this.elements.waterIntervalDisplay.value = this.elements.waterIntervalSlider.value;
+                }
             });
 
             this.elements.waterInterval.addEventListener('change', () => {
                 this.elements.waterIntervalSlider.value = this.elements.waterInterval.value;
+                if (this.elements.waterIntervalDisplay) {
+                    this.elements.waterIntervalDisplay.value = this.elements.waterInterval.value;
+                }
             });
         }
 
         if (this.elements.postureIntervalSlider && this.elements.postureInterval) {
             this.elements.postureIntervalSlider.addEventListener('input', () => {
                 this.elements.postureInterval.value = this.elements.postureIntervalSlider.value;
+                if (this.elements.postureIntervalDisplay) {
+                    this.elements.postureIntervalDisplay.value = this.elements.postureIntervalSlider.value;
+                }
             });
 
             this.elements.postureInterval.addEventListener('change', () => {
                 this.elements.postureIntervalSlider.value = this.elements.postureInterval.value;
+                if (this.elements.postureIntervalDisplay) {
+                    this.elements.postureIntervalDisplay.value = this.elements.postureInterval.value;
+                }
+            });
+        }
+
+        // Main display interval input linkage
+        if (this.elements.waterIntervalDisplay) {
+            this.elements.waterIntervalDisplay.addEventListener('change', () => {
+                const value = parseInt(this.elements.waterIntervalDisplay.value);
+                if (value >= 5 && value <= 120) {
+                    if (this.elements.waterInterval) {
+                        this.elements.waterInterval.value = value;
+                    }
+                    if (this.elements.waterIntervalSlider) {
+                        this.elements.waterIntervalSlider.value = value;
+                    }
+                    this.triggerEvent('waterIntervalChanged', { interval: value });
+                } else {
+                    // Reset to previous valid value
+                    this.elements.waterIntervalDisplay.value = this.elements.waterInterval ? this.elements.waterInterval.value : 30;
+                }
+            });
+        }
+
+        if (this.elements.postureIntervalDisplay) {
+            this.elements.postureIntervalDisplay.addEventListener('change', () => {
+                const value = parseInt(this.elements.postureIntervalDisplay.value);
+                if (value >= 15 && value <= 120) {
+                    if (this.elements.postureInterval) {
+                        this.elements.postureInterval.value = value;
+                    }
+                    if (this.elements.postureIntervalSlider) {
+                        this.elements.postureIntervalSlider.value = value;
+                    }
+                    this.triggerEvent('postureIntervalChanged', { interval: value });
+                } else {
+                    // Reset to previous valid value
+                    this.elements.postureIntervalDisplay.value = this.elements.postureInterval ? this.elements.postureInterval.value : 30;
+                }
             });
         }
 
@@ -459,13 +510,9 @@ class UIController {
             }
         }
 
-        // Update remaining time display
-        if (status.isActive && status.timeRemaining > 0) {
-            this.updateTimeDisplay(timeElement, status.timeRemaining, type);
+        // Keep time display always visible since it now contains the interval input
+        if (timeElement) {
             timeElement.style.display = 'block';
-        } else {
-            timeElement.textContent = '';
-            timeElement.style.display = 'none';
         }
 
         // Update button states
@@ -701,6 +748,9 @@ class UIController {
             if (this.elements.waterIntervalSlider) {
                 this.elements.waterIntervalSlider.value = settings.water.interval || 30;
             }
+            if (this.elements.waterIntervalDisplay) {
+                this.elements.waterIntervalDisplay.value = settings.water.interval || 30;
+            }
             if (this.elements.waterTarget) {
                 this.elements.waterTarget.value = settings.water.target || 8;
             }
@@ -716,6 +766,9 @@ class UIController {
             }
             if (this.elements.postureIntervalSlider) {
                 this.elements.postureIntervalSlider.value = settings.posture.interval || 30;
+            }
+            if (this.elements.postureIntervalDisplay) {
+                this.elements.postureIntervalDisplay.value = settings.posture.interval || 30;
             }
             if (this.elements.postureTarget) {
                 this.elements.postureTarget.value = settings.posture.target || 8;
@@ -817,8 +870,9 @@ class UIController {
     updateTimeDisplay(element, timeRemaining, type) {
         if (!element) return;
 
-        // Format time as "XX hours XX minutes" or "XX minutes"
-        element.textContent = this.formatTime(timeRemaining);
+        // Since we now have input boxes in the time display, we don't need to update the text
+        // The input boxes show the interval, not the remaining time
+        // This method is kept for compatibility but doesn't need to do anything
     }
 
     /**

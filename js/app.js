@@ -417,6 +417,15 @@ class OfficeWellnessApp {
             this.stopReminder('posture');
         });
 
+        // 间隔变更事件
+        this.uiController.on('waterIntervalChanged', (data) => {
+            this.handleIntervalChange('water', data.interval);
+        });
+
+        this.uiController.on('postureIntervalChanged', (data) => {
+            this.handleIntervalChange('posture', data.interval);
+        });
+
         // 设置保存事件
         this.uiController.on('saveSettings', () => {
             this.handleSaveSettings();
@@ -425,6 +434,38 @@ class OfficeWellnessApp {
         this.uiController.on('resetSettings', () => {
             this.handleResetSettings();
         });
+    }
+
+    /**
+     * 处理间隔变更
+     * @param {string} type - 提醒类型 ('water' | 'posture')
+     * @param {number} interval - 新的间隔（分钟）
+     * @private
+     */
+    handleIntervalChange(type, interval) {
+        try {
+            // 更新设置
+            const currentSettings = this.appSettings.getSettings();
+            if (type === 'water') {
+                currentSettings.water.interval = interval;
+                if (this.waterReminder) {
+                    this.waterReminder.updateSettings(currentSettings.water);
+                }
+            } else if (type === 'posture') {
+                currentSettings.posture.interval = interval;
+                if (this.postureReminder) {
+                    this.postureReminder.updateSettings(currentSettings.posture);
+                }
+            }
+            
+            // 保存设置
+            this.appSettings.saveSettings(currentSettings);
+            
+            console.log(`${type} reminder interval updated to ${interval} minutes`);
+            
+        } catch (error) {
+            console.error(`Failed to update ${type} interval:`, error);
+        }
     }
 
     /**
