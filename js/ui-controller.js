@@ -86,7 +86,7 @@ class UIController {
             postureStats: document.getElementById('posture-stats'),
             postureProgress: document.getElementById('posture-progress'),
             postureCount: document.getElementById('posture-count'),
-            activityStatusValue: document.getElementById('activity-status-value'),
+
 
             // Quick action buttons
             startAllBtn: document.getElementById('start-all-btn'),
@@ -359,8 +359,7 @@ class UIController {
         this.updateNextReminderTime('water', null);
         this.updateNextReminderTime('posture', null);
 
-        // Set activity status
-        this.updateActivityStatus(true);
+
 
         // Set health score
         this.updateHealthScore(0, 0);
@@ -1121,23 +1120,7 @@ class UIController {
         }
     }
 
-    /**
-     * Update activity status
-     * @param {boolean} isActive - Whether user is active
-     */
-    updateActivityStatus(isActive) {
-        if (!this.elements.activityStatusValue) {
-            return;
-        }
 
-        if (isActive) {
-            this.elements.activityStatusValue.textContent = 'Active';
-            this.elements.activityStatusValue.classList.remove('inactive');
-        } else {
-            this.elements.activityStatusValue.textContent = 'Away';
-            this.elements.activityStatusValue.classList.add('inactive');
-        }
-    }
 
     /**
      * Update health score
