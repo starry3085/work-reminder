@@ -206,28 +206,10 @@ body {
 .status-info {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
 }
 
-.status-display {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
 
-.status-display .status-icon {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--text-secondary);
-}
-
-.status-display .status-icon.active {
-    background: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
 
 .time-remaining {
     font-size: 1.1rem;
@@ -963,7 +945,7 @@ input[type="number"] {
     .status-info {
         flex-direction: row;
         gap: 0.5rem;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
     }
     
