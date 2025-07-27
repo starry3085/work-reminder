@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .error { background: #ffebee; border: 1px solid #f44336; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #e8f5e8; border: 1px solid #4caf50; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; }
+        button { margin: 5px; padding: 8px 16px; }
+    </style>
+</head>
+<body>
+    <h1>Error Debug Test</h1>
+    
+    <div id="status"></div>
+    <div id="log" class="log"></div>
+    
+    <button onclick="testScriptLoading()">Test Script Loading</button>
+    <button onclick="testAppInit()">Test App Init</button>
+    <button onclick="clearLog()">Clear Log</button>
+    
+    <script>
+        let logDiv = document.getElementById('log');
+        let statusDiv = document.getElementById('status');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            logDiv.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            logDiv.innerHTML = '';
+        }
+        
+        function updateStatus(message, isError = false) {
+            statusDiv.innerHTML = `<div class="${isError ? 'error' : 'success'}">${message}</div>`;
+        }
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            log(`ERROR: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`, 'error');
+            updateStatus(`Script Error: ${e.message}`, true);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            log(`PROMISE ERROR: ${e.reason}`, 'error');
+            updateStatus(`Promise Error: ${e.reason}`, true);
+        });
+        
+        function testScriptLoading() {
+            log('Testing script loading...');
+            
+            const scripts = [
+                'js/error-handler.js',
+                'js/storage-manager.js',
+                'js/app-settings.js',
+                'js/notification-service.js',
+                'js/activity-detector.js',
+                'js/reminder-manager.js',
+                'js/water-reminder.js',
+                'js/standup-reminder.js',
+                'js/mobile-adapter.js',
+                'js/ui-controller.js',
+                'js/app.js'
+            ];
+            
+            let loadedCount = 0;
+            let errorCount = 0;
+            
+            scripts.forEach((src, index) => {
+                const script = document.createElement('script');
+                script.src = src;
+                
+                script.onload = function() {
+                    loadedCount++;
+                    log(`✓ Loaded: ${src}`, 'success');
+                    
+                    if (loadedCount + errorCount === scripts.length) {
+                        if (errorCount === 0) {
+                            updateStatus('All scripts loaded successfully!');
+                            log('All scripts loaded successfully!', 'success');
+                        } else {
+                            updateStatus(`${errorCount} scripts failed to load`, true);
+                        }
+                    }
+                };
+                
+                script.onerror = function() {
+                    errorCount++;
+                    log(`✗ Failed to load: ${src}`, 'error');
+                    
+                    if (loadedCount + errorCount === scripts.length) {
+                        updateStatus(`${errorCount} scripts failed to load`, true);
+                    }
+                };
+                
+                document.head.appendChild(script);
+            });
+        }
+        
+        function testAppInit() {
+            log('Testing app initialization...');
+            
+            if (typeof OfficeWellnessApp === 'undefined') {
+                log('OfficeWellnessApp class not found!', 'error');
+                updateStatus('OfficeWellnessApp class not found!', true);
+                return;
+            }
+            
+            try {
+                log('Creating app instance...');
+                const app = new OfficeWellnessApp();
+                log('App instance created successfully', 'success');
+                
+                log('Initializing app...');
+                app.initialize().then(() => {
+                    log('App initialized successfully!', 'success');
+                    updateStatus('App initialized successfully!');
+                }).catch(error => {
+                    log(`App initialization failed: ${error.message}`, 'error');
+                    updateStatus(`App initialization failed: ${error.message}`, true);
+                });
+                
+            } catch (error) {
+                log(`Failed to create app instance: ${error.message}`, 'error');
+                updateStatus(`Failed to create app instance: ${error.message}`, true);
+            }
+        }
+        
+        log('Error debug page loaded');
+    </script>
+</body>
+</html>

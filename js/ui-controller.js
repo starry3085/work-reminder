@@ -582,12 +582,7 @@ class UIController {
             if (actionButton) actionButton.style.display = 'none';
         }
 
-        // Update application status summary
-        this.updateAppStatusSummary(
-            this.uiState.water.isActive || this.uiState.posture.isActive
-        );
-
-        // Update UI state
+        // Update UI state first
         if (type === 'water') {
             this.uiState.water.isActive = status.isActive;
             this.uiState.water.status = status.status || (status.isActive ? 'Active' : 'Inactive');
@@ -597,6 +592,11 @@ class UIController {
             this.uiState.posture.status = status.status || (status.isActive ? 'Active' : 'Inactive');
             this.uiState.posture.timeRemaining = status.timeRemaining || 0;
         }
+
+        // Update application status summary after updating UI state
+        this.updateAppStatusSummary(
+            this.uiState.water.isActive || this.uiState.posture.isActive
+        );
     }
 
     /**
@@ -1189,9 +1189,9 @@ class UIController {
     /**
      * Update health score
      * @param {number} waterCompletionRate - Water reminder completion rate (0-1)
-     * @param {number} postureCompletionRate - Standup reminder completion rate (0-1)
+     * @param {number} standupCompletionRate - Standup reminder completion rate (0-1)
      */
-    updateHealthScore(waterCompletionRate, postureCompletionRate) {
+    updateHealthScore(waterCompletionRate, standupCompletionRate) {
         if (!this.elements.healthScore) {
             return;
         }

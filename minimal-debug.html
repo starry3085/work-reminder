@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Debug</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>Office Wellness Reminder</h1>
+            <p class="app-subtitle">Minimal Debug Test</p>
+            <div class="app-status-summary" id="app-status-summary">
+                <div class="status-indicator" id="app-status-indicator"></div>
+                <span id="app-status-text">Wellness Reminders Inactive</span>
+            </div>
+        </header>
+
+        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px;">
+            <button id="start-all-btn" class="btn-primary">Start All</button>
+            <button onclick="testStatus()">Test Status Update</button>
+            <button onclick="checkElements()">Check Elements</button>
+        </div>
+
+        <div id="log" style="background: #f5f5f5; padding: 10px; margin: 10px 0; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+
+        <!-- Required minimal elements -->
+        <div id="water-card" style="display: none;"></div>
+        <div id="posture-card" style="display: none;"></div>
+        <div id="water-status-badge"></div>
+        <div id="posture-status-badge"></div>
+        <div id="water-time"></div>
+        <div id="posture-time"></div>
+        <div id="water-toggle"></div>
+        <div id="posture-toggle"></div>
+        <div id="settings-panel"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function checkElements() {
+            const indicator = document.getElementById('app-status-indicator');
+            const text = document.getElementById('app-status-text');
+            
+            log('=== Element Check ===');
+            log('Indicator: ' + (indicator ? 'Found' : 'Not found'));
+            log('Text: ' + (text ? 'Found' : 'Not found'));
+            
+            if (indicator) {
+                log('Indicator classes: ' + indicator.className);
+            }
+            if (text) {
+                log('Text content: ' + text.textContent);
+            }
+        }
+        
+        function testStatus() {
+            const indicator = document.getElementById('app-status-indicator');
+            const text = document.getElementById('app-status-text');
+            
+            if (!indicator || !text) {
+                log('ERROR: Elements not found');
+                return;
+            }
+            
+            const isActive = indicator.classList.contains('active');
+            
+            if (isActive) {
+                indicator.classList.remove('active');
+                text.textContent = 'Wellness Reminders Inactive';
+                log('Set to inactive');
+            } else {
+                indicator.classList.add('active');
+                text.textContent = 'Wellness Reminders Active';
+                log('Set to active');
+            }
+            
+            log('Final classes: ' + indicator.className);
+        }
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            log(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
+        });
+        
+        window.onload = function() {
+            log('Page loaded');
+            checkElements();
+        };
+    </script>
+</body>
+</html>

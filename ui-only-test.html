@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Only Test</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>Office Wellness Reminder</h1>
+            <p class="app-subtitle">UI Only Test</p>
+            <div class="app-status-summary" id="app-status-summary">
+                <div class="status-indicator" id="app-status-indicator"></div>
+                <span id="app-status-text">Wellness Reminders Inactive</span>
+            </div>
+        </header>
+
+        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px;">
+            <button onclick="simulateWaterStart()">Simulate Water Start</button>
+            <button onclick="simulatePostureStart()">Simulate Posture Start</button>
+            <button onclick="simulateBothStart()">Simulate Both Start</button>
+            <button onclick="simulateStop()">Simulate Stop</button>
+            <button onclick="checkStatus()">Check Status</button>
+        </div>
+
+        <div id="log" style="background: #f5f5f5; padding: 10px; margin: 10px 0; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+
+        <!-- Required elements for UI controller -->
+        <div id="water-card" style="display: none;"></div>
+        <div id="posture-card" style="display: none;"></div>
+        <div id="water-status-badge"></div>
+        <div id="posture-status-badge"></div>
+        <div id="water-time"></div>
+        <div id="posture-time"></div>
+        <div id="water-toggle"></div>
+        <div id="posture-toggle"></div>
+        <div id="settings-panel"></div>
+    </div>
+
+    <!-- Only load UI controller -->
+    <script src="js/ui-controller.js"></script>
+    
+    <script>
+        let uiController;
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function checkStatus() {
+            const indicator = document.getElementById('app-status-indicator');
+            const text = document.getElementById('app-status-text');
+            
+            log('=== Status Check ===');
+            log('Indicator classes: ' + indicator.className);
+            log('Text content: ' + text.textContent);
+            log('Has active class: ' + indicator.classList.contains('active'));
+            
+            if (uiController) {
+                log('Water active: ' + uiController.uiState.water.isActive);
+                log('Posture active: ' + uiController.uiState.posture.isActive);
+                log('Combined: ' + (uiController.uiState.water.isActive || uiController.uiState.posture.isActive));
+            }
+        }
+        
+        function simulateWaterStart() {
+            if (!uiController) {
+                log('UI Controller not initialized');
+                return;
+            }
+            
+            log('Simulating water reminder start...');
+            uiController.updateReminderStatus('water', {
+                isActive: true,
+                status: 'started',
+                timeRemaining: 1800000
+            });
+            
+            setTimeout(checkStatus, 100);
+        }
+        
+        function simulatePostureStart() {
+            if (!uiController) {
+                log('UI Controller not initialized');
+                return;
+            }
+            
+            log('Simulating posture reminder start...');
+            uiController.updateReminderStatus('posture', {
+                isActive: true,
+                status: 'started',
+                timeRemaining: 1800000
+            });
+            
+            setTimeout(checkStatus, 100);
+        }
+        
+        function simulateBothStart() {
+            simulateWaterStart();
+            setTimeout(simulatePostureStart, 200);
+        }
+        
+        function simulateStop() {
+            if (!uiController) {
+                log('UI Controller not initialized');
+                return;
+            }
+            
+            log('Simulating stop...');
+            uiController.updateReminderStatus('water', {
+                isActive: false,
+                status: 'stopped',
+                timeRemaining: 0
+            });
+            
+            uiController.updateReminderStatus('posture', {
+                isActive: false,
+                status: 'stopped',
+                timeRemaining: 0
+            });
+            
+            setTimeout(checkStatus, 100);
+        }
+        
+        function init() {
+            try {
+                log('Creating UI Controller...');
+                uiController = new UIController();
+                
+                log('Initializing UI Controller...');
+                uiController.initialize();
+                
+                log('UI Controller initialized successfully');
+                checkStatus();
+            } catch (error) {
+                log('ERROR: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            log(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
+        });
+        
+        window.onload = init;
+    </script>
+</body>
+</html>

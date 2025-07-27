@@ -438,7 +438,7 @@ class NotificationService {
                 if (type === 'water') {
                     audio.src = 'assets/water-reminder.mp3';
                 } else if (type === 'posture') {
-                    audio.src = 'assets/posture-reminder.mp3';
+                    audio.src = 'assets/standup-reminder.mp3';
                 } else {
                     audio.src = 'assets/notification.mp3';
                 }
@@ -463,7 +463,7 @@ class NotificationService {
                     if (type === 'water') {
                         newAudio.src = 'assets/water-reminder.mp3';
                     } else if (type === 'posture') {
-                        newAudio.src = 'assets/posture-reminder.mp3';
+                        newAudio.src = 'assets/standup-reminder.mp3';
                     } else {
                         newAudio.src = 'assets/notification.mp3';
                     }

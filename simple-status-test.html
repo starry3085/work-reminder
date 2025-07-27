@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Status Test</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>Office Wellness Reminder</h1>
+            <p class="app-subtitle">Simple Status Test</p>
+            <div class="app-status-summary" id="app-status-summary">
+                <div class="status-indicator" id="app-status-indicator"></div>
+                <span id="app-status-text">Wellness Reminders Inactive</span>
+            </div>
+        </header>
+
+        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px;">
+            <button onclick="simulateStart()">Simulate Start</button>
+            <button onclick="simulateStop()">Simulate Stop</button>
+            <button onclick="checkStatus()">Check Status</button>
+        </div>
+
+        <div id="log" style="background: #f5f5f5; padding: 10px; margin: 10px 0; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+
+        <!-- Required minimal elements -->
+        <div id="water-card" style="display: none;"></div>
+        <div id="posture-card" style="display: none;"></div>
+        <div id="water-status-badge"></div>
+        <div id="posture-status-badge"></div>
+        <div id="water-time"></div>
+        <div id="posture-time"></div>
+        <div id="water-toggle"></div>
+        <div id="posture-toggle"></div>
+        <div id="settings-panel"></div>
+    </div>
+
+    <script src="js/ui-controller.js"></script>
+    
+    <script>
+        let uiController;
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function init() {
+            try {
+                uiController = new UIController();
+                uiController.initialize();
+                log('UI Controller initialized');
+                checkStatus();
+            } catch (error) {
+                log('ERROR: ' + error.message);
+            }
+        }
+        
+        function simulateStart() {
+            if (!uiController) {
+                log('UI Controller not initialized');
+                return;
+            }
+            
+            log('Simulating water reminder start...');
+            uiController.updateReminderStatus('water', {
+                isActive: true,
+                status: 'started',
+                timeRemaining: 1800000
+            });
+            
+            checkStatus();
+        }
+        
+        function simulateStop() {
+            if (!uiController) {
+                log('UI Controller not initialized');
+                return;
+            }
+            
+            log('Simulating water reminder stop...');
+            uiController.updateReminderStatus('water', {
+                isActive: false,
+                status: 'stopped',
+                timeRemaining: 0
+            });
+            
+            checkStatus();
+        }
+        
+        function checkStatus() {
+            const indicator = document.getElementById('app-status-indicator');
+            const text = document.getElementById('app-status-text');
+            
+            log('--- Status Check ---');
+            log('Indicator classes: ' + indicator.className);
+            log('Text content: ' + text.textContent);
+            log('Has active class: ' + indicator.classList.contains('active'));
+            
+            if (uiController) {
+                log('Water active: ' + uiController.uiState.water.isActive);
+                log('Posture active: ' + uiController.uiState.posture.isActive);
+            }
+        }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>
