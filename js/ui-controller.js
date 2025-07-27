@@ -1169,7 +1169,8 @@ class UIController {
             this.elements.appStatusText.textContent = 'Wellness Reminders Active';
         } else {
             this.elements.appStatusIndicator.classList.remove('active');
-            this.elements.appStatusText.textContent = 'Wellness Reminders Inactive';
+            // Remove the inactive status text - just hide the status
+            this.elements.appStatusText.textContent = '';
         }
     }
 
