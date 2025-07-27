@@ -3,154 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Fix - Office Wellness Reminder</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .test-section {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .success { background-color: #d4edda; border-color: #c3e6cb; }
-        .error { background-color: #f8d7da; border-color: #f5c6cb; }
-        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
-        button {
-            padding: 10px 15px;
-            margin: 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-    </style>
+    <title>Button Fix Test</title>
+    <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-    <h1>Office Wellness Reminder - Fix Test</h1>
-    
-    <div class="test-section">
-        <h3>Component Loading Test</h3>
-        <div id="component-status">Testing...</div>
-    </div>
-    
-    <div class="test-section">
-        <h3>Basic Functionality Test</h3>
-        <button class="btn-primary" onclick="testWaterReminder()">Test Water Reminder</button>
-        <button class="btn-primary" onclick="testPostureReminder()">Test Posture Reminder</button>
-        <button class="btn-secondary" onclick="testSettings()">Test Settings</button>
-        <div id="test-results"></div>
-    </div>
-    
-    <div class="test-section">
-        <h3>Error Log</h3>
-        <div id="error-log" style="font-family: monospace; font-size: 12px; max-height: 200px; overflow-y: auto;"></div>
+    <div id="app">
+        <h1>Button Fix Test</h1>
+        
+        <div class="reminder-card" id="water-card">
+            <div class="card-header">
+                <div class="card-icon water-icon"></div>
+                <div class="card-title">
+                    <h3>Water Reminder</h3>
+                    <div class="card-status">
+                        <span class="status-badge" id="water-status-badge">Inactive</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-time" id="water-time">
+                <div class="time-display">
+                    <label>Interval (minutes):</label>
+                    <input type="number" id="water-interval-display" value="30" min="1" max="60">
+                </div>
+            </div>
+            <div class="card-controls">
+                <button class="btn-primary" id="water-toggle">Start</button>
+                <button class="btn-secondary" id="water-reset" style="display: none;">Reset</button>
+                <button class="btn-action" id="waterDrink" style="display: none;">Hydrated</button>
+            </div>
+        </div>
+
+        <div class="reminder-card" id="posture-card">
+            <div class="card-header">
+                <div class="card-icon posture-icon"></div>
+                <div class="card-title">
+                    <h3>Standup Reminder</h3>
+                    <div class="card-status">
+                        <span class="status-badge" id="posture-status-badge">Inactive</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-time" id="posture-time">
+                <div class="time-display">
+                    <label>Interval (minutes):</label>
+                    <input type="number" id="posture-interval-display" value="30" min="1" max="60">
+                </div>
+            </div>
+            <div class="card-controls">
+                <button class="btn-primary" id="posture-toggle">Start</button>
+                <button class="btn-secondary" id="posture-reset" style="display: none;">Reset</button>
+                <button class="btn-action" id="postureActivity" style="display: none;">Moved</button>
+            </div>
+        </div>
+
+        <section class="quick-actions">
+            <div class="quick-actions-group">
+                <button class="btn-action" id="start-all-btn">Start All</button>
+                <button class="btn-action" id="pause-all-btn">Pause All</button>
+            </div>
+        </section>
+
+        <!-- Required elements for UI controller -->
+        <div id="app-status-indicator"></div>
+        <div id="app-status-text"></div>
+        <div id="settings-panel"></div>
+        
+        <div id="log" style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+            <h3>Event Log:</h3>
+            <div id="log-content">Initializing...</div>
+        </div>
     </div>
 
-    <script>
-        // Capture console errors
-        const originalError = console.error;
-        const errorLog = document.getElementById('error-log');
-        
-        console.error = function(...args) {
-            originalError.apply(console, args);
-            errorLog.innerHTML += '<div style="color: red;">' + args.join(' ') + '</div>';
-            errorLog.scrollTop = errorLog.scrollHeight;
-        };
-        
-        const originalWarn = console.warn;
-        console.warn = function(...args) {
-            originalWarn.apply(console, args);
-            errorLog.innerHTML += '<div style="color: orange;">' + args.join(' ') + '</div>';
-            errorLog.scrollTop = errorLog.scrollHeight;
-        };
-        
-        // Test component loading
-        function testComponents() {
-            const componentStatus = document.getElementById('component-status');
-            const components = [
-                'ErrorHandler',
-                'StorageManager', 
-                'AppSettings',
-                'NotificationService',
-                'ActivityDetector',
-                'ReminderManager',
-                'WaterReminder',
-                'PostureReminder',
-                'UIController',
-                'OfficeWellnessApp'
-            ];
-            
-            let results = [];
-            
-            components.forEach(component => {
-                try {
-                    if (typeof window[component] !== 'undefined') {
-                        results.push(`✅ ${component}: Available`);
-                    } else {
-                        results.push(`❌ ${component}: Not found`);
-                    }
-                } catch (error) {
-                    results.push(`❌ ${component}: Error - ${error.message}`);
-                }
-            });
-            
-            componentStatus.innerHTML = results.join('<br>');
-            
-            // Overall status
-            const failedComponents = results.filter(r => r.includes('❌')).length;
-            if (failedComponents === 0) {
-                componentStatus.className = 'success';
-            } else if (failedComponents < 3) {
-                componentStatus.className = 'warning';
-            } else {
-                componentStatus.className = 'error';
-            }
-        }
-        
-        function testWaterReminder() {
-            const results = document.getElementById('test-results');
-            try {
-                results.innerHTML += '<div>Testing water reminder...</div>';
-                // Add test logic here
-                results.innerHTML += '<div style="color: green;">✅ Water reminder test passed</div>';
-            } catch (error) {
-                results.innerHTML += '<div style="color: red;">❌ Water reminder test failed: ' + error.message + '</div>';
-            }
-        }
-        
-        function testPostureReminder() {
-            const results = document.getElementById('test-results');
-            try {
-                results.innerHTML += '<div>Testing posture reminder...</div>';
-                // Add test logic here
-                results.innerHTML += '<div style="color: green;">✅ Posture reminder test passed</div>';
-            } catch (error) {
-                results.innerHTML += '<div style="color: red;">❌ Posture reminder test failed: ' + error.message + '</div>';
-            }
-        }
-        
-        function testSettings() {
-            const results = document.getElementById('test-results');
-            try {
-                results.innerHTML += '<div>Testing settings...</div>';
-                // Add test logic here
-                results.innerHTML += '<div style="color: green;">✅ Settings test passed</div>';
-            } catch (error) {
-                results.innerHTML += '<div style="color: red;">❌ Settings test failed: ' + error.message + '</div>';
-            }
-        }
-        
-        // Run component test on load
-        window.addEventListener('load', testComponents);
-    </script>
-    
-    <!-- Load the same scripts as main app -->
+    <!-- JavaScript Files -->
     <script src="js/error-handler.js"></script>
     <script src="js/storage-manager.js"></script>
     <script src="js/app-settings.js"></script>
@@ -162,5 +86,83 @@
     <script src="js/mobile-adapter.js"></script>
     <script src="js/ui-controller.js"></script>
     <script src="js/app.js"></script>
+
+    <script>
+        function addLog(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+        }
+
+        // Force button event binding
+        document.addEventListener('DOMContentLoaded', () => {
+            addLog('DOM loaded, forcing button event binding...');
+            
+            setTimeout(() => {
+                const waterToggle = document.getElementById('water-toggle');
+                const postureToggle = document.getElementById('posture-toggle');
+                const startAllBtn = document.getElementById('start-all-btn');
+                
+                // Force direct event binding
+                if (waterToggle) {
+                    addLog('Binding water toggle...');
+                    waterToggle.addEventListener('click', function(e) {
+                        addLog('Water toggle clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const isStart = this.textContent.trim() === 'Start';
+                        if (isStart) {
+                            this.textContent = 'Pause';
+                            this.className = 'btn-secondary';
+                            addLog('Water reminder started');
+                        } else {
+                            this.textContent = 'Start';
+                            this.className = 'btn-primary';
+                            addLog('Water reminder paused');
+                        }
+                    }, true);
+                }
+                
+                if (postureToggle) {
+                    addLog('Binding posture toggle...');
+                    postureToggle.addEventListener('click', function(e) {
+                        addLog('Posture toggle clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const isStart = this.textContent.trim() === 'Start';
+                        if (isStart) {
+                            this.textContent = 'Pause';
+                            this.className = 'btn-secondary';
+                            addLog('Posture reminder started');
+                        } else {
+                            this.textContent = 'Start';
+                            this.className = 'btn-primary';
+                            addLog('Posture reminder paused');
+                        }
+                    }, true);
+                }
+                
+                if (startAllBtn) {
+                    addLog('Binding start all...');
+                    startAllBtn.addEventListener('click', function(e) {
+                        addLog('Start all clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        if (waterToggle && waterToggle.textContent.trim() === 'Start') {
+                            waterToggle.click();
+                        }
+                        if (postureToggle && postureToggle.textContent.trim() === 'Start') {
+                            postureToggle.click();
+                        }
+                    }, true);
+                }
+                
+                addLog('Direct button binding complete');
+            }, 500);
+        });
+    </script>
 </body>
 </html>

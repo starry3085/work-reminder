@@ -1119,6 +1119,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         console.error('Application startup failed:', error);
         
+        // 如果应用初始化失败，设置基本的按钮功能
+        setupFallbackButtons();
+        
         // 显示错误信息给用户
         const errorDiv = document.createElement('div');
         errorDiv.style.cssText = `
@@ -1176,4 +1179,228 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // 导出给其他脚本使用
-window.OfficeWellnessApp = OfficeWellnessApp;
+window.OfficeWellnessApp = OfficeWellnessApp;/
+/ 备用按钮功能 - 当主应用初始化失败时使用
+function setupFallbackButtons() {
+    console.log('Setting up fallback button handlers...');
+    
+    // 水提醒按钮
+    const waterToggle = document.getElementById('water-toggle');
+    if (waterToggle) {
+        waterToggle.addEventListener('click', () => {
+            console.log('Water toggle clicked (fallback)');
+            const isActive = waterToggle.textContent === 'Start';
+            
+            if (isActive) {
+                waterToggle.textContent = 'Pause';
+                waterToggle.className = 'btn-secondary';
+                showSimpleNotification('Water reminder started!');
+            } else {
+                waterToggle.textContent = 'Start';
+                waterToggle.className = 'btn-primary';
+                showSimpleNotification('Water reminder paused!');
+            }
+        });
+        console.log('Water toggle fallback handler added');
+    }
+    
+    // 姿势提醒按钮
+    const postureToggle = document.getElementById('posture-toggle');
+    if (postureToggle) {
+        postureToggle.addEventListener('click', () => {
+            console.log('Posture toggle clicked (fallback)');
+            const isActive = postureToggle.textContent === 'Start';
+            
+            if (isActive) {
+                postureToggle.textContent = 'Pause';
+                postureToggle.className = 'btn-secondary';
+                showSimpleNotification('Posture reminder started!');
+            } else {
+                postureToggle.textContent = 'Start';
+                postureToggle.className = 'btn-primary';
+                showSimpleNotification('Posture reminder paused!');
+            }
+        });
+        console.log('Posture toggle fallback handler added');
+    }
+    
+    // Start All 按钮
+    const startAllBtn = document.getElementById('start-all-btn');
+    if (startAllBtn) {
+        startAllBtn.addEventListener('click', () => {
+            console.log('Start All clicked (fallback)');
+            if (waterToggle && waterToggle.textContent === 'Start') {
+                waterToggle.click();
+            }
+            if (postureToggle && postureToggle.textContent === 'Start') {
+                postureToggle.click();
+            }
+        });
+    }
+    
+    // Pause All 按钮
+    const pauseAllBtn = document.getElementById('pause-all-btn');
+    if (pauseAllBtn) {
+        pauseAllBtn.addEventListener('click', () => {
+            console.log('Pause All clicked (fallback)');
+            if (waterToggle && waterToggle.textContent === 'Pause') {
+                waterToggle.click();
+            }
+            if (postureToggle && postureToggle.textContent === 'Pause') {
+                postureToggle.click();
+            }
+        });
+    }
+}
+
+// 简单通知函数
+function showSimpleNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        z-index: 10000;
+        font-family: Arial, sans-serif;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+// 全局应用实例
+let app = null;
+
+// 应用初始化
+document.addEventListener('DOMContentLoaded', async () => {
+    // 立即初始化备用按钮处理，确保按钮总是能工作
+    initializeFallbackButtons();
+    
+    try {
+        console.log('Starting application initialization...');
+        
+        // 创建应用实例
+        app = new OfficeWellnessApp();
+        
+        // 初始化应用
+        await app.initialize();
+        
+        console.log('Application initialized successfully');
+        
+        // 如果主应用初始化成功，移除备用处理器的标记，让主应用接管
+        setTimeout(() => {
+            const waterToggle = document.getElementById('water-toggle');
+            const postureToggle = document.getElementById('posture-toggle');
+            const startAllBtn = document.getElementById('start-all-btn');
+            
+            if (waterToggle) waterToggle.removeAttribute('data-fallback-bound');
+            if (postureToggle) postureToggle.removeAttribute('data-fallback-bound');
+            if (startAllBtn) startAllBtn.removeAttribute('data-fallback-bound');
+            
+            console.log('Main app took over button handling');
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        console.log('Using fallback button handlers');
+    }
+});
+
+// 备用按钮初始化 - 确保按钮总是能工作
+function initializeFallbackButtons() {
+    console.log('Initializing fallback button handlers...');
+    
+    // 立即尝试绑定，然后再延迟尝试
+    bindFallbackHandlers();
+    setTimeout(bindFallbackHandlers, 100);
+    setTimeout(bindFallbackHandlers, 500);
+}
+
+function bindFallbackHandlers() {
+    const waterToggle = document.getElementById('water-toggle');
+    const postureToggle = document.getElementById('posture-toggle');
+    const startAllBtn = document.getElementById('start-all-btn');
+    
+    if (waterToggle && !waterToggle.hasAttribute('data-fallback-bound')) {
+        console.log('Binding fallback water toggle handler');
+        waterToggle.setAttribute('data-fallback-bound', 'true');
+        
+        const waterHandler = function(e) {
+            console.log('Fallback water toggle click');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isActive = this.textContent.trim() === 'Start';
+            if (isActive) {
+                this.textContent = 'Pause';
+                this.className = 'btn-secondary';
+                showSimpleNotification('Water reminder started!');
+            } else {
+                this.textContent = 'Start';
+                this.className = 'btn-primary';
+                showSimpleNotification('Water reminder paused!');
+            }
+        };
+        
+        waterToggle.addEventListener('click', waterHandler, true);
+        waterToggle.addEventListener('click', waterHandler, false); // 双重绑定确保触发
+    }
+    
+    if (postureToggle && !postureToggle.hasAttribute('data-fallback-bound')) {
+        console.log('Binding fallback posture toggle handler');
+        postureToggle.setAttribute('data-fallback-bound', 'true');
+        
+        const postureHandler = function(e) {
+            console.log('Fallback posture toggle click');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isActive = this.textContent.trim() === 'Start';
+            if (isActive) {
+                this.textContent = 'Pause';
+                this.className = 'btn-secondary';
+                showSimpleNotification('Posture reminder started!');
+            } else {
+                this.textContent = 'Start';
+                this.className = 'btn-primary';
+                showSimpleNotification('Posture reminder paused!');
+            }
+        };
+        
+        postureToggle.addEventListener('click', postureHandler, true);
+        postureToggle.addEventListener('click', postureHandler, false); // 双重绑定确保触发
+    }
+    
+    if (startAllBtn && !startAllBtn.hasAttribute('data-fallback-bound')) {
+        console.log('Binding fallback start all handler');
+        startAllBtn.setAttribute('data-fallback-bound', 'true');
+        
+        const startAllHandler = function(e) {
+            console.log('Fallback start all click');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 启动所有提醒
+            if (waterToggle && waterToggle.textContent.trim() === 'Start') {
+                waterToggle.click();
+            }
+            if (postureToggle && postureToggle.textContent.trim() === 'Start') {
+                postureToggle.click();
+            }
+            
+            showSimpleNotification('All reminders started!');
+        };
+        
+        startAllBtn.addEventListener('click', startAllHandler, true);
+        startAllBtn.addEventListener('click', startAllHandler, false); // 双重绑定确保触发
+    }
+}
