@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings Fix Test</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Office Wellness Reminder</h1>
+            <div class="app-controls">
+                <button id="settings-btn" class="btn-icon" title="Settings">⚙️</button>
+                <button id="help-btn" class="btn-icon" title="Help">❓</button>
+            </div>
+        </header>
+        
+        <main class="app-main">
+            <section class="wellness-status">
+                <div class="status-card" id="water-card">
+                    <h3>Water Reminder</h3>
+                    <p>Test card</p>
+                </div>
+                
+                <div class="status-card" id="posture-card">
+                    <h3>Standup Reminder</h3>
+                    <p>Test card</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header">
+            <h2>Settings</h2>
+            <button class="btn-close" id="settings-close">X</button>
+        </div>
+        <div class="settings-content">
+            <p>Settings panel is working!</p>
+        </div>
+        <div class="settings-footer">
+            <button class="btn-secondary" id="reset-settings">Reset</button>
+            <button class="btn-primary" id="save-settings">Save</button>
+        </div>
+    </div>
+
+    <!-- Help Panel -->
+    <div class="help-overlay" id="help-overlay">
+        <div class="help-content">
+            <button class="btn-close" id="help-close">X</button>
+            <h2>Help</h2>
+            <p>Help content here</p>
+        </div>
+    </div>
+
+    <!-- Notification Overlay -->
+    <div class="notification-overlay" id="notification-overlay">
+        <div class="notification-content">
+            <div id="notification-icon">💧</div>
+            <div id="notification-title">Title</div>
+            <div id="notification-message">Message</div>
+            <button id="notification-confirm">OK</button>
+            <button id="notification-snooze">Snooze</button>
+        </div>
+    </div>
+
+    <!-- Required hidden elements -->
+    <div style="display: none;">
+        <div id="app"></div>
+        <div id="app-status-indicator"></div>
+        <div id="app-status-text"></div>
+    </div>
+
+    <script>
+        // Console override to capture warnings
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        const logs = [];
+        
+        console.warn = function(...args) {
+            logs.push('WARN: ' + args.join(' '));
+            originalWarn.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            logs.push('ERROR: ' + args.join(' '));
+            originalError.apply(console, args);
+        };
+        
+        // Show logs on page
+        function showLogs() {
+            const logDiv = document.createElement('div');
+            logDiv.style.cssText = `
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 200px;
+                background: #f8f9fa;
+                border-top: 2px solid #007bff;
+                padding: 10px;
+                font-family: monospace;
+                font-size: 12px;
+                overflow-y: auto;
+                z-index: 9999;
+            `;
+            logDiv.innerHTML = '<strong>Console Logs:</strong><br>' + logs.join('<br>');
+            document.body.appendChild(logDiv);
+        }
+        
+        let uiController;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing UI Controller...');
+            
+            try {
+                uiController = new UIController();
+                uiController.initialize();
+                console.log('UI Controller initialized successfully');
+                
+                // Show logs after 2 seconds
+                setTimeout(showLogs, 2000);
+                
+            } catch (error) {
+                console.error('Failed to initialize UI Controller:', error);
+                setTimeout(showLogs, 1000);
+            }
+        });
+    </script>
+    
+    <script src="js/ui-controller.js"></script>
+</body>
+</html>

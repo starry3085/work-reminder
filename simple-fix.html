@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Office Wellness Reminder - Simple Fix</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <main class="main-panel">
+            <header class="app-header">
+                <h1>Office Wellness Reminder</h1>
+                <p class="app-subtitle">Maintain Healthy Work Habits</p>
+                <div class="app-status-summary" id="app-status-summary">
+                    <div class="status-indicator" id="app-status-indicator"></div>
+                    <span id="app-status-text">Wellness Reminders Inactive</span>
+                </div>
+            </header>
+
+            <section class="status-section">
+                <div class="reminder-card" id="water-card">
+                    <div class="card-header">
+                        <div class="card-icon water-icon"></div>
+                        <h3>Water Reminder</h3>
+                        <div class="status-badge" id="water-status-badge">Inactive</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="status-info">
+                            <span class="next-reminder-label">Remind every:</span>
+                            <div class="time-remaining" id="water-time">
+                                <input type="number" id="water-interval-display" min="1" max="60" value="30" class="interval-input"> mins
+                            </div>
+                        </div>
+                        <div class="daily-stats" id="water-stats">
+                            <span class="stats-text">Today: 0/8 glasses</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="water-progress"></div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button id="water-toggle" class="btn-primary">Start</button>
+                            <button id="water-reset" class="btn-secondary" style="display: none;">Reset</button>
+                            <button id="waterDrink" class="btn-action" style="display: none;">💧 Hydrated</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reminder-card" id="posture-card">
+                    <div class="card-header">
+                        <div class="card-icon posture-icon"></div>
+                        <h3>Standup Reminder</h3>
+                        <div class="status-badge" id="posture-status-badge">Inactive</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="status-info">
+                            <span class="next-reminder-label">Remind every:</span>
+                            <div class="time-remaining" id="posture-time">
+                                <input type="number" id="posture-interval-display" min="1" max="60" value="30" class="interval-input"> mins
+                            </div>
+                        </div>
+                        <div class="daily-stats" id="posture-stats">
+                            <span class="stats-text">Today: 0/8 activities</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="posture-progress"></div>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button id="posture-toggle" class="btn-primary">Start</button>
+                            <button id="posture-reset" class="btn-secondary" style="display: none;">Reset</button>
+                            <button id="postureActivity" class="btn-action" style="display: none;">🧘 Moved</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="control-section">
+                <div class="global-controls">
+                    <button id="start-all-btn" class="btn-primary">Start All</button>
+                    <button id="pause-all-btn" class="btn-secondary">Pause All</button>
+                </div>
+                
+                <div class="app-controls">
+                    <button id="settings-btn" class="btn-icon" title="Settings">⚙️</button>
+                    <button id="help-btn" class="btn-icon" title="Help">❓</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Required elements -->
+        <div id="settings-panel" class="settings-panel"></div>
+        <div id="notification-overlay" class="notification-overlay"></div>
+        <div id="help-overlay" class="help-overlay"></div>
+    </div>
+
+    <script>
+        // 简单的状态管理
+        let waterActive = false;
+        let postureActive = false;
+        
+        // 更新应用状态指示器
+        function updateAppStatus() {
+            const indicator = document.getElementById('app-status-indicator');
+            const text = document.getElementById('app-status-text');
+            
+            if (indicator && text) {
+                const isActive = waterActive || postureActive;
+                
+                if (isActive) {
+                    indicator.classList.add('active');
+                    text.textContent = 'Wellness Reminders Active';
+                } else {
+                    indicator.classList.remove('active');
+                    text.textContent = 'Wellness Reminders Inactive';
+                }
+                
+                console.log(`Status updated: ${isActive ? 'ACTIVE' : 'INACTIVE'}`);
+            }
+        }
+        
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: #3498db;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+                font-size: 14px;
+                white-space: nowrap;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                max-width: 300px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        // 初始化按钮事件
+        function initializeButtons() {
+            const waterToggle = document.getElementById('water-toggle');
+            const postureToggle = document.getElementById('posture-toggle');
+            const startAllBtn = document.getElementById('start-all-btn');
+            const pauseAllBtn = document.getElementById('pause-all-btn');
+            
+            // 水提醒按钮
+            if (waterToggle) {
+                waterToggle.addEventListener('click', () => {
+                    const isStart = waterToggle.textContent.trim() === 'Start';
+                    
+                    if (isStart) {
+                        waterToggle.textContent = 'Pause';
+                        waterToggle.className = 'btn-secondary';
+                        waterActive = true;
+                        showNotification('💧 Water reminder started!');
+                    } else {
+                        waterToggle.textContent = 'Start';
+                        waterToggle.className = 'btn-primary';
+                        waterActive = false;
+                        showNotification('💧 Water reminder paused!');
+                    }
+                    
+                    updateAppStatus();
+                });
+            }
+            
+            // 姿势提醒按钮
+            if (postureToggle) {
+                postureToggle.addEventListener('click', () => {
+                    const isStart = postureToggle.textContent.trim() === 'Start';
+                    
+                    if (isStart) {
+                        postureToggle.textContent = 'Pause';
+                        postureToggle.className = 'btn-secondary';
+                        postureActive = true;
+                        showNotification('🧘 Standup reminder started!');
+                    } else {
+                        postureToggle.textContent = 'Start';
+                        postureToggle.className = 'btn-primary';
+                        postureActive = false;
+                        showNotification('🧘 Standup reminder paused!');
+                    }
+                    
+                    updateAppStatus();
+                });
+            }
+            
+            // Start All 按钮
+            if (startAllBtn) {
+                startAllBtn.addEventListener('click', () => {
+                    let started = [];
+                    
+                    if (waterToggle && waterToggle.textContent.trim() === 'Start') {
+                        waterToggle.click();
+                        started.push('Water');
+                    }
+                    
+                    if (postureToggle && postureToggle.textContent.trim() === 'Start') {
+                        postureToggle.click();
+                        started.push('Posture');
+                    }
+                    
+                    if (started.length > 0) {
+                        showNotification(`🚀 Started: ${started.join(' & ')} reminders!`);
+                    } else {
+                        showNotification('ℹ️ All reminders are already active');
+                    }
+                });
+            }
+            
+            // Pause All 按钮
+            if (pauseAllBtn) {
+                pauseAllBtn.addEventListener('click', () => {
+                    let paused = [];
+                    
+                    if (waterToggle && waterToggle.textContent.trim() === 'Pause') {
+                        waterToggle.click();
+                        paused.push('Water');
+                    }
+                    
+                    if (postureToggle && postureToggle.textContent.trim() === 'Pause') {
+                        postureToggle.click();
+                        paused.push('Posture');
+                    }
+                    
+                    if (paused.length > 0) {
+                        showNotification(`⏸️ Paused: ${paused.join(' & ')} reminders!`);
+                    } else {
+                        showNotification('ℹ️ All reminders are already inactive');
+                    }
+                });
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('Simple fix page loaded');
+            initializeButtons();
+            updateAppStatus();
+        });
+    </script>
+</body>
+</html>

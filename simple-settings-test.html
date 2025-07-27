@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Settings Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .btn-action { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 10px;
+        }
+        .settings-panel { 
+            display: none; 
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            background: white; 
+            border: 2px solid #007bff; 
+            border-radius: 8px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            z-index: 1000; 
+        }
+        .settings-panel.open { display: block; }
+        .btn-close { 
+            background: #dc3545; 
+            color: white; 
+            border: none; 
+            padding: 5px 10px; 
+            border-radius: 3px; 
+            cursor: pointer; 
+            float: right; 
+        }
+        #log { 
+            margin-top: 20px; 
+            padding: 10px; 
+            background: #f8f9fa; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            white-space: pre-wrap; 
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Settings Button Test</h1>
+    
+    <button class="btn-action" id="settings-btn">Settings ⚙️</button>
+    
+    <div class="settings-panel" id="settings-panel">
+        <button class="btn-close" id="settings-close">X</button>
+        <h2>Settings Panel</h2>
+        <p>This panel should open when you click the Settings button.</p>
+        <p>Click X or outside to close.</p>
+    </div>
+    
+    <div id="log">Test Log:\n</div>
+
+    <script>
+        function log(message) {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logEl.textContent += `[${time}] ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(message);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM loaded');
+            
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsPanel = document.getElementById('settings-panel');
+            const settingsClose = document.getElementById('settings-close');
+            
+            log(`Elements found: btn=${!!settingsBtn}, panel=${!!settingsPanel}, close=${!!settingsClose}`);
+            
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', function(e) {
+                    log('Settings button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (settingsPanel) {
+                        if (settingsPanel.classList.contains('open')) {
+                            settingsPanel.classList.remove('open');
+                            log('Panel closed');
+                        } else {
+                            settingsPanel.classList.add('open');
+                            log('Panel opened');
+                        }
+                    }
+                });
+                log('Settings button event listener added');
+            }
+            
+            if (settingsClose) {
+                settingsClose.addEventListener('click', function(e) {
+                    log('Close button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (settingsPanel) {
+                        settingsPanel.classList.remove('open');
+                        log('Panel closed via close button');
+                    }
+                });
+                log('Close button event listener added');
+            }
+            
+            // Click outside to close
+            document.addEventListener('click', function(e) {
+                if (settingsPanel && settingsPanel.classList.contains('open')) {
+                    if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+                        settingsPanel.classList.remove('open');
+                        log('Panel closed by clicking outside');
+                    }
+                }
+            });
+            
+            log('All event listeners set up');
+        });
+    </script>
+</body>
+</html>

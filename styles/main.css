@@ -383,7 +383,7 @@ body {
 /* 快速操作区域 */
 .quick-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: 1rem;
     flex-wrap: wrap;
     margin-top: 1.5rem;

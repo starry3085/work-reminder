@@ -88,9 +88,7 @@ class UIController {
             postureCount: document.getElementById('posture-count'),
 
 
-            // Quick action buttons
-            startAllBtn: document.getElementById('start-all-btn'),
-            pauseAllBtn: document.getElementById('pause-all-btn'),
+
 
             // Health score
             healthScore: document.getElementById('health-score'),
@@ -202,14 +200,7 @@ class UIController {
             this.triggerEvent('postureActivity');
         });
 
-        // Global control buttons
-        this.addEventHandler('startAllBtn', 'click', () => {
-            this.triggerEvent('startAll');
-        });
 
-        this.addEventHandler('pauseAllBtn', 'click', () => {
-            this.triggerEvent('pauseAll');
-        });
 
         // Settings panel slider linkage
         if (this.elements.waterIntervalSlider && this.elements.waterInterval) {
