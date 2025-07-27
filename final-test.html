@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Test</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>Office Wellness Reminder</h1>
+            <p class="app-subtitle">Final Test</p>
+            <div class="app-status-summary" id="app-status-summary">
+                <div class="status-indicator" id="app-status-indicator"></div>
+                <span id="app-status-text">Wellness Reminders Inactive</span>
+            </div>
+        </header>
+
+        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px;">
+            <button id="start-all-btn" class="btn-primary">Start All</button>
+            <button id="pause-all-btn" class="btn-secondary">Pause All</button>
+            <button onclick="checkStatus()">Check Status</button>
+        </div>
+
+        <div id="log" style="background: #f5f5f5; padding: 10px; margin: 10px 0; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+
+        <!-- Required elements -->
+        <div id="water-card" style="display: none;"></div>
+        <div id="posture-card" style="display: none;"></div>
+        <div id="water-status-badge"></div>
+        <div id="posture-status-badge"></div>
+        <div id="water-time"></div>
+        <div id="posture-time"></div>
+        <div id="water-toggle"></div>
+        <div id="posture-toggle"></div>
+        <div id="settings-panel"></div>
+    </div>
+
+    <!-- Include all scripts -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/activity-detector.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/water-reminder.js"></script>
+    <script src="js/standup-reminder.js"></script>
+    <script src="js/ui-controller.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        let app;
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function checkStatus() {
+            const indicator = document.getElementById('app-status-indicator');
+            const text = document.getElementById('app-status-text');
+            
+            log('=== Status Check ===');
+            log('Indicator classes: ' + indicator.className);
+            log('Text content: ' + text.textContent);
+            log('Has active class: ' + indicator.classList.contains('active'));
+            
+            if (app && app.uiController) {
+                log('Water active: ' + app.uiController.uiState.water.isActive);
+                log('Posture active: ' + app.uiController.uiState.posture.isActive);
+            }
+        }
+        
+        async function init() {
+            try {
+                log('Initializing app...');
+                app = new OfficeWellnessApp();
+                await app.initialize();
+                log('App initialized successfully');
+                checkStatus();
+            } catch (error) {
+                log('ERROR: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>

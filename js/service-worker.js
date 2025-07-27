@@ -37,7 +37,7 @@ const MEDIA_ASSETS = [
   '/assets/favicon.ico',
   '/assets/notification.mp3',
   '/assets/standup-icon.png',
-  '/assets/posture-reminder.mp3',
+  '/assets/standup-reminder.mp3',
   '/assets/water-icon.png',
   '/assets/water-reminder.mp3'
 ];

@@ -54,11 +54,11 @@ class OfficeWellnessApp {
             // Load user settings and state
             await this.loadSettingsAndState();
             
-            // Set up event listeners (for reminder callbacks)
-            this.setupEventListeners();
-            
             // Initialize UI
             this.initializeUI();
+            
+            // Set up event listeners (for reminder callbacks)
+            this.setupEventListeners();
             
             // Request notification permission
             await this.requestNotificationPermission();
@@ -1213,11 +1213,11 @@ function setupFallbackButtons() {
             if (isActive) {
                 postureToggle.textContent = 'Pause';
                 postureToggle.className = 'btn-secondary';
-                showSimpleNotification('Posture reminder started!');
+                showSimpleNotification('Standup reminder started!');
             } else {
                 postureToggle.textContent = 'Start';
                 postureToggle.className = 'btn-primary';
-                showSimpleNotification('Posture reminder paused!');
+                showSimpleNotification('Standup reminder paused!');
             }
         });
         console.log('Posture toggle fallback handler added');
@@ -1259,7 +1259,7 @@ function showSimpleNotification(message) {
         position: fixed;
         top: 80px;
         right: 20px;
-        background: #4CAF50;
+        background: #3498db;
         color: white;
         padding: 10px 20px;
         border-radius: 4px;
@@ -1364,11 +1364,11 @@ function bindFallbackHandlers() {
             if (isActive) {
                 this.textContent = 'Pause';
                 this.className = 'btn-secondary';
-                showSimpleNotification('Posture reminder started!');
+                showSimpleNotification('Standup reminder started!');
             } else {
                 this.textContent = 'Start';
                 this.className = 'btn-primary';
-                showSimpleNotification('Posture reminder paused!');
+                showSimpleNotification('Standup reminder paused!');
             }
         };
         
@@ -1399,4 +1399,9 @@ function bindFallbackHandlers() {
         startAllBtn.addEventListener('click', startAllHandler, true);
         startAllBtn.addEventListener('click', startAllHandler, false); // 双重绑定确保触发
     }
+}
+
+// 导出类供其他模块使用
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = OfficeWellnessApp;
 }
