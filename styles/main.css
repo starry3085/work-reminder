@@ -1441,6 +1441,13 @@ ile-specific enhancements */
     align-items: center;
 }
 
+.guide-header .btn-close {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
 .guide-content {
     padding: 1.5rem;
 }
@@ -1451,6 +1458,13 @@ ile-specific enhancements */
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
+}
+
+.guide-footer button {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+    cursor: pointer;
 }
 
 .guide-step {
