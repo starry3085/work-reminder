@@ -1192,15 +1192,26 @@ function setupFallbackButtons() {
         const indicator = document.getElementById('app-status-indicator');
         const text = document.getElementById('app-status-text');
         
+        console.log('Updating app status - water:', waterActive, 'posture:', postureActive);
+        
         if (indicator && text) {
             const isActive = waterActive || postureActive;
+            console.log('Combined active status:', isActive);
+            
             if (isActive) {
                 indicator.classList.add('active');
                 text.textContent = 'Wellness Reminders Active';
+                console.log('Set status to active');
             } else {
                 indicator.classList.remove('active');
                 text.textContent = 'Wellness Reminders Inactive';
+                console.log('Set status to inactive');
             }
+            
+            console.log('Final indicator classes:', indicator.className);
+            console.log('Final text content:', text.textContent);
+        } else {
+            console.warn('Status elements not found - indicator:', !!indicator, 'text:', !!text);
         }
     }
     
