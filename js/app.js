@@ -1183,22 +1183,58 @@ window.OfficeWellnessApp = OfficeWellnessApp;
 function setupFallbackButtons() {
     console.log('Setting up fallback button handlers...');
     
+    // 状态跟踪
+    let waterActive = false;
+    let postureActive = false;
+    
+    // 更新应用状态指示器的函数
+    function updateAppStatus() {
+        const indicator = document.getElementById('app-status-indicator');
+        const text = document.getElementById('app-status-text');
+        
+        console.log('Updating app status - water:', waterActive, 'posture:', postureActive);
+        
+        if (indicator && text) {
+            const isActive = waterActive || postureActive;
+            console.log('Combined active status:', isActive);
+            
+            if (isActive) {
+                indicator.classList.add('active');
+                text.textContent = 'Wellness Reminders Active';
+                console.log('Set status to active');
+            } else {
+                indicator.classList.remove('active');
+                text.textContent = 'Wellness Reminders Inactive';
+                console.log('Set status to inactive');
+            }
+            
+            console.log('Final indicator classes:', indicator.className);
+            console.log('Final text content:', text.textContent);
+        } else {
+            console.warn('Status elements not found - indicator:', !!indicator, 'text:', !!text);
+        }
+    }
+    
     // 水提醒按钮
     const waterToggle = document.getElementById('water-toggle');
     if (waterToggle) {
         waterToggle.addEventListener('click', () => {
             console.log('Water toggle clicked (fallback)');
-            const isActive = waterToggle.textContent === 'Start';
+            const isStart = waterToggle.textContent.trim() === 'Start';
             
-            if (isActive) {
+            if (isStart) {
                 waterToggle.textContent = 'Pause';
                 waterToggle.className = 'btn-secondary';
-                showSimpleNotification('Water reminder started!');
+                waterActive = true;
+                showSimpleNotification('💧 Water reminder started!');
             } else {
                 waterToggle.textContent = 'Start';
                 waterToggle.className = 'btn-primary';
-                showSimpleNotification('Water reminder paused!');
+                waterActive = false;
+                showSimpleNotification('💧 Water reminder paused!');
             }
+            
+            updateAppStatus();
         });
         console.log('Water toggle fallback handler added');
     }
@@ -1208,17 +1244,21 @@ function setupFallbackButtons() {
     if (postureToggle) {
         postureToggle.addEventListener('click', () => {
             console.log('Posture toggle clicked (fallback)');
-            const isActive = postureToggle.textContent === 'Start';
+            const isStart = postureToggle.textContent.trim() === 'Start';
             
-            if (isActive) {
+            if (isStart) {
                 postureToggle.textContent = 'Pause';
                 postureToggle.className = 'btn-secondary';
-                showSimpleNotification('Standup reminder started!');
+                postureActive = true;
+                showSimpleNotification('🧘 Standup reminder started!');
             } else {
                 postureToggle.textContent = 'Start';
                 postureToggle.className = 'btn-primary';
-                showSimpleNotification('Standup reminder paused!');
+                postureActive = false;
+                showSimpleNotification('🧘 Standup reminder paused!');
             }
+            
+            updateAppStatus();
         });
         console.log('Posture toggle fallback handler added');
     }

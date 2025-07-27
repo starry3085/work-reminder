@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fallback Test</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>Office Wellness Reminder</h1>
+            <p class="app-subtitle">Fallback Test</p>
+            <div class="app-status-summary" id="app-status-summary">
+                <div class="status-indicator" id="app-status-indicator"></div>
+                <span id="app-status-text">Wellness Reminders Inactive</span>
+            </div>
+        </header>
+
+        <div style="background: white; padding: 20px; margin: 20px 0; border-radius: 8px;">
+            <button id="water-toggle" class="btn-primary">Start</button>
+            <button id="posture-toggle" class="btn-primary">Start</button>
+            <button id="start-all-btn" class="btn-primary">Start All</button>
+            <button id="pause-all-btn" class="btn-secondary">Pause All</button>
+            <button onclick="checkStatus()">Check Status</button>
+            <button onclick="simulateInitFailure()">Simulate Init Failure</button>
+        </div>
+
+        <div id="log" style="background: #f5f5f5; padding: 10px; margin: 10px 0; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function checkStatus() {
+            const indicator = document.getElementById('app-status-indicator');
+            const text = document.getElementById('app-status-text');
+            
+            log('=== Status Check ===');
+            log('Indicator classes: ' + indicator.className);
+            log('Text content: ' + text.textContent);
+            log('Has active class: ' + indicator.classList.contains('active'));
+        }
+        
+        function simulateInitFailure() {
+            log('Simulating initialization failure...');
+            
+            // 模拟应用初始化失败的情况
+            setupFallbackButtons();
+            log('Fallback buttons set up');
+        }
+        
+        // 从app.js复制的fallback函数
+        function setupFallbackButtons() {
+            console.log('Setting up fallback button handlers...');
+            
+            // 状态跟踪
+            let waterActive = false;
+            let postureActive = false;
+            
+            // 更新应用状态指示器的函数
+            function updateAppStatus() {
+                const indicator = document.getElementById('app-status-indicator');
+                const text = document.getElementById('app-status-text');
+                
+                console.log('Updating app status - water:', waterActive, 'posture:', postureActive);
+                
+                if (indicator && text) {
+                    const isActive = waterActive || postureActive;
+                    console.log('Combined active status:', isActive);
+                    
+                    if (isActive) {
+                        indicator.classList.add('active');
+                        text.textContent = 'Wellness Reminders Active';
+                        console.log('Set status to active');
+                    } else {
+                        indicator.classList.remove('active');
+                        text.textContent = 'Wellness Reminders Inactive';
+                        console.log('Set status to inactive');
+                    }
+                    
+                    console.log('Final indicator classes:', indicator.className);
+                    console.log('Final text content:', text.textContent);
+                } else {
+                    console.warn('Status elements not found - indicator:', !!indicator, 'text:', !!text);
+                }
+            }
+            
+            // 水提醒按钮
+            const waterToggle = document.getElementById('water-toggle');
+            if (waterToggle) {
+                waterToggle.addEventListener('click', () => {
+                    console.log('Water toggle clicked (fallback)');
+                    const isStart = waterToggle.textContent.trim() === 'Start';
+                    
+                    if (isStart) {
+                        waterToggle.textContent = 'Pause';
+                        waterToggle.className = 'btn-secondary';
+                        waterActive = true;
+                        log('💧 Water reminder started!');
+                    } else {
+                        waterToggle.textContent = 'Start';
+                        waterToggle.className = 'btn-primary';
+                        waterActive = false;
+                        log('💧 Water reminder paused!');
+                    }
+                    
+                    updateAppStatus();
+                });
+                console.log('Water toggle fallback handler added');
+            }
+            
+            // 姿势提醒按钮
+            const postureToggle = document.getElementById('posture-toggle');
+            if (postureToggle) {
+                postureToggle.addEventListener('click', () => {
+                    console.log('Posture toggle clicked (fallback)');
+                    const isStart = postureToggle.textContent.trim() === 'Start';
+                    
+                    if (isStart) {
+                        postureToggle.textContent = 'Pause';
+                        postureToggle.className = 'btn-secondary';
+                        postureActive = true;
+                        log('🧘 Standup reminder started!');
+                    } else {
+                        postureToggle.textContent = 'Start';
+                        postureToggle.className = 'btn-primary';
+                        postureActive = false;
+                        log('🧘 Standup reminder paused!');
+                    }
+                    
+                    updateAppStatus();
+                });
+                console.log('Posture toggle fallback handler added');
+            }
+            
+            // Start All 按钮
+            const startAllBtn = document.getElementById('start-all-btn');
+            if (startAllBtn) {
+                startAllBtn.addEventListener('click', () => {
+                    console.log('Start All clicked (fallback)');
+                    if (waterToggle && waterToggle.textContent.trim() === 'Start') {
+                        waterToggle.click();
+                    }
+                    if (postureToggle && postureToggle.textContent.trim() === 'Start') {
+                        postureToggle.click();
+                    }
+                });
+            }
+            
+            // Pause All 按钮
+            const pauseAllBtn = document.getElementById('pause-all-btn');
+            if (pauseAllBtn) {
+                pauseAllBtn.addEventListener('click', () => {
+                    console.log('Pause All clicked (fallback)');
+                    if (waterToggle && waterToggle.textContent.trim() === 'Pause') {
+                        waterToggle.click();
+                    }
+                    if (postureToggle && postureToggle.textContent.trim() === 'Pause') {
+                        postureToggle.click();
+                    }
+                });
+            }
+        }
+        
+        window.onload = function() {
+            log('Page loaded');
+            checkStatus();
+        };
+    </script>
+</body>
+</html>
