@@ -788,7 +788,9 @@ class OfficeWellnessApp {
                 });
                 
                 if (closeBtn) {
-                    closeBtn.addEventListener('click', () => {
+                    closeBtn.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
                         console.log('Guide close button clicked');
                         this.closeFirstUseGuide(guideOverlay);
                         // 标记首次使用完成
@@ -797,7 +799,9 @@ class OfficeWellnessApp {
                 }
                 
                 if (settingsBtn) {
-                    settingsBtn.addEventListener('click', () => {
+                    settingsBtn.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
                         console.log('Guide settings button clicked');
                         this.closeFirstUseGuide(guideOverlay);
                         // 标记首次使用完成
@@ -810,7 +814,9 @@ class OfficeWellnessApp {
                 }
                 
                 if (startBtn) {
-                    startBtn.addEventListener('click', () => {
+                    startBtn.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
                         console.log('Guide start button clicked');
                         this.closeFirstUseGuide(guideOverlay);
                         // 标记首次使用完成
@@ -833,8 +839,12 @@ class OfficeWellnessApp {
      * @private
      */
     closeFirstUseGuide(guideOverlay) {
+        console.log('Closing first use guide');
         if (guideOverlay && guideOverlay.parentNode) {
             guideOverlay.parentNode.removeChild(guideOverlay);
+            console.log('Guide overlay removed');
+        } else {
+            console.warn('Guide overlay not found or already removed');
         }
     }
 
