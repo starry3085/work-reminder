@@ -774,28 +774,53 @@ class OfficeWellnessApp {
             
             document.body.appendChild(guideOverlay);
             
-            // 添加事件监听
-            document.getElementById('guide-close').addEventListener('click', () => {
-                this.closeFirstUseGuide(guideOverlay);
-            });
-            
-            document.getElementById('guide-settings').addEventListener('click', () => {
-                this.closeFirstUseGuide(guideOverlay);
-                // 打开设置面板
-                if (this.uiController) {
-                    this.uiController.showSettings();
+            // 使用setTimeout确保DOM元素已经完全添加
+            setTimeout(() => {
+                // 添加事件监听
+                const closeBtn = document.getElementById('guide-close');
+                const settingsBtn = document.getElementById('guide-settings');
+                const startBtn = document.getElementById('guide-start');
+                
+                console.log('Guide buttons found:', {
+                    closeBtn: !!closeBtn,
+                    settingsBtn: !!settingsBtn,
+                    startBtn: !!startBtn
+                });
+                
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        console.log('Guide close button clicked');
+                        this.closeFirstUseGuide(guideOverlay);
+                        // 标记首次使用完成
+                        this.appSettings.markFirstUseComplete();
+                    });
                 }
-            });
-            
-            document.getElementById('guide-start').addEventListener('click', () => {
-                this.closeFirstUseGuide(guideOverlay);
-                // 直接开始提醒
-                this.startReminder('water');
-                this.startReminder('posture');
-            });
-            
-            // 标记首次使用完成
-            this.appSettings.markFirstUseComplete();
+                
+                if (settingsBtn) {
+                    settingsBtn.addEventListener('click', () => {
+                        console.log('Guide settings button clicked');
+                        this.closeFirstUseGuide(guideOverlay);
+                        // 标记首次使用完成
+                        this.appSettings.markFirstUseComplete();
+                        // 打开设置面板
+                        if (this.uiController) {
+                            this.uiController.showSettings();
+                        }
+                    });
+                }
+                
+                if (startBtn) {
+                    startBtn.addEventListener('click', () => {
+                        console.log('Guide start button clicked');
+                        this.closeFirstUseGuide(guideOverlay);
+                        // 标记首次使用完成
+                        this.appSettings.markFirstUseComplete();
+                        // 直接开始提醒
+                        this.startReminder('water');
+                        this.startReminder('posture');
+                    });
+                }
+            }, 100);
             
         } catch (error) {
             console.error('显示首次使用引导失败:', error);
@@ -931,43 +956,6 @@ class OfficeWellnessApp {
         } catch (recoveryError) {
             console.error('Failed to recover from initialization error:', recoveryError);
             this.showFallbackError('Application failed to start. Please refresh the page.');
-        }
-    }sole.error('应用初始化错误:', error);
-        
-        // 使用错误处理器获取用户友好的错误信息
-        let errorInfo;
-        if (this.errorHandler) {
-            errorInfo = this.errorHandler.getUserFriendlyError(error);
-        } else {
-            // 如果错误处理器不可用，使用旧方法
-            errorInfo = {
-                title: '初始化失败',
-                message: this.getErrorMessage(error),
-                type: 'error',
-                solution: '请刷新页面重试'
-            };
-        }
-        
-        // 尝试显示错误信息
-        try {
-            if (this.uiController && this.uiController.isInitialized) {
-                this.uiController.showInPageNotification(
-                    errorInfo.type || 'error', 
-                    errorInfo.title || '初始化失败', 
-                    errorInfo.message
-                );
-                
-                // 如果有解决方案，显示在控制台
-                if (errorInfo.solution) {
-                    console.info('建议解决方案:', errorInfo.solution);
-                }
-            } else {
-                // 如果UI控制器不可用，直接在页面显示
-                this.showFallbackError(errorInfo.message || '应用初始化失败');
-            }
-        } catch (displayError) {
-            console.error('显示错误信息失败:', displayError);
-            this.showFallbackError('应用启动失败，请刷新页面重试');
         }
     }
 
@@ -1179,8 +1167,9 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // 导出给其他脚本使用
-window.OfficeWellnessApp = OfficeWellnessApp;/
-/ 备用按钮功能 - 当主应用初始化失败时使用
+window.OfficeWellnessApp = OfficeWellnessApp;
+
+// 备用按钮功能 - 当主应用初始化失败时使用
 function setupFallbackButtons() {
     console.log('Setting up fallback button handlers...');
     
@@ -1276,9 +1265,6 @@ function showSimpleNotification(message) {
         }
     }, 3000);
 }
-
-// 全局应用实例
-let app = null;
 
 // 应用初始化
 document.addEventListener('DOMContentLoaded', async () => {

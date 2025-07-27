@@ -309,5 +309,134 @@
     <script src="js/mobile-adapter.js"></script>
     <script src="js/ui-controller.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- Emergency Button Fix -->
+    <script>
+        // 紧急按钮修复 - 确保按钮总是能工作
+        (function() {
+            function showNotification(message) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #4CAF50;
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 5px;
+                    z-index: 10000;
+                    font-family: Arial, sans-serif;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 3000);
+            }
+
+            function initButtons() {
+                console.log('Emergency button initialization...');
+                
+                const waterToggle = document.getElementById('water-toggle');
+                const postureToggle = document.getElementById('posture-toggle');
+                const startAllBtn = document.getElementById('start-all-btn');
+                
+                if (waterToggle) {
+                    console.log('Found water toggle button');
+                    waterToggle.onclick = function(e) {
+                        console.log('Water button clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const isStart = this.textContent.trim() === 'Start';
+                        if (isStart) {
+                            this.textContent = 'Pause';
+                            this.className = 'btn-secondary';
+                            showNotification('💧 Water reminder started!');
+                        } else {
+                            this.textContent = 'Start';
+                            this.className = 'btn-primary';
+                            showNotification('💧 Water reminder paused!');
+                        }
+                        return false;
+                    };
+                } else {
+                    console.error('Water toggle button not found!');
+                }
+                
+                if (postureToggle) {
+                    console.log('Found posture toggle button');
+                    postureToggle.onclick = function(e) {
+                        console.log('Posture button clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const isStart = this.textContent.trim() === 'Start';
+                        if (isStart) {
+                            this.textContent = 'Pause';
+                            this.className = 'btn-secondary';
+                            showNotification('🧘 Posture reminder started!');
+                        } else {
+                            this.textContent = 'Start';
+                            this.className = 'btn-primary';
+                            showNotification('🧘 Posture reminder paused!');
+                        }
+                        return false;
+                    };
+                } else {
+                    console.error('Posture toggle button not found!');
+                }
+                
+                if (startAllBtn) {
+                    console.log('Found start all button');
+                    startAllBtn.onclick = function(e) {
+                        console.log('Start all button clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        let started = [];
+                        
+                        if (waterToggle && waterToggle.textContent.trim() === 'Start') {
+                            waterToggle.click();
+                            started.push('Water');
+                        }
+                        
+                        if (postureToggle && postureToggle.textContent.trim() === 'Start') {
+                            postureToggle.click();
+                            started.push('Posture');
+                        }
+                        
+                        if (started.length > 0) {
+                            showNotification(`🚀 Started: ${started.join(' & ')} reminders!`);
+                        } else {
+                            showNotification('ℹ️ All reminders are already active');
+                        }
+                        
+                        return false;
+                    };
+                } else {
+                    console.error('Start all button not found!');
+                }
+                
+                console.log('Emergency button initialization complete');
+            }
+
+            // 立即尝试初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initButtons);
+            } else {
+                initButtons();
+            }
+            
+            // 延迟再次尝试，确保DOM完全加载
+            setTimeout(initButtons, 100);
+            setTimeout(initButtons, 500);
+            setTimeout(initButtons, 1000);
+        })();
+    </script>
 </body>
 </html>
