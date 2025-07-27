@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Fix Test</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Button Fix Test</h1>
+        
+        <div class="reminder-card" id="water-card">
+            <div class="card-header">
+                <div class="card-icon water-icon"></div>
+                <div class="card-title">
+                    <h3>Water Reminder</h3>
+                    <div class="card-status">
+                        <span class="status-badge" id="water-status-badge">Inactive</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-time" id="water-time">
+                <div class="time-display">
+                    <label>Interval (minutes):</label>
+                    <input type="number" id="water-interval-display" value="30" min="1" max="60">
+                </div>
+            </div>
+            <div class="card-controls">
+                <button class="btn-primary" id="water-toggle">Start</button>
+                <button class="btn-secondary" id="water-reset" style="display: none;">Reset</button>
+                <button class="btn-action" id="waterDrink" style="display: none;">Hydrated</button>
+            </div>
+        </div>
+
+        <div class="reminder-card" id="posture-card">
+            <div class="card-header">
+                <div class="card-icon posture-icon"></div>
+                <div class="card-title">
+                    <h3>Standup Reminder</h3>
+                    <div class="card-status">
+                        <span class="status-badge" id="posture-status-badge">Inactive</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-time" id="posture-time">
+                <div class="time-display">
+                    <label>Interval (minutes):</label>
+                    <input type="number" id="posture-interval-display" value="30" min="1" max="60">
+                </div>
+            </div>
+            <div class="card-controls">
+                <button class="btn-primary" id="posture-toggle">Start</button>
+                <button class="btn-secondary" id="posture-reset" style="display: none;">Reset</button>
+                <button class="btn-action" id="postureActivity" style="display: none;">Moved</button>
+            </div>
+        </div>
+
+        <section class="quick-actions">
+            <div class="quick-actions-group">
+                <button class="btn-action" id="start-all-btn">Start All</button>
+                <button class="btn-action" id="pause-all-btn">Pause All</button>
+            </div>
+        </section>
+
+        <!-- Required elements for UI controller -->
+        <div id="app-status-indicator"></div>
+        <div id="app-status-text"></div>
+        <div id="settings-panel"></div>
+        
+        <div id="log" style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+            <h3>Event Log:</h3>
+            <div id="log-content">Initializing...</div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/error-handler.js"></script>
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/activity-detector.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/water-reminder.js"></script>
+    <script src="js/standup-reminder.js"></script>
+    <script src="js/mobile-adapter.js"></script>
+    <script src="js/ui-controller.js"></script>
+    <script src="js/app.js"></script>
+
+    <script>
+        function addLog(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+        }
+
+        // Force button event binding
+        document.addEventListener('DOMContentLoaded', () => {
+            addLog('DOM loaded, forcing button event binding...');
+            
+            setTimeout(() => {
+                const waterToggle = document.getElementById('water-toggle');
+                const postureToggle = document.getElementById('posture-toggle');
+                const startAllBtn = document.getElementById('start-all-btn');
+                
+                // Force direct event binding
+                if (waterToggle) {
+                    addLog('Binding water toggle...');
+                    waterToggle.addEventListener('click', function(e) {
+                        addLog('Water toggle clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const isStart = this.textContent.trim() === 'Start';
+                        if (isStart) {
+                            this.textContent = 'Pause';
+                            this.className = 'btn-secondary';
+                            addLog('Water reminder started');
+                        } else {
+                            this.textContent = 'Start';
+                            this.className = 'btn-primary';
+                            addLog('Water reminder paused');
+                        }
+                    }, true);
+                }
+                
+                if (postureToggle) {
+                    addLog('Binding posture toggle...');
+                    postureToggle.addEventListener('click', function(e) {
+                        addLog('Posture toggle clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const isStart = this.textContent.trim() === 'Start';
+                        if (isStart) {
+                            this.textContent = 'Pause';
+                            this.className = 'btn-secondary';
+                            addLog('Posture reminder started');
+                        } else {
+                            this.textContent = 'Start';
+                            this.className = 'btn-primary';
+                            addLog('Posture reminder paused');
+                        }
+                    }, true);
+                }
+                
+                if (startAllBtn) {
+                    addLog('Binding start all...');
+                    startAllBtn.addEventListener('click', function(e) {
+                        addLog('Start all clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        if (waterToggle && waterToggle.textContent.trim() === 'Start') {
+                            waterToggle.click();
+                        }
+                        if (postureToggle && postureToggle.textContent.trim() === 'Start') {
+                            postureToggle.click();
+                        }
+                    }, true);
+                }
+                
+                addLog('Direct button binding complete');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -54,7 +54,7 @@ class OfficeWellnessApp {
             // Load user settings and state
             await this.loadSettingsAndState();
             
-            // Set up event listeners
+            // Set up event listeners (for reminder callbacks)
             this.setupEventListeners();
             
             // Initialize UI
@@ -92,10 +92,20 @@ class OfficeWellnessApp {
     async initializeComponents() {
         try {
             // Initialize error handler
-            this.errorHandler = new ErrorHandler();
+            try {
+                this.errorHandler = new ErrorHandler();
+            } catch (error) {
+                console.warn('Failed to initialize error handler:', error);
+                this.errorHandler = null;
+            }
             
             // Initialize mobile adapter
-            this.mobileAdapter = new MobileAdapter(this.errorHandler);
+            try {
+                this.mobileAdapter = new MobileAdapter(this.errorHandler);
+            } catch (error) {
+                console.warn('Failed to initialize mobile adapter:', error);
+                this.mobileAdapter = null;
+            }
             
             // Check browser compatibility
             this.checkBrowserCompatibility();
@@ -107,46 +117,75 @@ class OfficeWellnessApp {
             this.appSettings = new AppSettings(this.storageManager);
             
             // Initialize notification service
-            this.notificationService = new NotificationService();
+            try {
+                this.notificationService = new NotificationService();
+            } catch (error) {
+                console.warn('Failed to initialize notification service:', error);
+                // Create a fallback notification service
+                this.notificationService = {
+                    showNotification: () => console.log('Notification service unavailable'),
+                    showInPageAlert: () => console.log('In-page alert unavailable'),
+                    requestPermission: () => Promise.resolve(false)
+                };
+            }
             
             // Initialize activity detector (for posture reminders)
-            this.activityDetector = new ActivityDetector((event) => {
-                console.log('User activity status changed:', event);
-                // Activity detector callback will be handled in ReminderManager
-                
-                // Update user activity information in app state
-                if (this.appSettings) {
-                    const currentState = this.appSettings.getState();
-                    currentState.userActivity = {
-                        isActive: event.isActive,
-                        lastActivityTime: event.lastActivityTime,
-                        awayStartTime: event.awayStartTime
-                    };
-                    this.appSettings.updateState(currentState);
-                }
-            });
+            try {
+                this.activityDetector = new ActivityDetector((event) => {
+                    console.log('User activity status changed:', event);
+                    // Activity detector callback will be handled in ReminderManager
+                    
+                    // Update user activity information in app state
+                    if (this.appSettings) {
+                        const currentState = this.appSettings.getState();
+                        currentState.userActivity = {
+                            isActive: event.isActive,
+                            lastActivityTime: event.lastActivityTime,
+                            awayStartTime: event.awayStartTime
+                        };
+                        this.appSettings.updateState(currentState);
+                    }
+                });
+            } catch (error) {
+                console.warn('Failed to initialize activity detector:', error);
+                this.activityDetector = null;
+            }
             
             // Get current settings
             const currentSettings = this.appSettings.getSettings();
             
             // Initialize reminder managers
-            this.waterReminder = new WaterReminder(
-                currentSettings.water, 
-                this.notificationService
-            );
+            try {
+                this.waterReminder = new WaterReminder(
+                    currentSettings.water, 
+                    this.notificationService
+                );
+            } catch (error) {
+                console.warn('Failed to initialize water reminder:', error);
+                this.waterReminder = null;
+            }
             
-            this.postureReminder = new PostureReminder(
-                currentSettings.posture, 
-                this.notificationService,
-                this.activityDetector // Pass activity detector to posture reminder
-            );
+            try {
+                this.postureReminder = new PostureReminder(
+                    currentSettings.posture, 
+                    this.notificationService,
+                    this.activityDetector // Pass activity detector to posture reminder
+                );
+            } catch (error) {
+                console.warn('Failed to initialize posture reminder:', error);
+                this.postureReminder = null;
+            }
             
             // Initialize UI controller
             this.uiController = new UIController();
             
             // Apply mobile adaptation
             if (this.mobileAdapter) {
-                this.mobileAdapter.applyMobileAdaptation();
+                try {
+                    this.mobileAdapter.applyMobileAdaptation();
+                } catch (error) {
+                    console.warn('Failed to apply mobile adaptation:', error);
+                }
             }
         } catch (error) {
             console.error('Failed to initialize components:', error);
@@ -291,7 +330,7 @@ class OfficeWellnessApp {
      */
     setupEventListeners() {
         // 设置水提醒状态变化回调
-        if (this.waterReminder) {
+        if (this.waterReminder && typeof this.waterReminder.setStatusChangeCallback === 'function') {
             this.waterReminder.setStatusChangeCallback((status) => {
                 console.log('水提醒状态变化:', status);
                 if (this.uiController) {
@@ -299,15 +338,17 @@ class OfficeWellnessApp {
                 }
             });
             
-            this.waterReminder.setTimeUpdateCallback((timeInfo) => {
-                if (this.uiController) {
-                    this.uiController.updateReminderTime('water', timeInfo);
-                }
-            });
+            if (typeof this.waterReminder.setTimeUpdateCallback === 'function') {
+                this.waterReminder.setTimeUpdateCallback((timeInfo) => {
+                    if (this.uiController) {
+                        this.uiController.updateReminderTime('water', timeInfo);
+                    }
+                });
+            }
         }
         
         // 设置久坐提醒状态变化回调
-        if (this.postureReminder) {
+        if (this.postureReminder && typeof this.postureReminder.setStatusChangeCallback === 'function') {
             this.postureReminder.setStatusChangeCallback((status) => {
                 console.log('久坐提醒状态变化:', status);
                 if (this.uiController) {
@@ -315,23 +356,27 @@ class OfficeWellnessApp {
                 }
                 
                 // If auto-pause or resume, show notification
-                if (status.isAuto) {
+                if (status.isAuto && this.notificationService) {
                     const message = status.status === 'paused' 
                         ? 'Detected you are away, standup reminder auto-paused' 
                         : 'Detected you have returned, standup reminder auto-resumed';
                     
-                    this.notificationService.showInPageAlert('info', {
-                        title: 'Activity Detection',
-                        message: message
-                    });
+                    if (typeof this.notificationService.showInPageAlert === 'function') {
+                        this.notificationService.showInPageAlert('info', {
+                            title: 'Activity Detection',
+                            message: message
+                        });
+                    }
                 }
             });
             
-            this.postureReminder.setTimeUpdateCallback((timeInfo) => {
-                if (this.uiController) {
-                    this.uiController.updateReminderTime('posture', timeInfo);
-                }
-            });
+            if (typeof this.postureReminder.setTimeUpdateCallback === 'function') {
+                this.postureReminder.setTimeUpdateCallback((timeInfo) => {
+                    if (this.uiController) {
+                        this.uiController.updateReminderTime('posture', timeInfo);
+                    }
+                });
+            }
         }
     }
 
@@ -348,8 +393,9 @@ class OfficeWellnessApp {
         // 初始化UI控制器
         this.uiController.initialize();
         
-        // 应用当前设置到UI
-        this.uiController.applySettingsToUI(this.currentSettings);
+        // 获取当前设置并应用到UI
+        const currentSettings = this.appSettings.getSettings();
+        this.uiController.applySettingsToUI(currentSettings);
         
         // 绑定UI事件到应用逻辑
         this.setupUIEventHandlers();
@@ -648,12 +694,17 @@ class OfficeWellnessApp {
                     
                     // 如果剩余时间有效，则恢复计时器
                     if (timeRemaining > 0 && timeRemaining < currentSettings.posture.interval * 60 * 1000) {
-                        this.postureReminder.restoreState({
-                            isActive: true,
-                            timeRemaining: timeRemaining,
-                            nextReminderAt: currentState.postureReminder.nextReminderAt,
-                            lastAcknowledged: currentState.postureReminder.lastAcknowledged
-                        });
+                        if (typeof this.postureReminder.restoreState === 'function') {
+                            this.postureReminder.restoreState({
+                                isActive: true,
+                                timeRemaining: timeRemaining,
+                                nextReminderAt: currentState.postureReminder.nextReminderAt,
+                                lastAcknowledged: currentState.postureReminder.lastAcknowledged
+                            });
+                        } else {
+                            // 如果没有restoreState方法，则重新开始
+                            this.postureReminder.start();
+                        }
                     } else {
                         // 如果时间无效，则重新开始
                         this.postureReminder.start();
@@ -723,28 +774,59 @@ class OfficeWellnessApp {
             
             document.body.appendChild(guideOverlay);
             
-            // 添加事件监听
-            document.getElementById('guide-close').addEventListener('click', () => {
-                this.closeFirstUseGuide(guideOverlay);
-            });
-            
-            document.getElementById('guide-settings').addEventListener('click', () => {
-                this.closeFirstUseGuide(guideOverlay);
-                // 打开设置面板
-                if (this.uiController) {
-                    this.uiController.showSettings();
+            // 使用setTimeout确保DOM元素已经完全添加
+            setTimeout(() => {
+                // 添加事件监听
+                const closeBtn = document.getElementById('guide-close');
+                const settingsBtn = document.getElementById('guide-settings');
+                const startBtn = document.getElementById('guide-start');
+                
+                console.log('Guide buttons found:', {
+                    closeBtn: !!closeBtn,
+                    settingsBtn: !!settingsBtn,
+                    startBtn: !!startBtn
+                });
+                
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        console.log('Guide close button clicked');
+                        this.closeFirstUseGuide(guideOverlay);
+                        // 标记首次使用完成
+                        this.appSettings.markFirstUseComplete();
+                    });
                 }
-            });
-            
-            document.getElementById('guide-start').addEventListener('click', () => {
-                this.closeFirstUseGuide(guideOverlay);
-                // 直接开始提醒
-                this.startReminder('water');
-                this.startReminder('posture');
-            });
-            
-            // 标记首次使用完成
-            this.appSettings.markFirstUseComplete();
+                
+                if (settingsBtn) {
+                    settingsBtn.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        console.log('Guide settings button clicked');
+                        this.closeFirstUseGuide(guideOverlay);
+                        // 标记首次使用完成
+                        this.appSettings.markFirstUseComplete();
+                        // 打开设置面板
+                        if (this.uiController) {
+                            this.uiController.showSettings();
+                        }
+                    });
+                }
+                
+                if (startBtn) {
+                    startBtn.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        console.log('Guide start button clicked');
+                        this.closeFirstUseGuide(guideOverlay);
+                        // 标记首次使用完成
+                        this.appSettings.markFirstUseComplete();
+                        // 直接开始提醒
+                        this.startReminder('water');
+                        this.startReminder('posture');
+                    });
+                }
+            }, 100);
             
         } catch (error) {
             console.error('显示首次使用引导失败:', error);
@@ -757,8 +839,12 @@ class OfficeWellnessApp {
      * @private
      */
     closeFirstUseGuide(guideOverlay) {
+        console.log('Closing first use guide');
         if (guideOverlay && guideOverlay.parentNode) {
             guideOverlay.parentNode.removeChild(guideOverlay);
+            console.log('Guide overlay removed');
+        } else {
+            console.warn('Guide overlay not found or already removed');
         }
     }
 
@@ -817,7 +903,8 @@ class OfficeWellnessApp {
      * @private
      */
     async requestNotificationPermission() {
-        if (!this.currentSettings.notifications.browserNotifications) {
+        const currentSettings = this.appSettings.getSettings();
+        if (!currentSettings.notifications.browserNotifications) {
             return;
         }
 
@@ -825,23 +912,26 @@ class OfficeWellnessApp {
             const hasPermission = await this.notificationService.requestPermission();
             if (!hasPermission) {
                 // 显示权限请求提示
-                this.uiController.showPermissionPrompt(
-                    async () => {
-                        // 用户点击允许
-                        const granted = await this.notificationService.requestPermission();
-                        if (granted) {
-                            console.log('通知权限已获得');
-                        } else {
-                            console.log('用户拒绝了通知权限');
+                if (this.uiController && typeof this.uiController.showPermissionPrompt === 'function') {
+                    this.uiController.showPermissionPrompt(
+                        async () => {
+                            // 用户点击允许
+                            const granted = await this.notificationService.requestPermission();
+                            if (granted) {
+                                console.log('通知权限已获得');
+                            } else {
+                                console.log('用户拒绝了通知权限');
+                            }
+                        },
+                        () => {
+                            // 用户点击拒绝
+                            console.log('用户选择不开启通知权限');
+                            const settings = this.appSettings.getSettings();
+                            settings.notifications.browserNotifications = false;
+                            this.appSettings.saveSettings(settings);
                         }
-                    },
-                    () => {
-                        // 用户点击拒绝
-                        console.log('用户选择不开启通知权限');
-                        this.currentSettings.notifications.browserNotifications = false;
-                        this.saveSettings();
-                    }
-                );
+                    );
+                }
             }
         } catch (error) {
             console.warn('请求通知权限失败:', error);
@@ -854,42 +944,28 @@ class OfficeWellnessApp {
      * @private
      */
     handleInitializationError(error) {
-        console.error('应用初始化错误:', error);
+        console.error('Application initialization error:', error);
         
-        // 使用错误处理器获取用户友好的错误信息
-        let errorInfo;
-        if (this.errorHandler) {
-            errorInfo = this.errorHandler.getUserFriendlyError(error);
-        } else {
-            // 如果错误处理器不可用，使用旧方法
-            errorInfo = {
-                title: '初始化失败',
-                message: this.getErrorMessage(error),
-                type: 'error',
-                solution: '请刷新页面重试'
-            };
-        }
+        // 显示用户友好的错误信息
+        const errorMessage = this.getErrorMessage(error);
+        this.showFallbackError(errorMessage);
         
-        // 尝试显示错误信息
+        // 尝试基本功能恢复
         try {
-            if (this.uiController && this.uiController.isInitialized) {
-                this.uiController.showInPageNotification(
-                    errorInfo.type || 'error', 
-                    errorInfo.title || '初始化失败', 
-                    errorInfo.message
-                );
-                
-                // 如果有解决方案，显示在控制台
-                if (errorInfo.solution) {
-                    console.info('建议解决方案:', errorInfo.solution);
-                }
-            } else {
-                // 如果UI控制器不可用，直接在页面显示
-                this.showFallbackError(errorInfo.message || '应用初始化失败');
+            // 至少确保UI可以显示
+            if (!this.uiController) {
+                this.uiController = new UIController();
+                this.uiController.initialize();
             }
-        } catch (displayError) {
-            console.error('显示错误信息失败:', displayError);
-            this.showFallbackError('应用启动失败，请刷新页面重试');
+            
+            // 显示错误状态
+            if (this.uiController) {
+                this.uiController.updateAppStatusSummary(false);
+            }
+            
+        } catch (recoveryError) {
+            console.error('Failed to recover from initialization error:', recoveryError);
+            this.showFallbackError('Application failed to start. Please refresh the page.');
         }
     }
 
@@ -898,22 +974,33 @@ class OfficeWellnessApp {
      * @param {string} type - 'water' | 'posture'
      */
     startReminder(type) {
-        const currentSettings = this.appSettings.getSettings();
-        
-        if (type === 'water' && this.waterReminder) {
-            this.waterReminder.start();
-            currentSettings.water.enabled = true;
-            this.appSettings.updateSettings(currentSettings);
+        try {
+            if (!this.appSettings) {
+                console.warn('App settings not initialized, cannot start reminder');
+                return;
+            }
             
-            // 保存应用状态
-            this.saveAppState();
-        } else if (type === 'posture' && this.postureReminder) {
-            this.postureReminder.start();
-            currentSettings.posture.enabled = true;
-            this.appSettings.updateSettings(currentSettings);
+            const currentSettings = this.appSettings.getSettings();
             
-            // 保存应用状态
-            this.saveAppState();
+            if (type === 'water' && this.waterReminder) {
+                this.waterReminder.start();
+                currentSettings.water.enabled = true;
+                this.appSettings.updateSettings(currentSettings);
+                
+                // 保存应用状态
+                this.saveAppState();
+            } else if (type === 'posture' && this.postureReminder) {
+                this.postureReminder.start();
+                currentSettings.posture.enabled = true;
+                this.appSettings.updateSettings(currentSettings);
+                
+                // 保存应用状态
+                this.saveAppState();
+            } else {
+                console.warn(`Cannot start ${type} reminder: reminder not initialized`);
+            }
+        } catch (error) {
+            console.error(`Failed to start ${type} reminder:`, error);
         }
     }
 
@@ -922,22 +1009,33 @@ class OfficeWellnessApp {
      * @param {string} type - 'water' | 'posture'
      */
     stopReminder(type) {
-        const currentSettings = this.appSettings.getSettings();
-        
-        if (type === 'water' && this.waterReminder) {
-            this.waterReminder.stop();
-            currentSettings.water.enabled = false;
-            this.appSettings.updateSettings(currentSettings);
+        try {
+            if (!this.appSettings) {
+                console.warn('App settings not initialized, cannot stop reminder');
+                return;
+            }
             
-            // 保存应用状态
-            this.saveAppState();
-        } else if (type === 'posture' && this.postureReminder) {
-            this.postureReminder.stop();
-            currentSettings.posture.enabled = false;
-            this.appSettings.updateSettings(currentSettings);
+            const currentSettings = this.appSettings.getSettings();
             
-            // 保存应用状态
-            this.saveAppState();
+            if (type === 'water' && this.waterReminder) {
+                this.waterReminder.stop();
+                currentSettings.water.enabled = false;
+                this.appSettings.updateSettings(currentSettings);
+                
+                // 保存应用状态
+                this.saveAppState();
+            } else if (type === 'posture' && this.postureReminder) {
+                this.postureReminder.stop();
+                currentSettings.posture.enabled = false;
+                this.appSettings.updateSettings(currentSettings);
+                
+                // 保存应用状态
+                this.saveAppState();
+            } else {
+                console.warn(`Cannot stop ${type} reminder: reminder not initialized`);
+            }
+        } catch (error) {
+            console.error(`Failed to stop ${type} reminder:`, error);
         }
     }
 
@@ -1017,7 +1115,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         app = new OfficeWellnessApp();
         await app.initialize();
     } catch (error) {
-        console.error('应用启动失败:', error);
+        console.error('Application startup failed:', error);
+        
+        // 如果应用初始化失败，设置基本的按钮功能
+        setupFallbackButtons();
         
         // 显示错误信息给用户
         const errorDiv = document.createElement('div');
@@ -1032,8 +1133,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             border-radius: 8px;
             z-index: 9999;
             font-family: Arial, sans-serif;
+            max-width: 400px;
+            text-align: center;
         `;
-        errorDiv.textContent = '应用启动失败，请刷新页面重试';
+        errorDiv.innerHTML = `
+            <strong>Application Error</strong><br>
+            The application failed to start properly.<br>
+            <button onclick="location.reload()" style="margin-top: 10px; padding: 5px 10px; background: white; color: #f44336; border: none; border-radius: 4px; cursor: pointer;">
+                Refresh Page
+            </button>
+        `;
         document.body.appendChild(errorDiv);
         
         // 5秒后自动隐藏错误信息
@@ -1069,3 +1178,225 @@ document.addEventListener('visibilitychange', () => {
 
 // 导出给其他脚本使用
 window.OfficeWellnessApp = OfficeWellnessApp;
+
+// 备用按钮功能 - 当主应用初始化失败时使用
+function setupFallbackButtons() {
+    console.log('Setting up fallback button handlers...');
+    
+    // 水提醒按钮
+    const waterToggle = document.getElementById('water-toggle');
+    if (waterToggle) {
+        waterToggle.addEventListener('click', () => {
+            console.log('Water toggle clicked (fallback)');
+            const isActive = waterToggle.textContent === 'Start';
+            
+            if (isActive) {
+                waterToggle.textContent = 'Pause';
+                waterToggle.className = 'btn-secondary';
+                showSimpleNotification('Water reminder started!');
+            } else {
+                waterToggle.textContent = 'Start';
+                waterToggle.className = 'btn-primary';
+                showSimpleNotification('Water reminder paused!');
+            }
+        });
+        console.log('Water toggle fallback handler added');
+    }
+    
+    // 姿势提醒按钮
+    const postureToggle = document.getElementById('posture-toggle');
+    if (postureToggle) {
+        postureToggle.addEventListener('click', () => {
+            console.log('Posture toggle clicked (fallback)');
+            const isActive = postureToggle.textContent === 'Start';
+            
+            if (isActive) {
+                postureToggle.textContent = 'Pause';
+                postureToggle.className = 'btn-secondary';
+                showSimpleNotification('Posture reminder started!');
+            } else {
+                postureToggle.textContent = 'Start';
+                postureToggle.className = 'btn-primary';
+                showSimpleNotification('Posture reminder paused!');
+            }
+        });
+        console.log('Posture toggle fallback handler added');
+    }
+    
+    // Start All 按钮
+    const startAllBtn = document.getElementById('start-all-btn');
+    if (startAllBtn) {
+        startAllBtn.addEventListener('click', () => {
+            console.log('Start All clicked (fallback)');
+            if (waterToggle && waterToggle.textContent === 'Start') {
+                waterToggle.click();
+            }
+            if (postureToggle && postureToggle.textContent === 'Start') {
+                postureToggle.click();
+            }
+        });
+    }
+    
+    // Pause All 按钮
+    const pauseAllBtn = document.getElementById('pause-all-btn');
+    if (pauseAllBtn) {
+        pauseAllBtn.addEventListener('click', () => {
+            console.log('Pause All clicked (fallback)');
+            if (waterToggle && waterToggle.textContent === 'Pause') {
+                waterToggle.click();
+            }
+            if (postureToggle && postureToggle.textContent === 'Pause') {
+                postureToggle.click();
+            }
+        });
+    }
+}
+
+// 简单通知函数
+function showSimpleNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        z-index: 10000;
+        font-family: Arial, sans-serif;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 3000);
+}
+
+// 应用初始化
+document.addEventListener('DOMContentLoaded', async () => {
+    // 立即初始化备用按钮处理，确保按钮总是能工作
+    initializeFallbackButtons();
+    
+    try {
+        console.log('Starting application initialization...');
+        
+        // 创建应用实例
+        app = new OfficeWellnessApp();
+        
+        // 初始化应用
+        await app.initialize();
+        
+        console.log('Application initialized successfully');
+        
+        // 如果主应用初始化成功，移除备用处理器的标记，让主应用接管
+        setTimeout(() => {
+            const waterToggle = document.getElementById('water-toggle');
+            const postureToggle = document.getElementById('posture-toggle');
+            const startAllBtn = document.getElementById('start-all-btn');
+            
+            if (waterToggle) waterToggle.removeAttribute('data-fallback-bound');
+            if (postureToggle) postureToggle.removeAttribute('data-fallback-bound');
+            if (startAllBtn) startAllBtn.removeAttribute('data-fallback-bound');
+            
+            console.log('Main app took over button handling');
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        console.log('Using fallback button handlers');
+    }
+});
+
+// 备用按钮初始化 - 确保按钮总是能工作
+function initializeFallbackButtons() {
+    console.log('Initializing fallback button handlers...');
+    
+    // 立即尝试绑定，然后再延迟尝试
+    bindFallbackHandlers();
+    setTimeout(bindFallbackHandlers, 100);
+    setTimeout(bindFallbackHandlers, 500);
+}
+
+function bindFallbackHandlers() {
+    const waterToggle = document.getElementById('water-toggle');
+    const postureToggle = document.getElementById('posture-toggle');
+    const startAllBtn = document.getElementById('start-all-btn');
+    
+    if (waterToggle && !waterToggle.hasAttribute('data-fallback-bound')) {
+        console.log('Binding fallback water toggle handler');
+        waterToggle.setAttribute('data-fallback-bound', 'true');
+        
+        const waterHandler = function(e) {
+            console.log('Fallback water toggle click');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isActive = this.textContent.trim() === 'Start';
+            if (isActive) {
+                this.textContent = 'Pause';
+                this.className = 'btn-secondary';
+                showSimpleNotification('Water reminder started!');
+            } else {
+                this.textContent = 'Start';
+                this.className = 'btn-primary';
+                showSimpleNotification('Water reminder paused!');
+            }
+        };
+        
+        waterToggle.addEventListener('click', waterHandler, true);
+        waterToggle.addEventListener('click', waterHandler, false); // 双重绑定确保触发
+    }
+    
+    if (postureToggle && !postureToggle.hasAttribute('data-fallback-bound')) {
+        console.log('Binding fallback posture toggle handler');
+        postureToggle.setAttribute('data-fallback-bound', 'true');
+        
+        const postureHandler = function(e) {
+            console.log('Fallback posture toggle click');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isActive = this.textContent.trim() === 'Start';
+            if (isActive) {
+                this.textContent = 'Pause';
+                this.className = 'btn-secondary';
+                showSimpleNotification('Posture reminder started!');
+            } else {
+                this.textContent = 'Start';
+                this.className = 'btn-primary';
+                showSimpleNotification('Posture reminder paused!');
+            }
+        };
+        
+        postureToggle.addEventListener('click', postureHandler, true);
+        postureToggle.addEventListener('click', postureHandler, false); // 双重绑定确保触发
+    }
+    
+    if (startAllBtn && !startAllBtn.hasAttribute('data-fallback-bound')) {
+        console.log('Binding fallback start all handler');
+        startAllBtn.setAttribute('data-fallback-bound', 'true');
+        
+        const startAllHandler = function(e) {
+            console.log('Fallback start all click');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // 启动所有提醒
+            if (waterToggle && waterToggle.textContent.trim() === 'Start') {
+                waterToggle.click();
+            }
+            if (postureToggle && postureToggle.textContent.trim() === 'Start') {
+                postureToggle.click();
+            }
+            
+            showSimpleNotification('All reminders started!');
+        };
+        
+        startAllBtn.addEventListener('click', startAllHandler, true);
+        startAllBtn.addEventListener('click', startAllHandler, false); // 双重绑定确保触发
+    }
+}

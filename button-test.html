@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { margin: 10px; padding: 10px 20px; font-size: 16px; }
+        .btn-primary { background: #007bff; color: white; border: none; border-radius: 4px; }
+        .btn-secondary { background: #6c757d; color: white; border: none; border-radius: 4px; }
+        .log { margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Button Test</h1>
+    
+    <button id="water-toggle" class="btn-primary">Start Water</button>
+    <button id="posture-toggle" class="btn-primary">Start Posture</button>
+    <button id="start-all-btn" class="btn-primary">Start All</button>
+    
+    <div class="log" id="log">
+        <h3>Event Log:</h3>
+        <div id="log-content">Click buttons to test...</div>
+    </div>
+
+    <script>
+        function addLog(message) {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            addLog('DOM loaded, setting up event listeners...');
+            
+            const waterToggle = document.getElementById('water-toggle');
+            const postureToggle = document.getElementById('posture-toggle');
+            const startAllBtn = document.getElementById('start-all-btn');
+            
+            if (waterToggle) {
+                addLog('Water toggle button found');
+                waterToggle.addEventListener('click', () => {
+                    addLog('Water toggle clicked!');
+                    const isStart = waterToggle.textContent.includes('Start');
+                    if (isStart) {
+                        waterToggle.textContent = 'Pause Water';
+                        waterToggle.className = 'btn-secondary';
+                    } else {
+                        waterToggle.textContent = 'Start Water';
+                        waterToggle.className = 'btn-primary';
+                    }
+                });
+            } else {
+                addLog('ERROR: Water toggle button not found!');
+            }
+            
+            if (postureToggle) {
+                addLog('Posture toggle button found');
+                postureToggle.addEventListener('click', () => {
+                    addLog('Posture toggle clicked!');
+                    const isStart = postureToggle.textContent.includes('Start');
+                    if (isStart) {
+                        postureToggle.textContent = 'Pause Posture';
+                        postureToggle.className = 'btn-secondary';
+                    } else {
+                        postureToggle.textContent = 'Start Posture';
+                        postureToggle.className = 'btn-primary';
+                    }
+                });
+            } else {
+                addLog('ERROR: Posture toggle button not found!');
+            }
+            
+            if (startAllBtn) {
+                addLog('Start all button found');
+                startAllBtn.addEventListener('click', () => {
+                    addLog('Start all clicked!');
+                    if (waterToggle && waterToggle.textContent.includes('Start')) {
+                        waterToggle.click();
+                    }
+                    if (postureToggle && postureToggle.textContent.includes('Start')) {
+                        postureToggle.click();
+                    }
+                });
+            } else {
+                addLog('ERROR: Start all button not found!');
+            }
+            
+            addLog('Event listeners setup complete');
+        });
+    </script>
+</body>
+</html>

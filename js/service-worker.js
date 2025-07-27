@@ -24,7 +24,7 @@ const JS_ASSETS = [
   '/js/error-handler.js',
   '/js/mobile-adapter.js',
   '/js/notification-service.js',
-  '/js/posture-reminder.js',
+  '/js/standup-reminder.js',
   '/js/reminder-manager.js',
   '/js/storage-manager.js',
   '/js/ui-controller.js',
@@ -36,7 +36,7 @@ const MEDIA_ASSETS = [
   '/assets/default-icon.png',
   '/assets/favicon.ico',
   '/assets/notification.mp3',
-  '/assets/posture-icon.png',
+  '/assets/standup-icon.png',
   '/assets/posture-reminder.mp3',
   '/assets/water-icon.png',
   '/assets/water-reminder.mp3'
@@ -54,19 +54,25 @@ self.addEventListener('install', event => {
       // Cache static resources
       caches.open(STATIC_CACHE).then(cache => {
         console.log('[Service Worker] Caching static resources');
-        return cache.addAll(STATIC_ASSETS);
+        return cache.addAll(STATIC_ASSETS).catch(error => {
+          console.warn('[Service Worker] Failed to cache some static resources:', error);
+        });
       }),
       
       // Cache JS resources
       caches.open(STATIC_CACHE).then(cache => {
         console.log('[Service Worker] Caching JS resources');
-        return cache.addAll(JS_ASSETS);
+        return cache.addAll(JS_ASSETS).catch(error => {
+          console.warn('[Service Worker] Failed to cache some JS resources:', error);
+        });
       }),
       
       // Cache media resources
       caches.open(ASSETS_CACHE).then(cache => {
         console.log('[Service Worker] Caching media resources');
-        return cache.addAll(MEDIA_ASSETS);
+        return cache.addAll(MEDIA_ASSETS).catch(error => {
+          console.warn('[Service Worker] Failed to cache some media resources:', error);
+        });
       })
     ])
   );

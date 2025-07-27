@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Buttons</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 15px; margin: 5px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Button Debug Test</h1>
+    
+    <div>
+        <button id="water-toggle">Water Start</button>
+        <button id="posture-toggle">Posture Start</button>
+    </div>
+    
+    <div class="log" id="log"></div>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message) {
+            log.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // Test direct button clicks
+        document.getElementById('water-toggle').addEventListener('click', () => {
+            addLog('Water toggle button clicked directly');
+        });
+        
+        document.getElementById('posture-toggle').addEventListener('click', () => {
+            addLog('Posture toggle button clicked directly');
+        });
+        
+        addLog('Debug page loaded, buttons should respond to clicks');
+    </script>
+</body>
+</html>
