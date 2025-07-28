@@ -42,7 +42,7 @@ class PostureReminder extends ReminderManager {
     loadDailyData() {
         try {
             const today = new Date().toDateString();
-            const savedData = localStorage.getItem('postureReminder_dailyData');
+            const savedData = localStorage.getItem('standupReminder_dailyData');
             
             if (savedData) {
                 const data = JSON.parse(savedData);
@@ -59,7 +59,7 @@ class PostureReminder extends ReminderManager {
                 }
             }
         } catch (error) {
-            console.warn('Failed to load today\'s posture data:', error);
+            console.warn('Failed to load today\'s standup data:', error);
             this.resetDailyData();
         }
     }
@@ -79,9 +79,9 @@ class PostureReminder extends ReminderManager {
                 totalSittingTime: this.totalSittingTime
             };
             
-            localStorage.setItem('postureReminder_dailyData', JSON.stringify(data));
+            localStorage.setItem('standupReminder_dailyData', JSON.stringify(data));
         } catch (error) {
-            console.warn('Failed to save today\'s posture data:', error);
+            console.warn('Failed to save today\'s standup data:', error);
         }
     }
 
@@ -570,7 +570,7 @@ class PostureReminder extends ReminderManager {
         
         // Check if need to reset daily data (new day)
         const today = new Date().toDateString();
-        const savedData = localStorage.getItem('postureReminder_dailyData');
+        const savedData = localStorage.getItem('standupReminder_dailyData');
         
         if (savedData) {
             try {

@@ -9,7 +9,7 @@ class NotificationService {
         this.audioContext = null;
         this.audioFiles = {
             water: null,
-            posture: null,
+            standup: null,
             default: null
         };
         

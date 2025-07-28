@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,12 +8,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#2c3e50">
     <title>Office Wellness Reminder</title>
-    <meta name="description" content="An application to help office workers develop healthy work habits with water and standup reminders">
+    <meta name="description"
+        content="An application to help office workers develop healthy work habits with water and standup reminders">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="assets/standup-icon.png">
     <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
     <div id="app">
         <!-- Main Control Panel -->
@@ -20,10 +23,7 @@
             <header class="app-header">
                 <h1>Office Wellness Reminder</h1>
                 <p class="app-subtitle">Maintain Healthy Work Habits</p>
-                <div class="app-status-summary" id="app-status-summary">
-                    <div class="status-indicator" id="app-status-indicator"></div>
-                    <span id="app-status-text"></span>
-                </div>
+
             </header>
 
             <!-- Status Display Area -->
@@ -38,7 +38,8 @@
                         <div class="status-info">
                             <span class="next-reminder-label">Remind every:</span>
                             <div class="time-remaining" id="water-time">
-                                <input type="number" id="water-interval-display" min="1" max="60" value="30" class="interval-input"> mins
+                                <input type="number" id="water-interval-display" min="1" max="60" value="30"
+                                    class="interval-input"> mins
                             </div>
                         </div>
                         <div class="daily-stats" id="water-stats">
@@ -56,32 +57,33 @@
                     </div>
                 </div>
 
-                <div class="reminder-card" id="posture-card">
+                <div class="reminder-card" id="standup-card">
                     <div class="card-header">
-                        <div class="card-icon posture-icon"></div>
+                        <div class="card-icon standup-icon"></div>
                         <h3>Standup Reminder</h3>
-                        <div class="status-badge" id="posture-status-badge">Inactive</div>
+                        <div class="status-badge" id="standup-status-badge">Inactive</div>
                     </div>
                     <div class="card-content">
                         <div class="status-info">
                             <span class="next-reminder-label">Remind every:</span>
-                            <div class="time-remaining" id="posture-time">
-                                <input type="number" id="posture-interval-display" min="1" max="60" value="30" class="interval-input"> mins
+                            <div class="time-remaining" id="standup-time">
+                                <input type="number" id="standup-interval-display" min="1" max="60" value="30"
+                                    class="interval-input"> mins
                             </div>
                         </div>
-                        <div class="daily-stats" id="posture-stats">
+                        <div class="daily-stats" id="standup-stats">
                             <span class="stats-text">Today: 0/8 activities</span>
                             <div class="progress-bar">
-                                <div class="progress-fill" id="posture-progress"></div>
+                                <div class="progress-fill" id="standup-progress"></div>
                             </div>
                         </div>
 
 
                     </div>
                     <div class="card-controls">
-                        <button class="btn-primary" id="posture-toggle">Start</button>
-                        <button class="btn-secondary" id="posture-reset" style="display: none;">Reset</button>
-                        <button class="btn-action" id="postureActivity" style="display: none;">Moved</button>
+                        <button class="btn-primary" id="standup-toggle">Start</button>
+                        <button class="btn-secondary" id="standup-reset" style="display: none;">Reset</button>
+                        <button class="btn-action" id="standupActivity" style="display: none;">Moved</button>
                     </div>
                 </div>
             </section>
@@ -93,7 +95,7 @@
                     <button class="btn-action" id="help-btn">Help</button>
                 </div>
             </section>
-            
+
             <!-- Status Summary Area -->
             <section class="status-summary">
                 <div class="summary-card">
@@ -105,7 +107,7 @@
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Activity count:</span>
-                            <span class="summary-value" id="posture-count">0/8</span>
+                            <span class="summary-value" id="standup-count">0/8</span>
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Wellness score:</span>
@@ -140,7 +142,8 @@
                         <div class="setting-control">
                             <input type="range" id="water-interval-slider" min="1" max="60" value="30" step="1">
                             <div class="range-value">
-                                <input type="number" id="water-interval" min="1" max="60" value="30" style="width: 90px;"> minutes
+                                <input type="number" id="water-interval" min="1" max="60" value="30"
+                                    style="width: 90px;"> minutes
                             </div>
                         </div>
                     </div>
@@ -151,12 +154,12 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="settings-section">
                     <h3>Standup Reminder</h3>
                     <div class="setting-item">
                         <label class="switch">
-                            <input type="checkbox" id="posture-enabled" checked>
+                            <input type="checkbox" id="standup-enabled" checked>
                             <span class="slider"></span>
                         </label>
                         <div class="setting-label">
@@ -165,18 +168,19 @@
                         </div>
                     </div>
                     <div class="setting-item">
-                        <label for="posture-interval">Reminder Interval</label>
+                        <label for="standup-interval">Reminder Interval</label>
                         <div class="setting-control">
-                            <input type="range" id="posture-interval-slider" min="1" max="60" value="30" step="1">
+                            <input type="range" id="standup-interval-slider" min="1" max="60" value="30" step="1">
                             <div class="range-value">
-                                <input type="number" id="posture-interval" min="1" max="60" value="30" style="width: 90px;"> minutes
+                                <input type="number" id="standup-interval" min="1" max="60" value="30"
+                                    style="width: 90px;"> minutes
                             </div>
                         </div>
                     </div>
                     <div class="setting-item">
-                        <label for="posture-target">Daily Target</label>
+                        <label for="standup-target">Daily Target</label>
                         <div class="setting-control">
-                            <input type="number" id="posture-target" min="1" max="20" value="8"> activities
+                            <input type="number" id="standup-target" min="1" max="20" value="8"> activities
                         </div>
                     </div>
                     <div class="setting-item">
@@ -190,7 +194,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="settings-section">
                     <h3>Notification Settings</h3>
                     <div class="setting-item">
@@ -224,7 +228,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="settings-section">
                     <h3>Appearance</h3>
                     <div class="setting-item">
@@ -281,7 +285,7 @@
                         <li><strong>Standup Reminder</strong>: Reminds you to take breaks from sitting</li>
                         <li><strong>Smart Detection</strong>: Automatically detects your activity status</li>
                     </ul>
-                    
+
                     <h3>How to Use</h3>
                     <ol>
                         <li>Click "Start" button to activate reminders</li>
@@ -294,6 +298,7 @@
     </div>
 
     <!-- JavaScript Files -->
+    <script src="js/debug-helper.js"></script>
     <script src="js/error-handler.js"></script>
     <script src="js/storage-manager.js"></script>
     <script src="js/app-settings.js"></script>
@@ -310,32 +315,122 @@
     <script>
         // 应用初始化
         let app;
-        
+
         async function initializeApp() {
             try {
                 console.log('Initializing Office Wellness App...');
+
+                // 运行诊断检查
+                let diagnostics = null;
+                if (typeof DebugHelper !== 'undefined') {
+                    const debugHelper = new DebugHelper();
+                    diagnostics = await debugHelper.runDiagnostics();
+
+                    // 如果有严重错误，显示诊断信息
+                    if (diagnostics.overall.status === 'error') {
+                        throw new Error(`Diagnostic check failed: ${diagnostics.classes.message}`);
+                    }
+                }
+
+                // 检查必要的类是否存在
+                const requiredClasses = [
+                    'ErrorHandler', 'StorageManager', 'AppSettings',
+                    'NotificationService', 'ActivityDetector', 'ReminderManager',
+                    'WaterReminder', 'PostureReminder', 'UIController', 'MobileAdapter'
+                ];
+
+                const missingClasses = requiredClasses.filter(className => !window[className]);
+                if (missingClasses.length > 0) {
+                    throw new Error(`Missing required classes: ${missingClasses.join(', ')}`);
+                }
+
+                // 隐藏启动错误提示（如果存在）
+                hideStartupError();
+
                 app = new OfficeWellnessApp();
                 await app.initialize();
                 console.log('App initialized successfully');
+
+                // 显示成功状态
+                showAppStatus('success', 'Application loaded successfully');
+
             } catch (error) {
                 console.error('App initialization failed:', error);
-                
-                // 显示错误通知
-                const notification = document.createElement('div');
-                notification.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #e74c3c;
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 5px;
-                    z-index: 10000;
-                    font-family: Arial, sans-serif;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                `;
-                notification.textContent = 'App initialization failed. Please refresh the page.';
-                document.body.appendChild(notification);
+                showAppStatus('error', 'Application failed to start: ' + error.message);
+                showStartupError(error);
+
+                // 如果有调试助手，显示详细诊断
+                if (typeof runDiagnostics === 'function') {
+                    console.log('Running detailed diagnostics...');
+                    runDiagnostics();
+                }
+            }
+        }
+
+        function showAppStatus(type, message) {
+            const statusIndicator = document.getElementById('app-status-indicator');
+            const statusText = document.getElementById('app-status-text');
+
+            if (statusIndicator && statusText) {
+                statusIndicator.className = `status-indicator ${type}`;
+                statusText.textContent = message;
+            }
+        }
+
+        function showStartupError(error) {
+            // 移除已存在的错误通知
+            const existingError = document.getElementById('startup-error');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // 创建错误通知
+            const notification = document.createElement('div');
+            notification.id = 'startup-error';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #e74c3c;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                max-width: 500px;
+                text-align: center;
+            `;
+
+            notification.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 8px;">应用启动失败</div>
+                <div style="font-size: 14px; margin-bottom: 12px;">${error.message}</div>
+                <button onclick="location.reload()" style="
+                    background: white;
+                    color: #e74c3c;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">刷新页面</button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // 10秒后自动隐藏
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 10000);
+        }
+
+        function hideStartupError() {
+            const existingError = document.getElementById('startup-error');
+            if (existingError) {
+                existingError.remove();
             }
         }
 
@@ -345,6 +440,18 @@
         } else {
             initializeApp();
         }
+
+        // 添加全局错误处理
+        window.addEventListener('error', function (event) {
+            console.error('Global error:', event.error);
+            showAppStatus('error', 'Runtime error occurred');
+        });
+
+        window.addEventListener('unhandledrejection', function (event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showAppStatus('error', 'Promise rejection occurred');
+        });
     </script>
 </body>
+
 </html>

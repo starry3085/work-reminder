@@ -17,7 +17,7 @@ class AppSettings {
                 lastReminder: null,
                 target: 8 // 每日目标杯数
             },
-            posture: {
+            standup: {
                 enabled: true,
                 interval: 30, // 分钟
                 sound: true,
@@ -46,7 +46,7 @@ class AppSettings {
                 nextReminderAt: null,
                 lastAcknowledged: null
             },
-            postureReminder: {
+            standupReminder: {
                 isActive: false,
                 timeRemaining: 0,
                 nextReminderAt: null,
@@ -227,8 +227,8 @@ class AppSettings {
             }
         }
         
-        if (state.postureReminder && state.postureReminder.nextReminderAt) {
-            if (now - state.postureReminder.nextReminderAt > maxAge) {
+        if (state.standupReminder && state.standupReminder.nextReminderAt) {
+            if (now - state.standupReminder.nextReminderAt > maxAge) {
                 console.warn('久坐提醒时间已过期');
                 return false;
             }
@@ -285,17 +285,17 @@ class AppSettings {
             }
             
             // 验证久坐提醒设置
-            if (settings.posture) {
-                if (typeof settings.posture.interval !== 'number' || 
-                    settings.posture.interval < 1 || 
-                    settings.posture.interval > 60) {
+            if (settings.standup) {
+                if (typeof settings.standup.interval !== 'number' || 
+                    settings.standup.interval < 1 || 
+                    settings.standup.interval > 60) {
                     console.warn('无效的久坐提醒间隔设置');
                     return false;
                 }
                 
-                if (typeof settings.posture.target !== 'number' || 
-                    settings.posture.target < 1 || 
-                    settings.posture.target > 20) {
+                if (typeof settings.standup.target !== 'number' || 
+                    settings.standup.target < 1 || 
+                    settings.standup.target > 20) {
                     console.warn('无效的久坐提醒目标设置');
                     return false;
                 }

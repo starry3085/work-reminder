@@ -15,7 +15,7 @@ class UIController {
                 completedToday: 0,
                 targetToday: 8
             },
-            posture: {
+            standup: {
                 isActive: false,
                 timeRemaining: 0,
                 status: 'Inactive',
@@ -76,16 +76,16 @@ class UIController {
             waterCount: document.getElementById('water-count'),
 
             // Standup reminder related
-            postureCard: document.getElementById('posture-card'),
-            postureStatusBadge: document.getElementById('posture-status-badge'),
-            postureTime: document.getElementById('posture-time'),
-            postureIntervalDisplay: document.getElementById('posture-interval-display'),
-            postureToggle: document.getElementById('posture-toggle'),
-            postureReset: document.getElementById('posture-reset'),
-            postureActivity: document.getElementById('postureActivity'),
-            postureStats: document.getElementById('posture-stats'),
-            postureProgress: document.getElementById('posture-progress'),
-            postureCount: document.getElementById('posture-count'),
+            standupCard: document.getElementById('standup-card'),
+            standupStatusBadge: document.getElementById('standup-status-badge'),
+            standupTime: document.getElementById('standup-time'),
+            standupIntervalDisplay: document.getElementById('standup-interval-display'),
+            standupToggle: document.getElementById('standup-toggle'),
+            standupReset: document.getElementById('standup-reset'),
+            standupActivity: document.getElementById('standupActivity'),
+            standupStats: document.getElementById('standup-stats'),
+            standupProgress: document.getElementById('standup-progress'),
+            standupCount: document.getElementById('standup-count'),
 
 
 
@@ -107,10 +107,10 @@ class UIController {
             waterTarget: document.getElementById('water-target'),
 
             // Settings - Standup reminder
-            postureEnabled: document.getElementById('posture-enabled'),
-            postureInterval: document.getElementById('posture-interval'),
-            postureIntervalSlider: document.getElementById('posture-interval-slider'),
-            postureTarget: document.getElementById('posture-target'),
+            standupEnabled: document.getElementById('standup-enabled'),
+            standupInterval: document.getElementById('standup-interval'),
+            standupIntervalSlider: document.getElementById('standup-interval-slider'),
+            standupTarget: document.getElementById('standup-target'),
             activityDetection: document.getElementById('activity-detection'),
 
             // Settings - Notifications
@@ -136,7 +136,7 @@ class UIController {
         };
 
         // Check if required elements exist
-        const requiredElements = ['waterCard', 'postureCard', 'settingsPanel'];
+        const requiredElements = ['waterCard', 'standupCard', 'settingsPanel'];
         const missingElements = requiredElements.filter(id => !this.elements[id]);
 
         if (missingElements.length > 0) {
@@ -188,16 +188,16 @@ class UIController {
         });
 
         // Standup reminder control buttons
-        this.addEventHandler('postureToggle', 'click', () => {
-            this.triggerEvent('postureToggle', { isActive: !this.uiState.posture.isActive });
+        this.addEventHandler('standupToggle', 'click', () => {
+            this.triggerEvent('standupToggle', { isActive: !this.uiState.standup.isActive });
         });
 
-        this.addEventHandler('postureReset', 'click', () => {
-            this.triggerEvent('postureReset');
+        this.addEventHandler('standupReset', 'click', () => {
+            this.triggerEvent('standupReset');
         });
 
-        this.addEventHandler('postureActivity', 'click', () => {
-            this.triggerEvent('postureActivity');
+        this.addEventHandler('standupActivity', 'click', () => {
+            this.triggerEvent('standupActivity');
         });
 
 
@@ -225,25 +225,25 @@ class UIController {
             });
         }
 
-        if (this.elements.postureIntervalSlider && this.elements.postureInterval) {
-            this.elements.postureIntervalSlider.addEventListener('input', () => {
-                this.elements.postureInterval.value = this.elements.postureIntervalSlider.value;
-                if (this.elements.postureIntervalDisplay) {
-                    this.elements.postureIntervalDisplay.value = this.elements.postureIntervalSlider.value;
+        if (this.elements.standupIntervalSlider && this.elements.standupInterval) {
+            this.elements.standupIntervalSlider.addEventListener('input', () => {
+                this.elements.standupInterval.value = this.elements.standupIntervalSlider.value;
+                if (this.elements.standupIntervalDisplay) {
+                    this.elements.standupIntervalDisplay.value = this.elements.standupIntervalSlider.value;
                 }
                 // Trigger interval change event for real-time updates
-                const value = parseInt(this.elements.postureIntervalSlider.value);
-                this.triggerEvent('postureIntervalChanged', { interval: value });
+                const value = parseInt(this.elements.standupIntervalSlider.value);
+                this.triggerEvent('standupIntervalChanged', { interval: value });
             });
 
-            this.elements.postureInterval.addEventListener('change', () => {
-                this.elements.postureIntervalSlider.value = this.elements.postureInterval.value;
-                if (this.elements.postureIntervalDisplay) {
-                    this.elements.postureIntervalDisplay.value = this.elements.postureInterval.value;
+            this.elements.standupInterval.addEventListener('change', () => {
+                this.elements.standupIntervalSlider.value = this.elements.standupInterval.value;
+                if (this.elements.standupIntervalDisplay) {
+                    this.elements.standupIntervalDisplay.value = this.elements.standupInterval.value;
                 }
                 // Trigger interval change event
-                const value = parseInt(this.elements.postureInterval.value);
-                this.triggerEvent('postureIntervalChanged', { interval: value });
+                const value = parseInt(this.elements.standupInterval.value);
+                this.triggerEvent('standupIntervalChanged', { interval: value });
             });
         }
 
@@ -280,17 +280,17 @@ class UIController {
             });
         }
 
-        if (this.elements.postureIntervalDisplay) {
-            this.elements.postureIntervalDisplay.addEventListener('change', () => {
-                const value = parseInt(this.elements.postureIntervalDisplay.value);
+        if (this.elements.standupIntervalDisplay) {
+            this.elements.standupIntervalDisplay.addEventListener('change', () => {
+                const value = parseInt(this.elements.standupIntervalDisplay.value);
                 if (value >= 1 && value <= 60) {
-                    if (this.elements.postureInterval) {
-                        this.elements.postureInterval.value = value;
+                    if (this.elements.standupInterval) {
+                        this.elements.standupInterval.value = value;
                     }
-                    if (this.elements.postureIntervalSlider) {
-                        this.elements.postureIntervalSlider.value = value;
+                    if (this.elements.standupIntervalSlider) {
+                        this.elements.standupIntervalSlider.value = value;
                     }
-                    this.triggerEvent('postureIntervalChanged', { interval: value });
+                    this.triggerEvent('standupIntervalChanged', { interval: value });
                 } else {
                     // Reset to valid range
                     let validValue = 30; // default
@@ -300,14 +300,14 @@ class UIController {
                         validValue = 60; // maximum
                     }
 
-                    this.elements.postureIntervalDisplay.value = validValue;
-                    if (this.elements.postureInterval) {
-                        this.elements.postureInterval.value = validValue;
+                    this.elements.standupIntervalDisplay.value = validValue;
+                    if (this.elements.standupInterval) {
+                        this.elements.standupInterval.value = validValue;
                     }
-                    if (this.elements.postureIntervalSlider) {
-                        this.elements.postureIntervalSlider.value = validValue;
+                    if (this.elements.standupIntervalSlider) {
+                        this.elements.standupIntervalSlider.value = validValue;
                     }
-                    this.triggerEvent('postureIntervalChanged', { interval: validValue });
+                    this.triggerEvent('standupIntervalChanged', { interval: validValue });
                 }
             });
         }
@@ -425,7 +425,7 @@ class UIController {
             status: 'Inactive'
         });
 
-        this.updateReminderStatus('posture', {
+        this.updateReminderStatus('standup', {
             isActive: false,
             timeRemaining: 0,
             status: 'Inactive'
@@ -433,7 +433,7 @@ class UIController {
 
         // Initialize progress bars
         this.updateDailyProgress('water', 0, 8);
-        this.updateDailyProgress('posture', 0, 8);
+        this.updateDailyProgress('standup', 0, 8);
 
         // Set application status summary
         this.updateAppStatusSummary(false);
@@ -510,7 +510,7 @@ class UIController {
 
     /**
      * Update reminder time display
-     * @param {string} type - 'water' | 'posture'
+     * @param {string} type - 'water' | 'standup'
      * @param {Object} timeInfo - Time information object
      */
     updateReminderTime(type, timeInfo) {
@@ -521,7 +521,7 @@ class UIController {
 
     /**
      * Update reminder status display
-     * @param {string} type - 'water' | 'posture'
+     * @param {string} type - 'water' | 'standup'
      * @param {Object} status - Status object
      */
     updateReminderStatus(type, status) {
@@ -530,7 +530,7 @@ class UIController {
         const timeElement = this.elements[`${type}Time`];
         const toggleButton = this.elements[`${type}Toggle`];
         const resetButton = this.elements[`${type}Reset`];
-        const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'postureActivity'}`];
+        const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'standupActivity'}`];
 
         if (!card || !timeElement || !toggleButton) {
             return;
@@ -578,15 +578,15 @@ class UIController {
             this.uiState.water.isActive = status.isActive;
             this.uiState.water.status = status.status || (status.isActive ? 'Active' : 'Inactive');
             this.uiState.water.timeRemaining = status.timeRemaining || 0;
-        } else if (type === 'posture') {
-            this.uiState.posture.isActive = status.isActive;
-            this.uiState.posture.status = status.status || (status.isActive ? 'Active' : 'Inactive');
-            this.uiState.posture.timeRemaining = status.timeRemaining || 0;
+        } else if (type === 'standup') {
+            this.uiState.standup.isActive = status.isActive;
+            this.uiState.standup.status = status.status || (status.isActive ? 'Active' : 'Inactive');
+            this.uiState.standup.timeRemaining = status.timeRemaining || 0;
         }
 
         // Update application status summary after updating UI state
         this.updateAppStatusSummary(
-            this.uiState.water.isActive || this.uiState.posture.isActive
+            this.uiState.water.isActive || this.uiState.standup.isActive
         );
     }
 
@@ -758,10 +758,10 @@ class UIController {
                 interval: this.elements.waterInterval ? parseInt(this.elements.waterInterval.value) : 30,
                 target: this.elements.waterTarget ? parseInt(this.elements.waterTarget.value) : 8
             },
-            posture: {
-                enabled: this.elements.postureEnabled ? this.elements.postureEnabled.checked : true,
-                interval: this.elements.postureInterval ? parseInt(this.elements.postureInterval.value) : 30,
-                target: this.elements.postureTarget ? parseInt(this.elements.postureTarget.value) : 8,
+            standup: {
+                enabled: this.elements.standupEnabled ? this.elements.standupEnabled.checked : true,
+                interval: this.elements.standupInterval ? parseInt(this.elements.standupInterval.value) : 30,
+                target: this.elements.standupTarget ? parseInt(this.elements.standupTarget.value) : 8,
                 activityDetection: this.elements.activityDetection ? this.elements.activityDetection.checked : true
             },
             notifications: {
@@ -1189,7 +1189,7 @@ class UIController {
         }
 
         // Simple health score calculation (max 100)
-        const score = Math.round((waterCompletionRate * 0.5 + postureCompletionRate * 0.5) * 100);
+        const score = Math.round((waterCompletionRate * 0.5 + standupCompletionRate * 0.5) * 100);
 
         // Set different colors based on score
         let scoreClass = '';
