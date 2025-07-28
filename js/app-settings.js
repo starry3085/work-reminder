@@ -345,3 +345,6 @@ class AppSettings {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AppSettings;
 }
+
+// Export for browser use
+window.AppSettings = AppSettings;

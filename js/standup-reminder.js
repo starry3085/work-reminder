@@ -613,3 +613,6 @@ class PostureReminder extends ReminderManager {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = PostureReminder;
 }
+
+// Export for browser use
+window.PostureReminder = PostureReminder;

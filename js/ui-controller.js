@@ -550,8 +550,10 @@ class UIController {
             statusBadge.textContent = status.isActive ? 'Active' : 'Inactive';
             if (status.isActive) {
                 statusBadge.classList.add('active');
+                statusBadge.classList.remove('inactive');
             } else {
                 statusBadge.classList.remove('active');
+                statusBadge.classList.add('inactive');
             }
         }
 
@@ -1215,3 +1217,6 @@ class UIController {
         this.elements.healthScore.textContent = score;
     }
 }
+
+// Export for browser use
+window.UIController = UIController;

@@ -1343,7 +1343,6 @@ let app = null;
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         app = new OfficeWellnessApp();
-        window.app = app; // 确保全局可访问
         await app.initialize();
     } catch (error) {
         console.error('Application startup failed:', error);
@@ -1477,43 +1476,19 @@ function setupFallbackButtons() {
             console.log('Standup toggle clicked (fallback)');
             const isStart = standupToggle.textContent.trim() === 'Start';
             
-            // 尝试调用主应用的方法
-            if (window.app && window.app.startReminder && window.app.stopReminder) {
-                if (isStart) {
-                    window.app.startReminder('standup');
-                } else {
-                    window.app.stopReminder('standup');
-                }
+            if (isStart) {
+                standupToggle.textContent = 'Pause';
+                standupToggle.className = 'btn-secondary';
+                standupActive = true;
+                showSimpleNotification('🧘 Standup reminder started!');
             } else {
-                // 备用逻辑：手动更新UI
-                if (isStart) {
-                    standupToggle.textContent = 'Pause';
-                    standupToggle.className = 'btn-secondary';
-                    standupActive = true;
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('standup-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Active';
-                        statusBadge.classList.add('active');
-                        statusBadge.classList.remove('inactive');
-                    }
-                    showSimpleNotification('🧘 Standup reminder started!');
-                } else {
-                    standupToggle.textContent = 'Start';
-                    standupToggle.className = 'btn-primary';
-                    standupActive = false;
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('standup-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Inactive';
-                        statusBadge.classList.remove('active');
-                        statusBadge.classList.add('inactive');
-                    }
-                    showSimpleNotification('🧘 Standup reminder paused!');
-                }
-                
-                updateAppStatus();
+                standupToggle.textContent = 'Start';
+                standupToggle.className = 'btn-primary';
+                standupActive = false;
+                showSimpleNotification('🧘 Standup reminder paused!');
             }
+            
+            updateAppStatus();
         });
         console.log('Standup toggle fallback handler added');
     }
@@ -1560,7 +1535,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // 创建应用实例
         app = new OfficeWellnessApp();
-        window.app = app; // 确保全局可访问
         
         // 初始化应用
         await app.initialize();
@@ -1608,39 +1582,14 @@ function bindFallbackHandlers() {
             e.stopPropagation();
             
             const isActive = this.textContent.trim() === 'Start';
-            
-            // 尝试调用主应用的方法
-            if (window.app && window.app.startReminder && window.app.stopReminder) {
-                if (isActive) {
-                    window.app.startReminder('water');
-                } else {
-                    window.app.stopReminder('water');
-                }
+            if (isActive) {
+                this.textContent = 'Pause';
+                this.className = 'btn-secondary';
+                showSimpleNotification('Water reminder started!');
             } else {
-                // 备用逻辑：手动更新UI
-                if (isActive) {
-                    this.textContent = 'Pause';
-                    this.className = 'btn-secondary';
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('water-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Active';
-                        statusBadge.classList.add('active');
-                        statusBadge.classList.remove('inactive');
-                    }
-                    showSimpleNotification('Water reminder started!');
-                } else {
-                    this.textContent = 'Start';
-                    this.className = 'btn-primary';
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('water-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Inactive';
-                        statusBadge.classList.remove('active');
-                        statusBadge.classList.add('inactive');
-                    }
-                    showSimpleNotification('Water reminder paused!');
-                }
+                this.textContent = 'Start';
+                this.className = 'btn-primary';
+                showSimpleNotification('Water reminder paused!');
             }
         };
         
@@ -1648,54 +1597,29 @@ function bindFallbackHandlers() {
         waterToggle.addEventListener('click', waterHandler, false); // 双重绑定确保触发
     }
     
-    if (standupToggle && !standupToggle.hasAttribute('data-fallback-bound')) {
-        console.log('Binding fallback standup toggle handler');
-        standupToggle.setAttribute('data-fallback-bound', 'true');
+    if (postureToggle && !postureToggle.hasAttribute('data-fallback-bound')) {
+        console.log('Binding fallback posture toggle handler');
+        postureToggle.setAttribute('data-fallback-bound', 'true');
         
-        const standupHandler = function(e) {
-            console.log('Fallback standup toggle click');
+        const postureHandler = function(e) {
+            console.log('Fallback posture toggle click');
             e.preventDefault();
             e.stopPropagation();
             
             const isActive = this.textContent.trim() === 'Start';
-            
-            // 尝试调用主应用的方法
-            if (window.app && window.app.startReminder && window.app.stopReminder) {
-                if (isActive) {
-                    window.app.startReminder('standup');
-                } else {
-                    window.app.stopReminder('standup');
-                }
+            if (isActive) {
+                this.textContent = 'Pause';
+                this.className = 'btn-secondary';
+                showSimpleNotification('Standup reminder started!');
             } else {
-                // 备用逻辑：手动更新UI
-                if (isActive) {
-                    this.textContent = 'Pause';
-                    this.className = 'btn-secondary';
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('standup-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Active';
-                        statusBadge.classList.add('active');
-                        statusBadge.classList.remove('inactive');
-                    }
-                    showSimpleNotification('Standup reminder started!');
-                } else {
-                    this.textContent = 'Start';
-                    this.className = 'btn-primary';
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('standup-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Inactive';
-                        statusBadge.classList.remove('active');
-                        statusBadge.classList.add('inactive');
-                    }
-                    showSimpleNotification('Standup reminder paused!');
-                }
+                this.textContent = 'Start';
+                this.className = 'btn-primary';
+                showSimpleNotification('Standup reminder paused!');
             }
         };
         
-        standupToggle.addEventListener('click', standupHandler, true);
-        standupToggle.addEventListener('click', standupHandler, false); // 双重绑定确保触发
+        postureToggle.addEventListener('click', postureHandler, true);
+        postureToggle.addEventListener('click', postureHandler, false); // 双重绑定确保触发
     }
 
 }

@@ -552,3 +552,6 @@ class NotificationService {
         }
     }
 }
+
+// Export for browser use
+window.NotificationService = NotificationService;

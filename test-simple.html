@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Test</title>
+</head>
+<body>
+    <h1>Simple Application Test</h1>
+    <div id="status"></div>
+    <div id="log"></div>
+
+    <!-- Load all JavaScript files -->
+    <script src="js/debug-helper.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/activity-detector.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/water-reminder.js"></script>
+    <script src="js/standup-reminder.js"></script>
+    <script src="js/mobile-adapter.js"></script>
+    <script src="js/ui-controller.js"></script>
+    <script src="js/app.js"></script>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const p = document.createElement('p');
+            p.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(p);
+            console.log(message);
+        }
+
+        async function testApp() {
+            try {
+                log('开始测试应用...');
+                
+                // 1. 检查所有必要的类
+                const requiredClasses = [
+                    'ErrorHandler', 'StorageManager', 'AppSettings',
+                    'NotificationService', 'ActivityDetector', 'ReminderManager',
+                    'WaterReminder', 'PostureReminder', 'UIController', 'MobileAdapter'
+                ];
+
+                const missingClasses = requiredClasses.filter(className => !window[className]);
+                if (missingClasses.length > 0) {
+                    throw new Error(`缺少必要的类: ${missingClasses.join(', ')}`);
+                }
+                log('✅ 所有必要的类都已加载', 'success');
+
+                // 2. 运行诊断
+                if (typeof DebugHelper !== 'undefined') {
+                    const debugHelper = new DebugHelper();
+                    const diagnostics = await debugHelper.runDiagnostics();
+                    log(`诊断结果: ${diagnostics.overall.status}`, diagnostics.overall.status === 'success' ? 'success' : 'error');
+                }
+
+                // 3. 尝试创建应用实例
+                log('创建应用实例...');
+                const app = new OfficeWellnessApp();
+                log('✅ 应用实例创建成功', 'success');
+
+                // 4. 尝试初始化应用
+                log('初始化应用...');
+                await app.initialize();
+                log('✅ 应用初始化成功', 'success');
+
+                document.getElementById('status').innerHTML = '<h2 style="color: green;">✅ 应用测试成功！</h2>';
+
+            } catch (error) {
+                log(`❌ 应用测试失败: ${error.message}`, 'error');
+                console.error('详细错误:', error);
+                document.getElementById('status').innerHTML = `<h2 style="color: red;">❌ 应用测试失败</h2><p>${error.message}</p>`;
+            }
+        }
+
+        // 页面加载完成后运行测试
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', testApp);
+        } else {
+            testApp();
+        }
+    </script>
+</body>
+</html>

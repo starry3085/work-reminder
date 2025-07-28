@@ -184,3 +184,5 @@ class ActivityDetector {
         return false;
     }
 }
+// Export for browser use
+window.ActivityDetector = ActivityDetector;

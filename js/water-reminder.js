@@ -348,3 +348,6 @@ class WaterReminder extends ReminderManager {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = WaterReminder;
 }
+
+// Export for browser use
+window.WaterReminder = WaterReminder;

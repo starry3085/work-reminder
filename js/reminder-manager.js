@@ -593,3 +593,6 @@ class ReminderManager {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ReminderManager;
 }
+
+// Export for browser use
+window.ReminderManager = ReminderManager;
