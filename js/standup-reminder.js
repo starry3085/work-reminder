@@ -10,7 +10,7 @@ class PostureReminder extends ReminderManager {
      * @param {ActivityDetector} activityDetector - Activity detector instance
      */
     constructor(settings, notificationService, activityDetector) {
-        super('posture', settings, notificationService, activityDetector);
+        super('standup', settings, notificationService, activityDetector);
         
         // Posture-specific state
         this.dailyActivityCount = 0;
@@ -389,7 +389,7 @@ class PostureReminder extends ReminderManager {
         
         // Show notification with confirm and snooze options
         this.notificationService.showNotification(
-            'posture',
+            'standup',
             title,
             message,
             () => this.confirmActivity(), // Confirm activity callback

@@ -70,7 +70,7 @@ class NotificationService {
 
     /**
      * 显示通知（自动选择最佳通知方式）
-     * @param {string} type - 通知类型 ('water' | 'posture')
+     * @param {string} type - 通知类型 ('water' | 'standup')
      * @param {string} title - 通知标题
      * @param {string} message - 通知内容
      * @param {Function} onConfirm - 确认回调
@@ -96,7 +96,7 @@ class NotificationService {
 
     /**
      * 显示浏览器通知
-     * @param {string} type - 通知类型 ('water' | 'posture')
+     * @param {string} type - 通知类型 ('water' | 'standup')
      * @param {string} title - 通知标题
      * @param {string} message - 通知内容
      * @returns {boolean} 是否成功显示
@@ -149,7 +149,7 @@ class NotificationService {
 
     /**
      * 显示页面内提醒弹窗
-     * @param {string} type - 提醒类型 ('water' | 'posture')
+     * @param {string} type - 提醒类型 ('water' | 'standup')
      * @param {string} title - 提醒标题
      * @param {string} message - 提醒内容
      * @param {Function} onConfirm - 确认回调

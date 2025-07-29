@@ -351,9 +351,18 @@ class OfficeWellnessApp {
      */
     async loadSettingsAndState() {
         try {
-            // 加载设置
-            const settings = this.appSettings.loadSettings();
+            // 检查是否为强制刷新
+            const isForceRefresh = this.appSettings.detectForceRefresh();
+            
+            // 加载设置（如果是强制刷新，则使用默认设置）
+            const settings = this.appSettings.loadSettings(isForceRefresh);
             console.log('User settings loaded:', settings);
+            
+            if (isForceRefresh) {
+                console.log('检测到强制刷新，已恢复默认设置');
+                // 清除应用状态
+                this.appSettings.resetState();
+            }
             
             // Load application state
             const state = this.appSettings.loadState();
@@ -510,7 +519,11 @@ class OfficeWellnessApp {
      * @private
      */
     setupUIEventHandlers() {
-        if (!this.uiController) return;
+        console.log('Setting up UI event handlers...');
+        if (!this.uiController) {
+            console.error('UI controller not available for event setup');
+            return;
+        }
 
         // 喝水提醒控制事件
         this.uiController.on('waterToggle', (data) => {
@@ -522,8 +535,10 @@ class OfficeWellnessApp {
         });
 
         this.uiController.on('waterReset', () => {
+            console.log('Water reset event handler called');
             this.resetReminder('water');
         });
+        console.log('Water reset event handler registered');
 
         this.uiController.on('waterDrink', () => {
             if (this.waterReminder) {
@@ -543,8 +558,10 @@ class OfficeWellnessApp {
         });
 
         this.uiController.on('standupReset', () => {
+            console.log('Standup reset event handler called');
             this.resetReminder('standup');
         });
+        console.log('Standup reset event handler registered');
 
         this.uiController.on('standupActivity', () => {
             if (this.standupReminder) {
@@ -572,6 +589,10 @@ class OfficeWellnessApp {
 
         this.uiController.on('resetSettings', () => {
             this.handleResetSettings();
+        });
+
+        this.uiController.on('forceResetSettings', () => {
+            this.handleForceResetSettings();
         });
     }
 
@@ -680,6 +701,57 @@ class OfficeWellnessApp {
             this.notificationService.showInPageAlert('error', {
                 title: 'Reset Failed',
                 message: 'Failed to reset settings, please try again'
+            });
+        }
+    }
+
+    /**
+     * 处理强制重置设置（强制恢复默认值）
+     * @private
+     */
+    handleForceResetSettings() {
+        try {
+            console.log('执行强制重置设置');
+            
+            // 强制重置为默认设置
+            const defaultSettings = this.appSettings.forceResetToDefaults();
+            
+            // 应用到UI
+            this.uiController.applySettingsToUI(defaultSettings);
+            
+            // 停止所有提醒
+            if (this.waterReminder && this.waterReminder.isActive) {
+                this.waterReminder.stop();
+            }
+            if (this.standupReminder && this.standupReminder.isActive) {
+                this.standupReminder.stop();
+            }
+            
+            // 更新提醒管理器设置
+            if (this.waterReminder) {
+                this.waterReminder.updateSettings(defaultSettings.water);
+            }
+            if (this.standupReminder) {
+                this.standupReminder.updateSettings(defaultSettings.standup);
+            }
+            
+            // 清除所有状态
+            this.appSettings.resetState();
+            
+            // Show force reset success notification
+            this.notificationService.showInPageAlert('success', {
+                title: '强制重置完成',
+                message: '所有设置已强制重置为默认值（30分钟间隔），所有提醒已停止'
+            });
+            
+            // 关闭设置面板
+            this.uiController.hideSettings();
+            
+        } catch (error) {
+            console.error('强制重置设置失败:', error);
+            this.notificationService.showInPageAlert('error', {
+                title: '强制重置失败',
+                message: '强制重置设置失败，请刷新页面重试'
             });
         }
     }
@@ -1382,6 +1454,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 errorDiv.parentNode.removeChild(errorDiv);
             }
         }, 5000);
+    }
+});
+
+// 监听强制刷新快捷键
+document.addEventListener('keydown', (event) => {
+    // 检测 Ctrl+F5 或 Ctrl+Shift+R (强制刷新)
+    if ((event.ctrlKey && event.key === 'F5') || 
+        (event.ctrlKey && event.shiftKey && event.key === 'R')) {
+        console.log('检测到强制刷新快捷键');
+        // 设置强制刷新标记
+        if (app && app.appSettings) {
+            app.appSettings.setForceRefreshFlag();
+        } else {
+            // 如果应用还未初始化，直接设置 sessionStorage
+            try {
+                sessionStorage.setItem('forceRefreshFlag', 'true');
+            } catch (error) {
+                console.warn('设置强制刷新标记失败:', error);
+            }
+        }
     }
 });
 

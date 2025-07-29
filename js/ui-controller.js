@@ -99,6 +99,7 @@ class UIController {
             settingsClose: document.getElementById('settings-close'),
             saveSettings: document.getElementById('save-settings'),
             resetSettings: document.getElementById('reset-settings'),
+            forceResetSettings: document.getElementById('force-reset-settings'),
 
             // Settings - Water reminder
             waterEnabled: document.getElementById('water-enabled'),
@@ -154,6 +155,7 @@ class UIController {
         this.addEventHandler('settingsClose', 'click', this.handleSettingsToggle);
         this.addEventHandler('saveSettings', 'click', this.handleSaveSettings.bind(this));
         this.addEventHandler('resetSettings', 'click', this.handleResetSettings.bind(this));
+        this.addEventHandler('forceResetSettings', 'click', this.handleForceResetSettings.bind(this));
 
         // Help panel events
         this.addEventHandler('helpBtn', 'click', this.handleHelpToggle);
@@ -180,6 +182,7 @@ class UIController {
         });
 
         this.addEventHandler('waterReset', 'click', () => {
+            console.log('Water Reset button clicked!');
             this.triggerEvent('waterReset');
         });
 
@@ -193,6 +196,7 @@ class UIController {
         });
 
         this.addEventHandler('standupReset', 'click', () => {
+            console.log('Standup Reset button clicked!');
             this.triggerEvent('standupReset');
         });
 
@@ -398,10 +402,15 @@ class UIController {
      * @param {*} data - Event data
      */
     triggerEvent(eventName, data = null) {
+        console.log(`Triggering event: ${eventName}`, data);
+        
         if (!this.eventListeners._custom || !this.eventListeners._custom[eventName]) {
+            console.warn(`No listeners found for event: ${eventName}`);
             return;
         }
 
+        console.log(`Found ${this.eventListeners._custom[eventName].length} listeners for event: ${eventName}`);
+        
         this.eventListeners._custom[eventName].forEach(callback => {
             try {
                 callback(data);
@@ -888,6 +897,17 @@ class UIController {
     }
 
     /**
+     * Handle force reset settings (reset to defaults)
+     * @private
+     */
+    handleForceResetSettings() {
+        // Show confirmation dialog
+        if (confirm('确定要强制重置所有设置为默认值吗？这将把所有提醒间隔重置为30分钟。')) {
+            this.triggerEvent('forceResetSettings');
+        }
+    }
+
+    /**
      * Format time display
      * @param {number} timeRemaining - Time remaining in milliseconds
      * @returns {string} Formatted time string
@@ -946,7 +966,7 @@ class UIController {
 
     /**
      * Update daily progress display
-     * @param {string} type - 'water' | 'posture'
+     * @param {string} type - 'water' | 'standup'
      * @param {number} current - Current completion count
      * @param {number} target - Target count
      */

@@ -387,7 +387,7 @@ body {
 }
 
 /* 按钮样式 */
-.btn-primary, .btn-secondary, .btn-action, .btn-close {
+.btn-primary, .btn-secondary, .btn-action, .btn-warning, .btn-close {
     padding: 0.5rem 1rem;
     border: none;
     border-radius: var(--border-radius);
@@ -426,6 +426,17 @@ body {
 
 .btn-action:hover {
     background: #1976D2;
+}
+
+.btn-warning {
+    background: #f39c12;
+    color: white;
+    border: 1px solid #e67e22;
+}
+
+.btn-warning:hover {
+    background: #e67e22;
+    transform: translateY(-1px);
 }
 
 .btn-close {
