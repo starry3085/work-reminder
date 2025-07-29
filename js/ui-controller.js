@@ -32,8 +32,7 @@ class UIController {
 
         // Bind methods
         this.bindEvents = this.bindEvents.bind(this);
-        this.handleSettingsToggle = this.handleSettingsToggle.bind(this);
-        this.handleHelpToggle = this.handleHelpToggle.bind(this);
+
         this.handleOutsideClick = this.handleOutsideClick.bind(this);
         this.handleNotificationKeydown = this.handleNotificationKeydown.bind(this);
     }
@@ -73,8 +72,6 @@ class UIController {
             waterDrink: document.getElementById('waterDrink'),
             waterStats: document.getElementById('water-stats'),
             waterProgress: document.getElementById('water-progress'),
-            waterCount: document.getElementById('water-count'),
-
             // Standup reminder related
             standupCard: document.getElementById('standup-card'),
             standupStatusBadge: document.getElementById('standup-status-badge'),
@@ -85,42 +82,8 @@ class UIController {
             standupActivity: document.getElementById('standupActivity'),
             standupStats: document.getElementById('standup-stats'),
             standupProgress: document.getElementById('standup-progress'),
-            standupCount: document.getElementById('standup-count'),
 
 
-
-
-            // Health score
-            healthScore: document.getElementById('health-score'),
-
-            // Settings panel
-            settingsBtn: document.getElementById('settings-btn'),
-            settingsPanel: document.getElementById('settings-panel'),
-            settingsClose: document.getElementById('settings-close'),
-            saveSettings: document.getElementById('save-settings'),
-            resetSettings: document.getElementById('reset-settings'),
-            forceResetSettings: document.getElementById('force-reset-settings'),
-
-            // Settings - Water reminder
-            waterEnabled: document.getElementById('water-enabled'),
-            waterInterval: document.getElementById('water-interval'),
-            waterIntervalSlider: document.getElementById('water-interval-slider'),
-            waterTarget: document.getElementById('water-target'),
-
-            // Settings - Standup reminder
-            standupEnabled: document.getElementById('standup-enabled'),
-            standupInterval: document.getElementById('standup-interval'),
-            standupIntervalSlider: document.getElementById('standup-interval-slider'),
-            standupTarget: document.getElementById('standup-target'),
-            activityDetection: document.getElementById('activity-detection'),
-
-            // Settings - Notifications
-            browserNotifications: document.getElementById('browser-notifications'),
-            soundEnabled: document.getElementById('sound-enabled'),
-            notificationStyle: document.getElementById('notification-style'),
-
-            // Settings - Appearance
-            themeSelector: document.getElementById('theme-selector'),
 
             // Notification popup
             notificationOverlay: document.getElementById('notification-overlay'),
@@ -130,10 +93,7 @@ class UIController {
             notificationConfirm: document.getElementById('notification-confirm'),
             notificationSnooze: document.getElementById('notification-snooze'),
 
-            // Help panel
-            helpBtn: document.getElementById('help-btn'),
-            helpOverlay: document.getElementById('help-overlay'),
-            helpClose: document.getElementById('help-close')
+
         };
 
         // Check if required elements exist
@@ -150,16 +110,7 @@ class UIController {
      * @private
      */
     bindEvents() {
-        // Settings panel events
-        this.addEventHandler('settingsBtn', 'click', this.handleSettingsToggle);
-        this.addEventHandler('settingsClose', 'click', this.handleSettingsToggle);
-        this.addEventHandler('saveSettings', 'click', this.handleSaveSettings.bind(this));
-        this.addEventHandler('resetSettings', 'click', this.handleResetSettings.bind(this));
-        this.addEventHandler('forceResetSettings', 'click', this.handleForceResetSettings.bind(this));
 
-        // Help panel events
-        this.addEventHandler('helpBtn', 'click', this.handleHelpToggle);
-        this.addEventHandler('helpClose', 'click', this.handleHelpToggle);
 
         // Notification popup events
         this.addEventHandler('notificationConfirm', 'click', () => {
@@ -451,11 +402,9 @@ class UIController {
 
 
 
-        // Set health score
-        this.updateHealthScore(0, 0);
 
-        // Hide settings panel
-        this.hideSettings();
+
+
 
         // Set theme
         this.applyTheme('light');
