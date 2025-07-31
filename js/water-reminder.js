@@ -141,20 +141,20 @@ class WaterReminder extends ReminderManager {
         }
         
         // Show in-page notification
-        this.notificationService.showInPageAlert('success', {
-            title: '💧 Water Confirmed',
-            message: message,
-            duration: 3000
-        });
+        this.notificationService.showInPageAlert(
+            'water',
+            '💧 Water Confirmed',
+            message
+        );
         
         // If goal reached, show celebration notification
         if (this.dailyWaterCount === this.dailyGoal) {
             setTimeout(() => {
-                this.notificationService.showInPageAlert('celebration', {
-                    title: '🎉 Goal Reached!',
-                    message: 'Congratulations on reaching your daily water goal! Keep up the good habits!',
-                    duration: 5000
-                });
+                this.notificationService.showInPageAlert(
+                    'water',
+                    '🎉 Goal Reached!',
+                    'Congratulations on reaching your daily water goal! Keep up the good habits!'
+                );
             }, 1000);
         }
     }
