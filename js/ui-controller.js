@@ -71,7 +71,7 @@ class UIController {
             waterReset: document.getElementById('water-reset'),
             waterDrink: document.getElementById('waterDrink'),
             waterStats: document.getElementById('water-stats'),
-            waterProgress: document.getElementById('water-progress'),
+            waterCountdown: document.getElementById('water-countdown'),
             // Standup reminder related
             standupCard: document.getElementById('standup-card'),
             standupStatusBadge: document.getElementById('standup-status-badge'),
@@ -81,7 +81,7 @@ class UIController {
             standupReset: document.getElementById('standup-reset'),
             standupActivity: document.getElementById('standupActivity'),
             standupStats: document.getElementById('standup-stats'),
-            standupProgress: document.getElementById('standup-progress'),
+            standupCountdown: document.getElementById('standup-countdown'),
 
 
 
@@ -391,9 +391,9 @@ class UIController {
             status: 'Inactive'
         });
 
-        // Initialize progress bars
-        this.updateDailyProgress('water', 0, 8);
-        this.updateDailyProgress('standup', 0, 8);
+        // Initialize countdown displays
+        this.updateCountdown('water', 0);
+        this.updateCountdown('standup', 0);
 
         // Set application status summary
         this.updateAppStatusSummary(false);
@@ -472,8 +472,18 @@ class UIController {
      * @param {Object} timeInfo - Time information object
      */
     updateReminderTime(type, timeInfo) {
-        // This method is called by reminder managers to update time display
-        // For now, we don't need to do anything special as time is handled in updateReminderStatus
+        // Update countdown display with current time remaining
+        if (timeInfo && typeof timeInfo.timeRemaining !== 'undefined') {
+            this.updateCountdown(type, timeInfo.timeRemaining);
+            
+            // Update UI state
+            if (type === 'water') {
+                this.uiState.water.timeRemaining = timeInfo.timeRemaining;
+            } else if (type === 'standup') {
+                this.uiState.standup.timeRemaining = timeInfo.timeRemaining;
+            }
+        }
+        
         console.log(`${type} reminder time updated:`, timeInfo);
     }
 
@@ -543,6 +553,9 @@ class UIController {
             this.uiState.standup.status = status.status || (status.isActive ? 'Active' : 'Inactive');
             this.uiState.standup.timeRemaining = status.timeRemaining || 0;
         }
+
+        // Update countdown display
+        this.updateCountdown(type, status.timeRemaining || 0);
 
         // Update application status summary after updating UI state
         this.updateAppStatusSummary(
@@ -914,27 +927,34 @@ class UIController {
 
 
     /**
-     * Update daily progress display
+     * Update countdown display
+     * @param {string} type - 'water' | 'standup'
+     * @param {number} timeRemaining - Time remaining in milliseconds
+     */
+    updateCountdown(type, timeRemaining) {
+        const countdownElement = this.elements[`${type}Countdown`];
+        
+        if (countdownElement) {
+            if (timeRemaining <= 0) {
+                countdownElement.textContent = '--:--';
+            } else {
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+    }
+
+    /**
+     * Update daily progress display (kept for compatibility, but now updates countdown)
      * @param {string} type - 'water' | 'standup'
      * @param {number} current - Current completion count
      * @param {number} target - Target count
      */
     updateDailyProgress(type, current, target) {
-        const statsElement = this.elements[`${type}Stats`];
-        const progressElement = this.elements[`${type}Progress`];
-
-        if (statsElement) {
-            const statsText = statsElement.querySelector('.stats-text');
-            if (statsText) {
-                const unit = type === 'water' ? 'glasses' : 'activities';
-                statsText.textContent = `Today: ${current}/${target} ${unit}`;
-            }
-        }
-
-        if (progressElement) {
-            const percentage = Math.min((current / target) * 100, 100);
-            progressElement.style.width = `${percentage}%`;
-        }
+        // This method is kept for compatibility but no longer updates progress bars
+        // The countdown display is updated through updateCountdown method
+        console.log(`Daily progress updated for ${type}: ${current}/${target}`);
     }
 
     /**

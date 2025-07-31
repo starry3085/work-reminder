@@ -343,6 +343,21 @@ body {
     width: 0%;
 }
 
+.countdown-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.countdown-time {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+    min-width: 60px;
+    text-align: right;
+}
+
 .next-reminder {
     display: flex;
     align-items: center;
