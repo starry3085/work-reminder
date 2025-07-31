@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>强制刷新测试</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .test-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .current-settings {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        .status-display {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>强制刷新和设置重置测试</h1>
+        
+        <div class="test-info">
+            <h3>测试说明</h3>
+            <p>这个页面用于测试强制刷新检测和设置重置功能：</p>
+            <ul>
+                <li><strong>普通刷新</strong>：F5 或点击刷新按钮 - 应该保持用户设置</li>
+                <li><strong>强制刷新</strong>：Ctrl+F5 或 Ctrl+Shift+R - 应该恢复默认设置（30分钟）</li>
+                <li><strong>强制重置按钮</strong>：手动重置所有设置为默认值</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>当前设置状态</h3>
+            <div class="current-settings" id="current-settings">
+                <div>水提醒间隔: <span id="water-interval-display">--</span> 分钟</div>
+                <div>站立提醒间隔: <span id="standup-interval-display">--</span> 分钟</div>
+                <div>强制刷新标记: <span id="force-refresh-flag">--</span></div>
+                <div>页面加载类型: <span id="navigation-type">--</span></div>
+            </div>
+            
+            <div class="test-buttons">
+                <button class="btn-primary" onclick="loadCurrentSettings()">刷新设置显示</button>
+                <button class="btn-secondary" onclick="showStorageInfo()">查看存储信息</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>设置修改测试</h3>
+            <div>
+                <label>水提醒间隔: 
+                    <input type="number" id="test-water-interval" min="1" max="60" value="30"> 分钟
+                </label>
+                <button class="btn-action" onclick="updateWaterInterval()">更新</button>
+            </div>
+            <div style="margin-top: 10px;">
+                <label>站立提醒间隔: 
+                    <input type="number" id="test-standup-interval" min="1" max="60" value="30"> 分钟
+                </label>
+                <button class="btn-action" onclick="updateStandupInterval()">更新</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>刷新测试</h3>
+            <div class="test-buttons">
+                <button class="btn-primary" onclick="normalRefresh()">普通刷新 (F5)</button>
+                <button class="btn-warning" onclick="forceRefresh()">强制刷新 (Ctrl+F5)</button>
+                <button class="btn-secondary" onclick="setForceRefreshFlag()">设置强制刷新标记</button>
+                <button class="btn-action" onclick="clearForceRefreshFlag()">清除强制刷新标记</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>手动重置测试</h3>
+            <div class="test-buttons">
+                <button class="btn-secondary" onclick="resetToDefaults()">重置为默认设置</button>
+                <button class="btn-warning" onclick="forceResetToDefaults()">强制重置为默认设置</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>日志输出</h3>
+            <div class="status-display" id="log-output">
+                等待操作...
+            </div>
+            <button class="btn-secondary" onclick="clearLog()">清除日志</button>
+        </div>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+
+    <script>
+        let storageManager;
+        let appSettings;
+        let logOutput = document.getElementById('log-output');
+
+        // 初始化
+        function init() {
+            try {
+                storageManager = new StorageManager();
+                appSettings = new AppSettings(storageManager);
+                
+                log('测试环境初始化完成');
+                loadCurrentSettings();
+                detectNavigationType();
+            } catch (error) {
+                log('初始化失败: ' + error.message);
+            }
+        }
+
+        // 日志输出
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            console.log(logEntry);
+            
+            if (logOutput) {
+                logOutput.innerHTML += logEntry + '<br>';
+                logOutput.scrollTop = logOutput.scrollHeight;
+            }
+        }
+
+        // 清除日志
+        function clearLog() {
+            if (logOutput) {
+                logOutput.innerHTML = '日志已清除<br>';
+            }
+        }
+
+        // 加载当前设置
+        function loadCurrentSettings() {
+            try {
+                const settings = appSettings.getSettings();
+                
+                document.getElementById('water-interval-display').textContent = settings.water.interval;
+                document.getElementById('standup-interval-display').textContent = settings.standup.interval;
+                
+                // 检查强制刷新标记
+                const forceRefreshFlag = sessionStorage.getItem('forceRefreshFlag');
+                document.getElementById('force-refresh-flag').textContent = forceRefreshFlag || '无';
+                
+                log(`当前设置 - 水提醒: ${settings.water.interval}分钟, 站立提醒: ${settings.standup.interval}分钟`);
+            } catch (error) {
+                log('加载设置失败: ' + error.message);
+            }
+        }
+
+        // 检测导航类型
+        function detectNavigationType() {
+            try {
+                let navigationType = '未知';
+                
+                if (window.performance && window.performance.getEntriesByType) {
+                    const navEntries = window.performance.getEntriesByType('navigation');
+                    if (navEntries.length > 0) {
+                        navigationType = navEntries[0].type;
+                    }
+                } else if (window.performance && window.performance.navigation) {
+                    const navType = window.performance.navigation.type;
+                    switch (navType) {
+                        case 0: navigationType = 'navigate'; break;
+                        case 1: navigationType = 'reload'; break;
+                        case 2: navigationType = 'back_forward'; break;
+                        default: navigationType = 'unknown';
+                    }
+                }
+                
+                document.getElementById('navigation-type').textContent = navigationType;
+                log(`页面导航类型: ${navigationType}`);
+            } catch (error) {
+                log('检测导航类型失败: ' + error.message);
+            }
+        }
+
+        // 显示存储信息
+        function showStorageInfo() {
+            try {
+                const storageInfo = storageManager.getStorageInfo();
+                log(`存储信息: ${JSON.stringify(storageInfo, null, 2)}`);
+                
+                const backup = storageManager.backupData();
+                log(`备份数据: ${JSON.stringify(backup, null, 2)}`);
+            } catch (error) {
+                log('获取存储信息失败: ' + error.message);
+            }
+        }
+
+        // 更新水提醒间隔
+        function updateWaterInterval() {
+            try {
+                const newInterval = parseInt(document.getElementById('test-water-interval').value);
+                if (newInterval < 1 || newInterval > 60) {
+                    log('间隔值无效，应在1-60分钟之间');
+                    return;
+                }
+                
+                const settings = appSettings.getSettings();
+                settings.water.interval = newInterval;
+                appSettings.saveSettings(settings);
+                
+                log(`水提醒间隔已更新为: ${newInterval}分钟`);
+                loadCurrentSettings();
+            } catch (error) {
+                log('更新水提醒间隔失败: ' + error.message);
+            }
+        }
+
+        // 更新站立提醒间隔
+        function updateStandupInterval() {
+            try {
+                const newInterval = parseInt(document.getElementById('test-standup-interval').value);
+                if (newInterval < 1 || newInterval > 60) {
+                    log('间隔值无效，应在1-60分钟之间');
+                    return;
+                }
+                
+                const settings = appSettings.getSettings();
+                settings.standup.interval = newInterval;
+                appSettings.saveSettings(settings);
+                
+                log(`站立提醒间隔已更新为: ${newInterval}分钟`);
+                loadCurrentSettings();
+            } catch (error) {
+                log('更新站立提醒间隔失败: ' + error.message);
+            }
+        }
+
+        // 普通刷新
+        function normalRefresh() {
+            log('执行普通刷新...');
+            location.reload();
+        }
+
+        // 强制刷新
+        function forceRefresh() {
+            log('设置强制刷新标记并刷新...');
+            sessionStorage.setItem('forceRefreshFlag', 'true');
+            location.reload(true);
+        }
+
+        // 设置强制刷新标记
+        function setForceRefreshFlag() {
+            sessionStorage.setItem('forceRefreshFlag', 'true');
+            log('已设置强制刷新标记');
+            loadCurrentSettings();
+        }
+
+        // 清除强制刷新标记
+        function clearForceRefreshFlag() {
+            sessionStorage.removeItem('forceRefreshFlag');
+            log('已清除强制刷新标记');
+            loadCurrentSettings();
+        }
+
+        // 重置为默认设置
+        function resetToDefaults() {
+            try {
+                const defaultSettings = appSettings.resetSettings();
+                log('已重置为默认设置');
+                loadCurrentSettings();
+            } catch (error) {
+                log('重置设置失败: ' + error.message);
+            }
+        }
+
+        // 强制重置为默认设置
+        function forceResetToDefaults() {
+            try {
+                const defaultSettings = appSettings.forceResetToDefaults();
+                log('已强制重置为默认设置');
+                loadCurrentSettings();
+            } catch (error) {
+                log('强制重置设置失败: ' + error.message);
+            }
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', init);
+
+        // 监听键盘事件
+        document.addEventListener('keydown', (event) => {
+            if ((event.ctrlKey && event.key === 'F5') || 
+                (event.ctrlKey && event.shiftKey && event.key === 'R')) {
+                log('检测到强制刷新快捷键');
+                sessionStorage.setItem('forceRefreshFlag', 'true');
+            }
+        });
+    </script>
+</body>
+</html>

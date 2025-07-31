@@ -5,8 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "npx http-server . -o",
-    "optimize": "node scripts/optimize-for-deployment.js",
-    "deploy": "npm run optimize && gh-pages -d .",
+    "deploy": "gh-pages -d .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -28,11 +27,7 @@
   },
   "homepage": "https://github.com/yourusername/office-wellness-reminder#readme",
   "devDependencies": {
-    "clean-css-cli": "^5.6.2",
     "gh-pages": "^5.0.0",
-    "html-minifier-terser": "^7.2.0",
-    "http-server": "^14.1.1",
-    "imagemin-cli": "^7.0.0",
-    "terser": "^5.19.2"
+    "http-server": "^14.1.1"
   }
 }

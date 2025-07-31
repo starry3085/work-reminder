@@ -225,3 +225,6 @@ class StorageManager {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = StorageManager;
 }
+
+// Export for browser use
+window.StorageManager = StorageManager;

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .btn {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .countdown-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        }
+        .interval-input {
+            width: 60px;
+            padding: 4px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>喝水提醒倒计时修复测试</h1>
+    
+    <div class="test-container">
+        <h2>问题描述</h2>
+        <p>喝水提醒设置了1分钟间隔，但倒计时显示从30分钟开始，这是因为：</p>
+        <ul>
+            <li>HTML中水提醒间隔初始值设为1分钟</li>
+            <li>应用默认设置是30分钟</li>
+            <li>UI控制器中设置同步有问题（使用了posture而不是standup）</li>
+        </ul>
+    </div>
+
+    <div class="test-container">
+        <h2>修复内容</h2>
+        <div class="test-result info">
+            <strong>修复1：</strong> 将HTML中水提醒间隔初始值从1分钟改为30分钟
+        </div>
+        <div class="test-result info">
+            <strong>修复2：</strong> 修复UI控制器中设置同步问题（posture → standup）
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>测试水提醒倒计时</h2>
+        <div>
+            <label>间隔设置: 
+                <input type="number" id="water-interval" min="1" max="60" value="1" class="interval-input"> 分钟
+            </label>
+            <button class="btn btn-primary" onclick="startWaterReminder()">开始水提醒</button>
+            <button class="btn btn-secondary" onclick="stopWaterReminder()">停止</button>
+        </div>
+        
+        <div class="countdown-display" id="water-countdown">--:--</div>
+        
+        <div id="water-status" class="test-result info">
+            状态: 未开始
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>测试日志</h2>
+        <div id="test-log" style="background: #f8f9fa; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; max-height: 300px; overflow-y: auto;">
+        </div>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/water-reminder.js"></script>
+
+    <script>
+        let waterReminder = null;
+        let updateTimer = null;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logDiv.textContent += logEntry;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function updateCountdown(timeRemaining) {
+            const countdownElement = document.getElementById('water-countdown');
+            if (timeRemaining <= 0) {
+                countdownElement.textContent = '--:--';
+            } else {
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function startWaterReminder() {
+            try {
+                const interval = parseInt(document.getElementById('water-interval').value);
+                log(`开始水提醒测试，间隔: ${interval}分钟`);
+
+                // 创建简单的通知服务
+                const notificationService = {
+                    showNotification: (type, title, message) => {
+                        log(`通知: ${title} - ${message}`);
+                        alert(`${title}\n${message}`);
+                    },
+                    showInPageAlert: (type, options) => {
+                        log(`页面提醒: ${options.title} - ${options.message}`);
+                    }
+                };
+
+                // 创建水提醒设置
+                const waterSettings = {
+                    enabled: true,
+                    interval: interval,
+                    sound: true,
+                    lastReminder: null,
+                    target: 8
+                };
+
+                // 创建水提醒实例
+                waterReminder = new WaterReminder(waterSettings, notificationService);
+
+                // 设置状态变化回调
+                waterReminder.setStatusChangeCallback((status) => {
+                    log(`水提醒状态变化: ${status.status}, 活跃: ${status.isActive}, 剩余时间: ${status.timeRemaining}ms`);
+                    document.getElementById('water-status').textContent = 
+                        `状态: ${status.status}, 活跃: ${status.isActive}, 剩余: ${Math.floor(status.timeRemaining/1000)}秒`;
+                });
+
+                // 设置时间更新回调
+                waterReminder.setTimeUpdateCallback((timeInfo) => {
+                    updateCountdown(timeInfo.timeRemaining);
+                });
+
+                // 启动提醒
+                waterReminder.start();
+
+                // 启动UI更新定时器
+                if (updateTimer) {
+                    clearInterval(updateTimer);
+                }
+                updateTimer = setInterval(() => {
+                    if (waterReminder && waterReminder.isActive) {
+                        const status = waterReminder.getCurrentStatus();
+                        updateCountdown(status.timeRemaining);
+                    }
+                }, 1000);
+
+                log(`水提醒已启动，预期倒计时应该从 ${interval}:00 开始`);
+
+            } catch (error) {
+                log(`启动水提醒失败: ${error.message}`, 'error');
+                console.error('启动水提醒失败:', error);
+            }
+        }
+
+        function stopWaterReminder() {
+            try {
+                if (waterReminder) {
+                    waterReminder.stop();
+                    waterReminder = null;
+                }
+                
+                if (updateTimer) {
+                    clearInterval(updateTimer);
+                    updateTimer = null;
+                }
+
+                updateCountdown(0);
+                document.getElementById('water-status').textContent = '状态: 已停止';
+                log('水提醒已停止');
+
+            } catch (error) {
+                log(`停止水提醒失败: ${error.message}`, 'error');
+                console.error('停止水提醒失败:', error);
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('倒计时修复测试页面已加载');
+            log('请设置间隔时间并点击"开始水提醒"按钮进行测试');
+            log('预期结果: 倒计时应该从设置的间隔时间开始，而不是从30分钟开始');
+        });
+    </script>
+</body>
+</html>

@@ -1,93 +1,217 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Debug Test</title>
+    <title>Status Debug Tool</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
-        .status-indicator { 
-            width: 12px; 
-            height: 12px; 
-            border-radius: 50%; 
-            background: #ccc; 
-            display: inline-block; 
-            margin-right: 8px;
-        }
-        .status-indicator.active { background: #4CAF50; }
-        .debug-info { 
-            background: #f5f5f5; 
-            padding: 10px; 
-            margin: 10px 0; 
-            border-radius: 4px;
-        }
-        button { margin: 5px; padding: 8px 16px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .debug-log { background: #f5f5f5; padding: 10px; border-radius: 3px; max-height: 300px; overflow-y: auto; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .status-info { margin: 10px 0; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
     </style>
 </head>
 <body>
-    <h1>Status Debug Test</h1>
+    <h1>Office Wellness Reminder - Status Debug Tool</h1>
     
-    <div class="app-status-summary">
-        <div class="status-indicator" id="app-status-indicator"></div>
-        <span id="app-status-text">Wellness Reminders Inactive</span>
+    <div class="debug-section">
+        <h3>应用状态检查</h3>
+        <button onclick="checkAppStatus()">检查应用状态</button>
+        <button onclick="checkUIController()">检查UI控制器</button>
+        <button onclick="checkReminderManagers()">检查提醒管理器</button>
+        <div id="app-status" class="status-info"></div>
     </div>
-    
-    <div class="debug-info">
-        <h3>Debug Info:</h3>
-        <div id="debug-output"></div>
+
+    <div class="debug-section">
+        <h3>手动测试</h3>
+        <button onclick="testPostureStart()">手动启动久坐提醒</button>
+        <button onclick="testPostureStop()">手动停止久坐提醒</button>
+        <button onclick="testStatusUpdate()">手动更新状态显示</button>
+        <div id="test-results" class="status-info"></div>
     </div>
-    
-    <button onclick="testStatusUpdate(true)">Set Active</button>
-    <button onclick="testStatusUpdate(false)">Set Inactive</button>
-    <button onclick="checkElements()">Check Elements</button>
-    
+
+    <div class="debug-section">
+        <h3>调试日志</h3>
+        <button onclick="clearLog()">清空日志</button>
+        <div id="debug-log" class="debug-log"></div>
+    </div>
+
     <script>
-        function log(message) {
-            const output = document.getElementById('debug-output');
-            output.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        let debugLog = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            debugLog.push({ message: logEntry, type });
+            updateLogDisplay();
+            console.log(logEntry);
         }
         
-        function checkElements() {
-            const indicator = document.getElementById('app-status-indicator');
-            const text = document.getElementById('app-status-text');
-            
-            log('Indicator element: ' + (indicator ? 'Found' : 'Not found'));
-            log('Text element: ' + (text ? 'Found' : 'Not found'));
-            
-            if (indicator) {
-                log('Indicator classes: ' + indicator.className);
-            }
-            if (text) {
-                log('Text content: ' + text.textContent);
-            }
+        function updateLogDisplay() {
+            const logDiv = document.getElementById('debug-log');
+            logDiv.innerHTML = debugLog.map(entry => 
+                `<div class="${entry.type}">${entry.message}</div>`
+            ).join('');
+            logDiv.scrollTop = logDiv.scrollHeight;
         }
         
-        function testStatusUpdate(isActive) {
-            const indicator = document.getElementById('app-status-indicator');
-            const text = document.getElementById('app-status-text');
+        function clearLog() {
+            debugLog = [];
+            updateLogDisplay();
+        }
+        
+        function checkAppStatus() {
+            const statusDiv = document.getElementById('app-status');
+            let status = '<h4>应用状态检查结果：</h4>';
             
-            log('Testing status update: ' + (isActive ? 'Active' : 'Inactive'));
-            
-            if (!indicator || !text) {
-                log('ERROR: Elements not found!');
-                return;
-            }
-            
-            if (isActive) {
-                indicator.classList.add('active');
-                text.textContent = 'Wellness Reminders Active';
-                log('Set to active - classes: ' + indicator.className);
+            // 检查全局app对象
+            if (typeof app !== 'undefined' && app) {
+                status += '<div class="success">✅ 全局app对象存在</div>';
+                status += `<div>- 初始化状态: ${app.isInitialized}</div>`;
+                
+                // 检查组件
+                if (app.uiController) {
+                    status += '<div class="success">✅ UI控制器存在</div>';
+                } else {
+                    status += '<div class="error">❌ UI控制器不存在</div>';
+                }
+                
+                if (app.postureReminder) {
+                    status += '<div class="success">✅ 久坐提醒管理器存在</div>';
+                    const postureStatus = app.postureReminder.getCurrentStatus();
+                    status += `<div>- 久坐提醒状态: ${JSON.stringify(postureStatus, null, 2)}</div>`;
+                } else {
+                    status += '<div class="error">❌ 久坐提醒管理器不存在</div>';
+                }
+                
+                if (app.waterReminder) {
+                    status += '<div class="success">✅ 喝水提醒管理器存在</div>';
+                    const waterStatus = app.waterReminder.getCurrentStatus();
+                    status += `<div>- 喝水提醒状态: ${JSON.stringify(waterStatus, null, 2)}</div>`;
+                } else {
+                    status += '<div class="error">❌ 喝水提醒管理器不存在</div>';
+                }
             } else {
-                indicator.classList.remove('active');
-                text.textContent = 'Wellness Reminders Inactive';
-                log('Set to inactive - classes: ' + indicator.className);
+                status += '<div class="error">❌ 全局app对象不存在</div>';
+            }
+            
+            statusDiv.innerHTML = status;
+            log('应用状态检查完成');
+        }
+        
+        function checkUIController() {
+            if (typeof app !== 'undefined' && app && app.uiController) {
+                const ui = app.uiController;
+                log('UI控制器状态: ' + JSON.stringify(ui.uiState, null, 2));
+                
+                // 检查DOM元素
+                const postureStatusBadge = document.getElementById('posture-status-badge');
+                if (postureStatusBadge) {
+                    log('久坐提醒状态标签内容: ' + postureStatusBadge.textContent);
+                    log('久坐提醒状态标签类名: ' + postureStatusBadge.className);
+                } else {
+                    log('久坐提醒状态标签不存在', 'error');
+                }
+            } else {
+                log('UI控制器不存在', 'error');
             }
         }
         
-        // Initial check
-        window.onload = function() {
-            checkElements();
-        };
+        function checkReminderManagers() {
+            if (typeof app !== 'undefined' && app) {
+                if (app.postureReminder) {
+                    const status = app.postureReminder.getCurrentStatus();
+                    log('久坐提醒管理器状态: ' + JSON.stringify(status, null, 2));
+                    
+                    // 检查回调是否设置
+                    if (app.postureReminder.statusChangeCallback) {
+                        log('久坐提醒状态变化回调已设置', 'success');
+                    } else {
+                        log('久坐提醒状态变化回调未设置', 'error');
+                    }
+                } else {
+                    log('久坐提醒管理器不存在', 'error');
+                }
+            }
+        }
+        
+        function testPostureStart() {
+            if (typeof app !== 'undefined' && app && app.postureReminder) {
+                log('手动启动久坐提醒...');
+                try {
+                    app.postureReminder.start();
+                    log('久坐提醒启动成功', 'success');
+                    
+                    // 检查状态
+                    setTimeout(() => {
+                        const status = app.postureReminder.getCurrentStatus();
+                        log('启动后状态: ' + JSON.stringify(status, null, 2));
+                        checkUIController();
+                    }, 100);
+                } catch (error) {
+                    log('久坐提醒启动失败: ' + error.message, 'error');
+                }
+            } else {
+                log('久坐提醒管理器不存在', 'error');
+            }
+        }
+        
+        function testPostureStop() {
+            if (typeof app !== 'undefined' && app && app.postureReminder) {
+                log('手动停止久坐提醒...');
+                try {
+                    app.postureReminder.stop();
+                    log('久坐提醒停止成功', 'success');
+                    
+                    // 检查状态
+                    setTimeout(() => {
+                        const status = app.postureReminder.getCurrentStatus();
+                        log('停止后状态: ' + JSON.stringify(status, null, 2));
+                        checkUIController();
+                    }, 100);
+                } catch (error) {
+                    log('久坐提醒停止失败: ' + error.message, 'error');
+                }
+            } else {
+                log('久坐提醒管理器不存在', 'error');
+            }
+        }
+        
+        function testStatusUpdate() {
+            if (typeof app !== 'undefined' && app && app.uiController) {
+                log('手动更新状态显示...');
+                try {
+                    // 手动调用状态更新
+                    app.uiController.updateReminderStatus('posture', {
+                        isActive: true,
+                        status: 'Active',
+                        timeRemaining: 1800000 // 30分钟
+                    });
+                    log('状态显示更新成功', 'success');
+                } catch (error) {
+                    log('状态显示更新失败: ' + error.message, 'error');
+                }
+            } else {
+                log('UI控制器不存在', 'error');
+            }
+        }
+        
+        // 页面加载完成后自动检查
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('页面加载完成，开始自动检查...');
+                checkAppStatus();
+            }, 1000);
+        });
+        
+        // 监听控制台错误
+        window.addEventListener('error', (event) => {
+            log('JavaScript错误: ' + event.error.message, 'error');
+        });
     </script>
 </body>
 </html>

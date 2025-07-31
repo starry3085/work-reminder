@@ -74,6 +74,25 @@ body {
     height: 10px;
     border-radius: 50%;
     background-color: var(--text-secondary);
+    transition: var(--transition);
+}
+
+.status-indicator.success {
+    background-color: #27ae60;
+    box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.2);
+    animation: pulse-success 2s infinite;
+}
+
+.status-indicator.error {
+    background-color: var(--danger-color);
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+    animation: pulse-error 2s infinite;
+}
+
+.status-indicator.warning {
+    background-color: #f39c12;
+    box-shadow: 0 0 0 2px rgba(243, 156, 18, 0.2);
+    animation: pulse-warning 2s infinite;
 }
 
 .status-indicator.active {
@@ -91,6 +110,42 @@ body {
     }
     100% {
         box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+@keyframes pulse-success {
+    0% {
+        box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(39, 174, 96, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(39, 174, 96, 0);
+    }
+}
+
+@keyframes pulse-error {
+    0% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(231, 76, 60, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+    }
+}
+
+@keyframes pulse-warning {
+    0% {
+        box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(243, 156, 18, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(243, 156, 18, 0);
     }
 }
 
@@ -158,7 +213,7 @@ body {
     background: #2196F3;
 }
 
-#posture-card.active::before {
+#standup-card.active::before {
     background: #FF9800;
 }
 
@@ -194,6 +249,16 @@ body {
 .status-badge.active {
     background: #e8f5e9;
     color: var(--primary-color);
+}
+
+.status-badge.inactive {
+    background: #f5f5f5;
+    color: var(--text-secondary);
+}
+
+.status-badge.paused {
+    background: #fff3cd;
+    color: #856404;
 }
 
 .card-content {
@@ -283,6 +348,20 @@ body {
     width: 0%;
 }
 
+.countdown-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.countdown-time {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 60px;
+    text-align: right;
+}
+
 .next-reminder {
     display: flex;
     align-items: center;
@@ -327,7 +406,7 @@ body {
 }
 
 /* 按钮样式 */
-.btn-primary, .btn-secondary, .btn-action, .btn-close {
+.btn-primary, .btn-secondary, .btn-action, .btn-warning, .btn-close {
     padding: 0.5rem 1rem;
     border: none;
     border-radius: var(--border-radius);
@@ -368,6 +447,17 @@ body {
     background: #1976D2;
 }
 
+.btn-warning {
+    background: #f39c12;
+    color: white;
+    border: 1px solid #e67e22;
+}
+
+.btn-warning:hover {
+    background: #e67e22;
+    transform: translateY(-1px);
+}
+
 .btn-close {
     background: var(--danger-color);
     color: white;
@@ -383,7 +473,7 @@ body {
 /* 快速操作区域 */
 .quick-actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     gap: 1rem;
     flex-wrap: wrap;
     margin-top: 1.5rem;
@@ -552,18 +642,18 @@ input[type="number"] {
 #water-interval::-webkit-inner-spin-button,
 #water-target::-webkit-outer-spin-button,
 #water-target::-webkit-inner-spin-button,
-#posture-interval::-webkit-outer-spin-button,
-#posture-interval::-webkit-inner-spin-button,
-#posture-target::-webkit-outer-spin-button,
-#posture-target::-webkit-inner-spin-button {
+#standup-interval::-webkit-outer-spin-button,
+#standup-interval::-webkit-inner-spin-button,
+#standup-target::-webkit-outer-spin-button,
+#standup-target::-webkit-inner-spin-button {
     -webkit-appearance: none !important;
     margin: 0 !important;
 }
 
 #water-interval,
 #water-target,
-#posture-interval,
-#posture-target {
+#standup-interval,
+#standup-target {
     -moz-appearance: textfield !important;
 }
 
@@ -862,11 +952,11 @@ input[type="number"] {
     color: #2196F3;
 }
 
-.notification-posture {
+.notification-standup {
     border-top: 3px solid #FF9800;
 }
 
-.notification-posture .notification-icon {
+.notification-standup .notification-icon {
     color: #FF9800;
 }
 
@@ -1683,7 +1773,7 @@ con styles to replace emojis */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233498db'%3E%3Cpath d='M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2c0-3.32-2.67-7.25-8-11.8zm0 18c-3.35 0-6-2.57-6-6.2 0-2.34 1.95-5.44 6-9.14 4.05 3.7 6 6.79 6 9.14 0 3.63-2.65 6.2-6 6.2zm-4-8c0 2.2 1.79 4 4 4 .5 0 .97-.09 1.4-.25-.4.25-.86.39-1.4.39-1.49 0-2.7-1.21-2.7-2.7 0-.54.14-1 .39-1.4-.16.43-.25.9-.25 1.4-.01.69.19 1.36.56 1.96.36-.6.56-1.27.56-1.96 0-2.21-1.79-4-4-4-.5 0-.97.09-1.4.25.4-.25.86-.39 1.4-.39 1.49 0 2.7 1.21 2.7 2.7 0 .54-.14 1-.39 1.4.17-.43.25-.9.25-1.4 0-.69-.19-1.36-.56-1.96-.36.6-.56 1.27-.56 1.96z'/%3E%3C/svg%3E");
 }
 
-.posture-icon {
+.standup-icon {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2334495e'%3E%3Cpath d='M12 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-1 17v-8H7v-2h6v10h-2z'/%3E%3Cpath d='M12 12c-1.1 0-2-.9-2-2V7h4v3c0 1.1-.9 2-2 2z'/%3E%3C/svg%3E");
 }
 
@@ -1728,7 +1818,7 @@ con styles to replace emojis */
     background: #3498db;
 }
 
-#posture-card.active::before {
+#standup-card.active::before {
     background: #34495e;
 }
 

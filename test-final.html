@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最终测试 - 简化版应用</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <h1>🧪 最终功能测试</h1>
+    <p>测试简化后的应用是否正常工作</p>
+    
+    <div style="margin: 20px 0;">
+        <button onclick="openApp()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            打开简化版应用
+        </button>
+    </div>
+    
+    <div id="test-results" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+        <h3>预期功能：</h3>
+        <ul>
+            <li>✅ 显示应用标题和副标题</li>
+            <li>✅ 显示水提醒卡片，包含间隔设置和控制按钮</li>
+            <li>✅ 显示站立提醒卡片，包含间隔设置和控制按钮</li>
+            <li>❌ 不应该有Settings按钮</li>
+            <li>❌ 不应该有Help按钮</li>
+            <li>❌ 不应该有Today's Wellness Status区域</li>
+            <li>✅ 提醒功能应该正常工作</li>
+        </ul>
+    </div>
+    
+    <script>
+        function openApp() {
+            window.open('index.html', '_blank');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAUSE按钮修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .countdown-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 15px 0;
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #007bff;
+        }
+        .interval-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .status-display {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-badge.active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-badge.inactive {
+            background: #f5f5f5;
+            color: #757575;
+        }
+        .status-badge.paused {
+            background: #fff3cd;
+            color: #856404;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .fix-info {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 PAUSE按钮修复测试</h1>
+    
+    <div class="fix-info">
+        <h2>修复内容</h2>
+        <ul>
+            <li><strong>修复1：</strong> PAUSE按钮逻辑从"停止"改为"暂停"</li>
+            <li><strong>修复2：</strong> 添加了Resume状态和相应的UI显示</li>
+            <li><strong>修复3：</strong> 修复了初始化时的设置同步问题</li>
+            <li><strong>修复4：</strong> 添加了暂停状态的CSS样式</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>1. 测试PAUSE/RESUME逻辑</h2>
+        <div>
+            <label><strong>测试间隔:</strong> 
+                <input type="number" id="test-interval" min="1" max="60" value="1" class="interval-input"> 分钟
+            </label>
+            <button class="btn btn-primary" id="toggle-btn" onclick="toggleReminder()">Start</button>
+            <button class="btn btn-danger" onclick="stopTest()">Stop</button>
+        </div>
+        
+        <div class="countdown-display" id="test-countdown">--:--</div>
+        
+        <div class="status-display" id="test-status">
+            状态: 未开始测试
+            <span class="status-badge inactive" id="status-badge">Inactive</span>
+        </div>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 状态变化测试</h2>
+        <div id="state-changes"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 调试日志</h2>
+        <button class="btn btn-primary" onclick="clearLog()">清除日志</button>
+        <pre id="debug-log"></pre>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/water-reminder.js"></script>
+
+    <script>
+        let testReminder = null;
+        let updateTimer = null;
+        let isActive = false;
+        let isPaused = false;
+        let stateChanges = [];
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}\n`;
+            logDiv.textContent += logEntry;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('debug-log').textContent = '';
+            stateChanges = [];
+            document.getElementById('state-changes').innerHTML = '';
+        }
+
+        function updateUI(status) {
+            const toggleBtn = document.getElementById('toggle-btn');
+            const statusBadge = document.getElementById('status-badge');
+            const statusDisplay = document.getElementById('test-status');
+            
+            // 更新按钮状态
+            if (status.isActive && !status.isPaused) {
+                // Running state
+                toggleBtn.textContent = 'Pause';
+                toggleBtn.className = 'btn btn-secondary';
+                statusBadge.textContent = 'Active';
+                statusBadge.className = 'status-badge active';
+                statusDisplay.innerHTML = `状态: 运行中 - 剩余: ${Math.floor(status.timeRemaining/1000)}秒 <span class="status-badge active">Active</span>`;
+            } else if (status.isActive && status.isPaused) {
+                // Paused state
+                toggleBtn.textContent = 'Resume';
+                toggleBtn.className = 'btn btn-primary';
+                statusBadge.textContent = 'Paused';
+                statusBadge.className = 'status-badge paused';
+                statusDisplay.innerHTML = `状态: 已暂停 - 剩余: ${Math.floor(status.timeRemaining/1000)}秒 <span class="status-badge paused">Paused</span>`;
+            } else {
+                // Stopped state
+                toggleBtn.textContent = 'Start';
+                toggleBtn.className = 'btn btn-primary';
+                statusBadge.textContent = 'Inactive';
+                statusBadge.className = 'status-badge inactive';
+                statusDisplay.innerHTML = `状态: 已停止 <span class="status-badge inactive">Inactive</span>`;
+            }
+            
+            // 记录状态变化
+            const stateChange = {
+                time: new Date().toLocaleTimeString(),
+                isActive: status.isActive,
+                isPaused: status.isPaused,
+                timeRemaining: Math.floor(status.timeRemaining/1000),
+                status: status.status
+            };
+            
+            stateChanges.push(stateChange);
+            updateStateChangesDisplay();
+        }
+
+        function updateStateChangesDisplay() {
+            const stateChangesDiv = document.getElementById('state-changes');
+            let html = '<h3>状态变化历史</h3>';
+            
+            stateChanges.slice(-10).forEach((change, index) => {
+                const statusText = change.isActive ? (change.isPaused ? 'Paused' : 'Active') : 'Inactive';
+                const statusClass = change.isActive ? (change.isPaused ? 'paused' : 'active') : 'inactive';
+                
+                html += `<div class="result info">
+                    <strong>${change.time}</strong> - 
+                    状态: <span class="status-badge ${statusClass}">${statusText}</span> - 
+                    剩余: ${change.timeRemaining}秒 - 
+                    事件: ${change.status}
+                </div>`;
+            });
+            
+            stateChangesDiv.innerHTML = html;
+        }
+
+        function toggleReminder() {
+            try {
+                const interval = parseInt(document.getElementById('test-interval').value);
+                
+                if (!testReminder) {
+                    // 创建新的提醒
+                    log(`创建新提醒 - 间隔: ${interval}分钟`);
+                    
+                    const notificationService = {
+                        showNotification: (type, title, message) => {
+                            log(`通知触发: ${title} - ${message}`);
+                            const result = `<div class="result warning">⏰ 提醒触发: ${title}</div>`;
+                            document.getElementById('test-results').innerHTML = result;
+                        },
+                        showInPageAlert: (type, options) => {
+                            log(`页面提醒: ${options.title} - ${options.message}`);
+                        }
+                    };
+
+                    const reminderSettings = {
+                        enabled: true,
+                        interval: interval,
+                        sound: true,
+                        lastReminder: null,
+                        target: 8
+                    };
+
+                    testReminder = new WaterReminder(reminderSettings, notificationService);
+
+                    // 设置状态变化回调
+                    testReminder.setStatusChangeCallback((status) => {
+                        log(`状态变化: ${status.status}, 活跃: ${status.isActive}, 暂停: ${status.isPaused}, 剩余: ${Math.floor(status.timeRemaining/1000)}秒`);
+                        
+                        isActive = status.isActive;
+                        isPaused = status.isPaused;
+                        
+                        updateUI(status);
+                    });
+
+                    // 设置时间更新回调
+                    testReminder.setTimeUpdateCallback((timeInfo) => {
+                        updateCountdown(timeInfo.timeRemaining);
+                    });
+
+                    // 启动提醒
+                    testReminder.start();
+                    
+                    // 启动UI更新定时器
+                    if (updateTimer) {
+                        clearInterval(updateTimer);
+                    }
+                    updateTimer = setInterval(() => {
+                        if (testReminder && testReminder.isActive) {
+                            const status = testReminder.getCurrentStatus();
+                            updateCountdown(status.timeRemaining);
+                        }
+                    }, 1000);
+                    
+                } else {
+                    // 切换现有提醒的状态
+                    if (isActive && !isPaused) {
+                        // 当前运行中，点击暂停
+                        log('暂停提醒');
+                        testReminder.pause();
+                    } else if (isActive && isPaused) {
+                        // 当前暂停中，点击恢复
+                        log('恢复提醒');
+                        testReminder.resume();
+                    } else {
+                        // 当前停止，点击开始
+                        log('重新启动提醒');
+                        testReminder.start();
+                    }
+                }
+
+            } catch (error) {
+                log(`切换提醒失败: ${error.message}`, 'error');
+                const result = `<div class="result error">❌ 操作失败: ${error.message}</div>`;
+                document.getElementById('test-results').innerHTML = result;
+            }
+        }
+
+        function stopTest() {
+            try {
+                if (testReminder) {
+                    testReminder.stop();
+                    testReminder = null;
+                }
+                
+                if (updateTimer) {
+                    clearInterval(updateTimer);
+                    updateTimer = null;
+                }
+
+                isActive = false;
+                isPaused = false;
+                
+                updateCountdown(0);
+                updateUI({ isActive: false, isPaused: false, timeRemaining: 0, status: 'stopped' });
+                log('测试已停止');
+
+            } catch (error) {
+                log(`停止测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        function updateCountdown(timeRemaining) {
+            const countdownElement = document.getElementById('test-countdown');
+            
+            if (timeRemaining <= 0) {
+                countdownElement.textContent = '--:--';
+                countdownElement.style.color = '#6c757d';
+            } else {
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining < 60000) {
+                    countdownElement.style.color = '#dc3545';
+                } else if (timeRemaining < 300000) {
+                    countdownElement.style.color = '#fd7e14';
+                } else {
+                    countdownElement.style.color = '#007bff';
+                }
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('PAUSE按钮修复测试页面已加载');
+            log('测试步骤：1.点击Start开始 → 2.点击Pause暂停 → 3.点击Resume恢复 → 4.点击Stop停止');
+            
+            // 初始化UI
+            updateUI({ isActive: false, isPaused: false, timeRemaining: 0, status: 'initial' });
+        });
+    </script>
+</body>
+</html>

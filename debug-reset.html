@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试RESET按钮问题</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-action {
+            background-color: #28a745;
+            color: white;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        .warning {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+    <h1>RESET按钮调试工具</h1>
+    
+    <div class="debug-section">
+        <h2>模拟主应用的按钮结构</h2>
+        
+        <!-- 水提醒卡片 -->
+        <div id="water-card">
+            <h3>水提醒</h3>
+            <button class="btn-primary" id="water-toggle">Start</button>
+            <button class="btn-secondary" id="water-reset" style="display: none;">Reset</button>
+            <button class="btn-action" id="waterDrink" style="display: none;">Hydrated</button>
+        </div>
+        
+        <!-- 站立提醒卡片 -->
+        <div id="standup-card">
+            <h3>站立提醒</h3>
+            <button class="btn-primary" id="standup-toggle">Start</button>
+            <button class="btn-secondary" id="standup-reset" style="display: none;">Reset</button>
+            <button class="btn-action" id="standupActivity" style="display: none;">Moved</button>
+        </div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>调试控制</h2>
+        <button onclick="showResetButtons()">显示RESET按钮</button>
+        <button onclick="hideResetButtons()">隐藏RESET按钮</button>
+        <button onclick="testElementCache()">测试元素缓存</button>
+        <button onclick="testEventBinding()">测试事件绑定</button>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>调试日志</h2>
+        <div class="log" id="debug-log">等待调试操作...</div>
+    </div>
+
+    <script>
+        // 模拟UIController的部分功能
+        class DebugUIController {
+            constructor() {
+                this.elements = {};
+                this.eventListeners = {};
+            }
+            
+            cacheElements() {
+                this.elements = {
+                    waterCard: document.getElementById('water-card'),
+                    waterToggle: document.getElementById('water-toggle'),
+                    waterReset: document.getElementById('water-reset'),
+                    waterDrink: document.getElementById('waterDrink'),
+                    
+                    standupCard: document.getElementById('standup-card'),
+                    standupToggle: document.getElementById('standup-toggle'),
+                    standupReset: document.getElementById('standup-reset'),
+                    standupActivity: document.getElementById('standupActivity')
+                };
+                
+                log('元素缓存完成', 'success');
+                
+                // 检查每个元素是否存在
+                Object.keys(this.elements).forEach(key => {
+                    const element = this.elements[key];
+                    if (element) {
+                        log(`✓ ${key}: 找到元素`, 'success');
+                    } else {
+                        log(`✗ ${key}: 元素不存在`, 'error');
+                    }
+                });
+            }
+            
+            addEventHandler(elementId, eventType, handler) {
+                const element = this.elements[elementId];
+                if (!element) {
+                    log(`警告: 元素不存在 - ${elementId}`, 'warning');
+                    return;
+                }
+
+                // Store event handler reference
+                if (!this.eventListeners[elementId]) {
+                    this.eventListeners[elementId] = {};
+                }
+
+                if (!this.eventListeners[elementId][eventType]) {
+                    this.eventListeners[elementId][eventType] = [];
+                }
+
+                this.eventListeners[elementId][eventType].push(handler);
+                element.addEventListener(eventType, handler);
+                
+                log(`✓ 事件绑定成功: ${elementId}.${eventType}`, 'success');
+            }
+            
+            bindEvents() {
+                log('开始绑定事件...', 'success');
+                
+                // 水提醒按钮事件
+                this.addEventHandler('waterToggle', 'click', () => {
+                    log('水提醒: Toggle按钮被点击', 'success');
+                    this.toggleWaterReminder();
+                });
+
+                this.addEventHandler('waterReset', 'click', () => {
+                    log('水提醒: Reset按钮被点击', 'success');
+                    this.resetWaterReminder();
+                });
+
+                this.addEventHandler('waterDrink', 'click', () => {
+                    log('水提醒: Drink按钮被点击', 'success');
+                });
+
+                // 站立提醒按钮事件
+                this.addEventHandler('standupToggle', 'click', () => {
+                    log('站立提醒: Toggle按钮被点击', 'success');
+                    this.toggleStandupReminder();
+                });
+
+                this.addEventHandler('standupReset', 'click', () => {
+                    log('站立提醒: Reset按钮被点击', 'success');
+                    this.resetStandupReminder();
+                });
+
+                this.addEventHandler('standupActivity', 'click', () => {
+                    log('站立提醒: Activity按钮被点击', 'success');
+                });
+                
+                log('事件绑定完成', 'success');
+            }
+            
+            toggleWaterReminder() {
+                const toggle = this.elements.waterToggle;
+                const reset = this.elements.waterReset;
+                const drink = this.elements.waterDrink;
+                
+                if (toggle.textContent === 'Start') {
+                    toggle.textContent = 'Pause';
+                    toggle.className = 'btn-secondary';
+                    reset.style.display = 'inline-block';
+                    drink.style.display = 'inline-block';
+                    log('水提醒已启动', 'success');
+                } else {
+                    toggle.textContent = 'Start';
+                    toggle.className = 'btn-primary';
+                    reset.style.display = 'none';
+                    drink.style.display = 'none';
+                    log('水提醒已暂停', 'success');
+                }
+            }
+            
+            resetWaterReminder() {
+                const toggle = this.elements.waterToggle;
+                const reset = this.elements.waterReset;
+                const drink = this.elements.waterDrink;
+                
+                toggle.textContent = 'Start';
+                toggle.className = 'btn-primary';
+                reset.style.display = 'none';
+                drink.style.display = 'none';
+                log('水提醒已重置', 'success');
+            }
+            
+            toggleStandupReminder() {
+                const toggle = this.elements.standupToggle;
+                const reset = this.elements.standupReset;
+                const activity = this.elements.standupActivity;
+                
+                if (toggle.textContent === 'Start') {
+                    toggle.textContent = 'Pause';
+                    toggle.className = 'btn-secondary';
+                    reset.style.display = 'inline-block';
+                    activity.style.display = 'inline-block';
+                    log('站立提醒已启动', 'success');
+                } else {
+                    toggle.textContent = 'Start';
+                    toggle.className = 'btn-primary';
+                    reset.style.display = 'none';
+                    activity.style.display = 'none';
+                    log('站立提醒已暂停', 'success');
+                }
+            }
+            
+            resetStandupReminder() {
+                const toggle = this.elements.standupToggle;
+                const reset = this.elements.standupReset;
+                const activity = this.elements.standupActivity;
+                
+                toggle.textContent = 'Start';
+                toggle.className = 'btn-primary';
+                reset.style.display = 'none';
+                activity.style.display = 'none';
+                log('站立提醒已重置', 'success');
+            }
+        }
+        
+        // 全局变量
+        let debugController = null;
+        
+        // 日志函数
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        // 调试函数
+        function showResetButtons() {
+            document.getElementById('water-reset').style.display = 'inline-block';
+            document.getElementById('standup-reset').style.display = 'inline-block';
+            log('RESET按钮已显示', 'success');
+        }
+        
+        function hideResetButtons() {
+            document.getElementById('water-reset').style.display = 'none';
+            document.getElementById('standup-reset').style.display = 'none';
+            log('RESET按钮已隐藏', 'success');
+        }
+        
+        function testElementCache() {
+            if (debugController) {
+                debugController.cacheElements();
+            } else {
+                log('调试控制器未初始化', 'error');
+            }
+        }
+        
+        function testEventBinding() {
+            if (debugController) {
+                debugController.bindEvents();
+            } else {
+                log('调试控制器未初始化', 'error');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM加载完成，开始初始化调试控制器...', 'success');
+            
+            debugController = new DebugUIController();
+            debugController.cacheElements();
+            debugController.bindEvents();
+            
+            log('调试控制器初始化完成', 'success');
+            log('请点击Start按钮启动提醒，然后测试Reset按钮', 'info');
+        });
+    </script>
+</body>
+</html>

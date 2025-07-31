@@ -25,19 +25,24 @@
 ```
 office-wellness-reminder/
 ├── index.html              # 主页面
+├── 404.html               # 错误页面
 ├── styles/
 │   └── main.css           # 主样式文件
 ├── js/
-│   ├── storage-manager.js  # 存储管理器
+│   ├── app.js             # 主应用文件
+│   ├── storage-manager.js # 存储管理器
+│   ├── app-settings.js    # 应用设置
 │   ├── notification-service.js # 通知服务
 │   ├── activity-detector.js    # 活动检测器
 │   ├── reminder-manager.js     # 提醒管理器
+│   ├── water-reminder.js       # 喝水提醒
+│   ├── standup-reminder.js     # 久坐提醒
 │   ├── ui-controller.js        # UI控制器
-│   └── app.js                  # 主应用文件
-├── assets/                # 静态资源
-├── .kiro/                 # Kiro AI Assistant 配置
-│   ├── hooks/             # 自动化钩子
-│   └── specs/             # 项目规格文档
+│   ├── error-handler.js        # 错误处理
+│   └── mobile-adapter.js       # 移动适配
+├── assets/                # 静态资源（图标、音频）
+├── manifest.json          # PWA配置
+├── package.json           # 项目配置
 └── README.md              # 项目说明
 ```
 

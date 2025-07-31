@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,12 +8,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#2c3e50">
     <title>Office Wellness Reminder</title>
-    <meta name="description" content="An application to help office workers develop healthy work habits with water and standup reminders">
+    <meta name="description"
+        content="An application to help office workers develop healthy work habits with water and standup reminders">
     <link rel="stylesheet" href="styles/main.css">
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="assets/standup-icon.png">
     <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
     <div id="app">
         <!-- Main Control Panel -->
@@ -20,10 +23,7 @@
             <header class="app-header">
                 <h1>Office Wellness Reminder</h1>
                 <p class="app-subtitle">Maintain Healthy Work Habits</p>
-                <div class="app-status-summary" id="app-status-summary">
-                    <div class="status-indicator active" id="app-status-indicator"></div>
-                    <span id="app-status-text">Wellness Reminders Active</span>
-                </div>
+
             </header>
 
             <!-- Status Display Area -->
@@ -32,19 +32,20 @@
                     <div class="card-header">
                         <div class="card-icon water-icon"></div>
                         <h3>Water Reminder</h3>
-                        <div class="status-badge" id="water-status-badge">Inactive</div>
+                        <div class="status-badge inactive" id="water-status-badge">Inactive</div>
                     </div>
                     <div class="card-content">
                         <div class="status-info">
                             <span class="next-reminder-label">Remind every:</span>
                             <div class="time-remaining" id="water-time">
-                                <input type="number" id="water-interval-display" min="1" max="60" value="30" class="interval-input"> mins
+                                <input type="number" id="water-interval-display" min="1" max="60" value="30"
+                                    class="interval-input"> mins
                             </div>
                         </div>
                         <div class="daily-stats" id="water-stats">
-                            <span class="stats-text">Today: 0/8 glasses</span>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="water-progress"></div>
+                            <div class="countdown-info">
+                                <span class="stats-text">Remind after:</span>
+                                <span class="countdown-time" id="water-countdown">--:--</span>
                             </div>
                         </div>
 
@@ -56,205 +57,43 @@
                     </div>
                 </div>
 
-                <div class="reminder-card" id="posture-card">
+                <div class="reminder-card" id="standup-card">
                     <div class="card-header">
-                        <div class="card-icon posture-icon"></div>
+                        <div class="card-icon standup-icon"></div>
                         <h3>Standup Reminder</h3>
-                        <div class="status-badge" id="posture-status-badge">Inactive</div>
+                        <div class="status-badge inactive" id="standup-status-badge">Inactive</div>
                     </div>
                     <div class="card-content">
                         <div class="status-info">
                             <span class="next-reminder-label">Remind every:</span>
-                            <div class="time-remaining" id="posture-time">
-                                <input type="number" id="posture-interval-display" min="1" max="60" value="30" class="interval-input"> mins
+                            <div class="time-remaining" id="standup-time">
+                                <input type="number" id="standup-interval-display" min="1" max="60" value="30"
+                                    class="interval-input"> mins
                             </div>
                         </div>
-                        <div class="daily-stats" id="posture-stats">
-                            <span class="stats-text">Today: 0/8 activities</span>
-                            <div class="progress-bar">
-                                <div class="progress-fill" id="posture-progress"></div>
+                        <div class="daily-stats" id="standup-stats">
+                            <div class="countdown-info">
+                                <span class="stats-text">Remind after:</span>
+                                <span class="countdown-time" id="standup-countdown">--:--</span>
                             </div>
                         </div>
 
 
                     </div>
                     <div class="card-controls">
-                        <button class="btn-primary" id="posture-toggle">Start</button>
-                        <button class="btn-secondary" id="posture-reset" style="display: none;">Reset</button>
-                        <button class="btn-action" id="postureActivity" style="display: none;">Moved</button>
+                        <button class="btn-primary" id="standup-toggle">Start</button>
+                        <button class="btn-secondary" id="standup-reset" style="display: none;">Reset</button>
+                        <button class="btn-action" id="standupActivity" style="display: none;">Moved</button>
                     </div>
                 </div>
             </section>
 
-            <!-- Quick Actions Area -->
-            <section class="quick-actions">
-                <div class="quick-actions-group">
-                    <button class="btn-action" id="start-all-btn">Start All</button>
-                    <button class="btn-action" id="pause-all-btn">Pause All</button>
-                </div>
-                <div class="quick-actions-group">
-                    <button class="btn-action" id="settings-btn">Settings</button>
-                    <button class="btn-action" id="help-btn">Help</button>
-                </div>
-            </section>
-            
-            <!-- Status Summary Area -->
-            <section class="status-summary">
-                <div class="summary-card">
-                    <div class="summary-title">Today's Wellness Status</div>
-                    <div class="summary-content">
-                        <div class="summary-item">
-                            <span class="summary-label">Hydration count:</span>
-                            <span class="summary-value" id="water-count">0/8</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Activity count:</span>
-                            <span class="summary-value" id="posture-count">0/8</span>
-                        </div>
-                        <div class="summary-item">
-                            <span class="summary-label">Wellness score:</span>
-                            <span class="summary-value" id="health-score">--</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+
+
+
         </main>
 
-        <!-- Settings Panel -->
-        <div class="settings-panel" id="settings-panel">
-            <div class="settings-header">
-                <h2>Settings</h2>
-                <button class="btn-close" id="settings-close">X</button>
-            </div>
-            <div class="settings-content">
-                <div class="settings-section">
-                    <h3>Water Reminder</h3>
-                    <div class="setting-item">
-                        <label class="switch">
-                            <input type="checkbox" id="water-enabled" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <div class="setting-label">
-                            <span>Enable Water Reminder</span>
-                            <small>Reminds you to stay hydrated</small>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label for="water-interval">Reminder Interval</label>
-                        <div class="setting-control">
-                            <input type="range" id="water-interval-slider" min="1" max="60" value="30" step="1">
-                            <div class="range-value">
-                                <input type="number" id="water-interval" min="1" max="60" value="30" style="width: 90px;"> minutes
-                            </div>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label for="water-target">Daily Target</label>
-                        <div class="setting-control">
-                            <input type="number" id="water-target" min="1" max="20" value="8"> glasses
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="settings-section">
-                    <h3>Standup Reminder</h3>
-                    <div class="setting-item">
-                        <label class="switch">
-                            <input type="checkbox" id="posture-enabled" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <div class="setting-label">
-                            <span>Enable Standup Reminder</span>
-                            <small>Reminds you to take breaks from sitting</small>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label for="posture-interval">Reminder Interval</label>
-                        <div class="setting-control">
-                            <input type="range" id="posture-interval-slider" min="1" max="60" value="30" step="1">
-                            <div class="range-value">
-                                <input type="number" id="posture-interval" min="1" max="60" value="30" style="width: 90px;"> minutes
-                            </div>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label for="posture-target">Daily Target</label>
-                        <div class="setting-control">
-                            <input type="number" id="posture-target" min="1" max="20" value="8"> activities
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label class="switch">
-                            <input type="checkbox" id="activity-detection" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <div class="setting-label">
-                            <span>Activity Detection</span>
-                            <small>Reset timer when activity is detected</small>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="settings-section">
-                    <h3>Notification Settings</h3>
-                    <div class="setting-item">
-                        <label class="switch">
-                            <input type="checkbox" id="browser-notifications" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <div class="setting-label">
-                            <span>Desktop Notifications</span>
-                            <small>Show notifications on system desktop</small>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label class="switch">
-                            <input type="checkbox" id="sound-enabled" checked>
-                            <span class="slider"></span>
-                        </label>
-                        <div class="setting-label">
-                            <span>Sound Alerts</span>
-                            <small>Play notification sounds</small>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <label for="notification-style">Notification Style</label>
-                        <div class="setting-control">
-                            <select id="notification-style">
-                                <option value="standard">Standard</option>
-                                <option value="minimal">Minimal</option>
-                                <option value="detailed">Detailed</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="settings-section">
-                    <h3>Appearance</h3>
-                    <div class="setting-item">
-                        <label for="theme-selector">Theme</label>
-                        <div class="setting-control theme-selector" id="theme-selector">
-                            <button class="theme-option active" data-theme="light">
-                                <div class="theme-preview light-theme"></div>
-                                <span>Light</span>
-                            </button>
-                            <button class="theme-option" data-theme="dark">
-                                <div class="theme-preview dark-theme"></div>
-                                <span>Dark</span>
-                            </button>
-                            <button class="theme-option" data-theme="auto">
-                                <div class="theme-preview auto-theme"></div>
-                                <span>Auto</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="settings-footer">
-                <button class="btn-secondary" id="reset-settings">Reset</button>
-                <button class="btn-primary" id="save-settings">Save</button>
-            </div>
-        </div>
+
 
         <!-- Notification Popup -->
         <div class="notification-overlay" id="notification-overlay">
@@ -271,33 +110,11 @@
             </div>
         </div>
 
-        <!-- Help Panel -->
-        <div class="help-overlay" id="help-overlay">
-            <div class="help-modal">
-                <div class="help-header">
-                    <h2>Help Guide</h2>
-                    <button class="btn-close" id="help-close">X</button>
-                </div>
-                <div class="help-content">
-                    <h3>Features</h3>
-                    <ul>
-                        <li><strong>Water Reminder</strong>: Reminds you to stay hydrated</li>
-                        <li><strong>Standup Reminder</strong>: Reminds you to take breaks from sitting</li>
-                        <li><strong>Smart Detection</strong>: Automatically detects your activity status</li>
-                    </ul>
-                    
-                    <h3>How to Use</h3>
-                    <ol>
-                        <li>Click "Start" button to activate reminders</li>
-                        <li>Adjust reminder intervals in settings</li>
-                        <li>Click "Done" when you receive a reminder</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <!-- JavaScript Files -->
+    <script src="js/debug-helper.js"></script>
     <script src="js/error-handler.js"></script>
     <script src="js/storage-manager.js"></script>
     <script src="js/app-settings.js"></script>
@@ -314,32 +131,122 @@
     <script>
         // 应用初始化
         let app;
-        
+
         async function initializeApp() {
             try {
                 console.log('Initializing Office Wellness App...');
+
+                // 运行诊断检查
+                let diagnostics = null;
+                if (typeof DebugHelper !== 'undefined') {
+                    const debugHelper = new DebugHelper();
+                    diagnostics = await debugHelper.runDiagnostics();
+
+                    // 如果有严重错误，显示诊断信息
+                    if (diagnostics.overall.status === 'error') {
+                        throw new Error(`Diagnostic check failed: ${diagnostics.classes.message}`);
+                    }
+                }
+
+                // 检查必要的类是否存在
+                const requiredClasses = [
+                    'ErrorHandler', 'StorageManager', 'AppSettings',
+                    'NotificationService', 'ActivityDetector', 'ReminderManager',
+                    'WaterReminder', 'PostureReminder', 'UIController', 'MobileAdapter'
+                ];
+
+                const missingClasses = requiredClasses.filter(className => !window[className]);
+                if (missingClasses.length > 0) {
+                    throw new Error(`Missing required classes: ${missingClasses.join(', ')}`);
+                }
+
+                // 隐藏启动错误提示（如果存在）
+                hideStartupError();
+
                 app = new OfficeWellnessApp();
                 await app.initialize();
                 console.log('App initialized successfully');
+
+                // 显示成功状态
+                showAppStatus('success', 'Application loaded successfully');
+
             } catch (error) {
                 console.error('App initialization failed:', error);
-                
-                // 显示错误通知
-                const notification = document.createElement('div');
-                notification.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    background: #e74c3c;
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 5px;
-                    z-index: 10000;
-                    font-family: Arial, sans-serif;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                `;
-                notification.textContent = 'App initialization failed. Please refresh the page.';
-                document.body.appendChild(notification);
+                showAppStatus('error', 'Application failed to start: ' + error.message);
+                showStartupError(error);
+
+                // 如果有调试助手，显示详细诊断
+                if (typeof runDiagnostics === 'function') {
+                    console.log('Running detailed diagnostics...');
+                    runDiagnostics();
+                }
+            }
+        }
+
+        function showAppStatus(type, message) {
+            const statusIndicator = document.getElementById('app-status-indicator');
+            const statusText = document.getElementById('app-status-text');
+
+            if (statusIndicator && statusText) {
+                statusIndicator.className = `status-indicator ${type}`;
+                statusText.textContent = message;
+            }
+        }
+
+        function showStartupError(error) {
+            // 移除已存在的错误通知
+            const existingError = document.getElementById('startup-error');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // 创建错误通知
+            const notification = document.createElement('div');
+            notification.id = 'startup-error';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #e74c3c;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                max-width: 500px;
+                text-align: center;
+            `;
+
+            notification.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 8px;">应用启动失败</div>
+                <div style="font-size: 14px; margin-bottom: 12px;">${error.message}</div>
+                <button onclick="location.reload()" style="
+                    background: white;
+                    color: #e74c3c;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">刷新页面</button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // 10秒后自动隐藏
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 10000);
+        }
+
+        function hideStartupError() {
+            const existingError = document.getElementById('startup-error');
+            if (existingError) {
+                existingError.remove();
             }
         }
 
@@ -349,6 +256,18 @@
         } else {
             initializeApp();
         }
+
+        // 添加全局错误处理
+        window.addEventListener('error', function (event) {
+            console.error('Global error:', event.error);
+            showAppStatus('error', 'Runtime error occurred');
+        });
+
+        window.addEventListener('unhandledrejection', function (event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showAppStatus('error', 'Promise rejection occurred');
+        });
     </script>
 </body>
+
 </html>

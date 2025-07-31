@@ -17,7 +17,7 @@ class AppSettings {
                 lastReminder: null,
                 target: 8 // 每日目标杯数
             },
-            posture: {
+            standup: {
                 enabled: true,
                 interval: 30, // 分钟
                 sound: true,
@@ -46,7 +46,7 @@ class AppSettings {
                 nextReminderAt: null,
                 lastAcknowledged: null
             },
-            postureReminder: {
+            standupReminder: {
                 isActive: false,
                 timeRemaining: 0,
                 nextReminderAt: null,
@@ -66,10 +66,22 @@ class AppSettings {
 
     /**
      * 加载应用设置
+     * @param {boolean} forceDefault - 是否强制使用默认设置（强制刷新时）
      * @returns {Object} 加载的设置
      */
-    loadSettings() {
+    loadSettings(forceDefault = false) {
         try {
+            // 检查是否为强制刷新
+            const isForceRefresh = this.detectForceRefresh();
+            
+            if (forceDefault || isForceRefresh) {
+                console.log('检测到强制刷新或强制使用默认设置，恢复默认设置');
+                this.currentSettings = { ...this.defaultSettings };
+                // 清除强制刷新标记
+                this.clearForceRefreshFlag();
+                return this.currentSettings;
+            }
+            
             const savedSettings = this.storageManager.loadSettings(this.settingsKey);
             if (savedSettings) {
                 // 深度合并保存的设置和默认设置
@@ -227,8 +239,8 @@ class AppSettings {
             }
         }
         
-        if (state.postureReminder && state.postureReminder.nextReminderAt) {
-            if (now - state.postureReminder.nextReminderAt > maxAge) {
+        if (state.standupReminder && state.standupReminder.nextReminderAt) {
+            if (now - state.standupReminder.nextReminderAt > maxAge) {
                 console.warn('久坐提醒时间已过期');
                 return false;
             }
@@ -285,17 +297,17 @@ class AppSettings {
             }
             
             // 验证久坐提醒设置
-            if (settings.posture) {
-                if (typeof settings.posture.interval !== 'number' || 
-                    settings.posture.interval < 1 || 
-                    settings.posture.interval > 60) {
+            if (settings.standup) {
+                if (typeof settings.standup.interval !== 'number' || 
+                    settings.standup.interval < 1 || 
+                    settings.standup.interval > 60) {
                     console.warn('无效的久坐提醒间隔设置');
                     return false;
                 }
                 
-                if (typeof settings.posture.target !== 'number' || 
-                    settings.posture.target < 1 || 
-                    settings.posture.target > 20) {
+                if (typeof settings.standup.target !== 'number' || 
+                    settings.standup.target < 1 || 
+                    settings.standup.target > 20) {
                     console.warn('无效的久坐提醒目标设置');
                     return false;
                 }
@@ -339,9 +351,83 @@ class AppSettings {
     isFirstUse() {
         return this.currentSettings.firstUse === true;
     }
+
+    /**
+     * 检测是否为强制刷新
+     * @returns {boolean} 是否为强制刷新
+     * @private
+     */
+    detectForceRefresh() {
+        try {
+            // 检查是否有强制刷新标记
+            const forceRefreshFlag = sessionStorage.getItem('forceRefreshFlag');
+            if (forceRefreshFlag === 'true') {
+                return true;
+            }
+            
+            // 检查 performance.navigation API（已废弃但仍可用）
+            if (window.performance && window.performance.navigation) {
+                // TYPE_RELOAD = 1 表示刷新
+                // 但无法区分普通刷新和强制刷新
+                return false;
+            }
+            
+            // 检查 performance.getEntriesByType API
+            if (window.performance && window.performance.getEntriesByType) {
+                const navEntries = window.performance.getEntriesByType('navigation');
+                if (navEntries.length > 0) {
+                    const navEntry = navEntries[0];
+                    // 如果是 reload 类型，可能是刷新
+                    return navEntry.type === 'reload';
+                }
+            }
+            
+            return false;
+        } catch (error) {
+            console.warn('检测强制刷新失败:', error);
+            return false;
+        }
+    }
+
+    /**
+     * 设置强制刷新标记
+     */
+    setForceRefreshFlag() {
+        try {
+            sessionStorage.setItem('forceRefreshFlag', 'true');
+        } catch (error) {
+            console.warn('设置强制刷新标记失败:', error);
+        }
+    }
+
+    /**
+     * 清除强制刷新标记
+     * @private
+     */
+    clearForceRefreshFlag() {
+        try {
+            sessionStorage.removeItem('forceRefreshFlag');
+        } catch (error) {
+            console.warn('清除强制刷新标记失败:', error);
+        }
+    }
+
+    /**
+     * 强制重置为默认设置（用于强制刷新）
+     * @returns {Object} 重置后的设置
+     */
+    forceResetToDefaults() {
+        console.log('强制重置为默认设置');
+        this.currentSettings = { ...this.defaultSettings };
+        this.saveSettings();
+        return this.currentSettings;
+    }
 }
 
 // 导出类供其他模块使用
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AppSettings;
 }
+
+// Export for browser use
+window.AppSettings = AppSettings;

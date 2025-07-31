@@ -15,7 +15,7 @@ class UIController {
                 completedToday: 0,
                 targetToday: 8
             },
-            posture: {
+            standup: {
                 isActive: false,
                 timeRemaining: 0,
                 status: 'Inactive',
@@ -32,8 +32,7 @@ class UIController {
 
         // Bind methods
         this.bindEvents = this.bindEvents.bind(this);
-        this.handleSettingsToggle = this.handleSettingsToggle.bind(this);
-        this.handleHelpToggle = this.handleHelpToggle.bind(this);
+
         this.handleOutsideClick = this.handleOutsideClick.bind(this);
         this.handleNotificationKeydown = this.handleNotificationKeydown.bind(this);
     }
@@ -72,56 +71,19 @@ class UIController {
             waterReset: document.getElementById('water-reset'),
             waterDrink: document.getElementById('waterDrink'),
             waterStats: document.getElementById('water-stats'),
-            waterProgress: document.getElementById('water-progress'),
-            waterCount: document.getElementById('water-count'),
-
+            waterCountdown: document.getElementById('water-countdown'),
             // Standup reminder related
-            postureCard: document.getElementById('posture-card'),
-            postureStatusBadge: document.getElementById('posture-status-badge'),
-            postureTime: document.getElementById('posture-time'),
-            postureIntervalDisplay: document.getElementById('posture-interval-display'),
-            postureToggle: document.getElementById('posture-toggle'),
-            postureReset: document.getElementById('posture-reset'),
-            postureActivity: document.getElementById('postureActivity'),
-            postureStats: document.getElementById('posture-stats'),
-            postureProgress: document.getElementById('posture-progress'),
-            postureCount: document.getElementById('posture-count'),
+            standupCard: document.getElementById('standup-card'),
+            standupStatusBadge: document.getElementById('standup-status-badge'),
+            standupTime: document.getElementById('standup-time'),
+            standupIntervalDisplay: document.getElementById('standup-interval-display'),
+            standupToggle: document.getElementById('standup-toggle'),
+            standupReset: document.getElementById('standup-reset'),
+            standupActivity: document.getElementById('standupActivity'),
+            standupStats: document.getElementById('standup-stats'),
+            standupCountdown: document.getElementById('standup-countdown'),
 
 
-            // Quick action buttons
-            startAllBtn: document.getElementById('start-all-btn'),
-            pauseAllBtn: document.getElementById('pause-all-btn'),
-
-            // Health score
-            healthScore: document.getElementById('health-score'),
-
-            // Settings panel
-            settingsBtn: document.getElementById('settings-btn'),
-            settingsPanel: document.getElementById('settings-panel'),
-            settingsClose: document.getElementById('settings-close'),
-            saveSettings: document.getElementById('save-settings'),
-            resetSettings: document.getElementById('reset-settings'),
-
-            // Settings - Water reminder
-            waterEnabled: document.getElementById('water-enabled'),
-            waterInterval: document.getElementById('water-interval'),
-            waterIntervalSlider: document.getElementById('water-interval-slider'),
-            waterTarget: document.getElementById('water-target'),
-
-            // Settings - Standup reminder
-            postureEnabled: document.getElementById('posture-enabled'),
-            postureInterval: document.getElementById('posture-interval'),
-            postureIntervalSlider: document.getElementById('posture-interval-slider'),
-            postureTarget: document.getElementById('posture-target'),
-            activityDetection: document.getElementById('activity-detection'),
-
-            // Settings - Notifications
-            browserNotifications: document.getElementById('browser-notifications'),
-            soundEnabled: document.getElementById('sound-enabled'),
-            notificationStyle: document.getElementById('notification-style'),
-
-            // Settings - Appearance
-            themeSelector: document.getElementById('theme-selector'),
 
             // Notification popup
             notificationOverlay: document.getElementById('notification-overlay'),
@@ -131,14 +93,11 @@ class UIController {
             notificationConfirm: document.getElementById('notification-confirm'),
             notificationSnooze: document.getElementById('notification-snooze'),
 
-            // Help panel
-            helpBtn: document.getElementById('help-btn'),
-            helpOverlay: document.getElementById('help-overlay'),
-            helpClose: document.getElementById('help-close')
+
         };
 
         // Check if required elements exist
-        const requiredElements = ['waterCard', 'postureCard', 'settingsPanel'];
+        const requiredElements = ['waterCard', 'standupCard', 'settingsPanel'];
         const missingElements = requiredElements.filter(id => !this.elements[id]);
 
         if (missingElements.length > 0) {
@@ -151,15 +110,7 @@ class UIController {
      * @private
      */
     bindEvents() {
-        // Settings panel events
-        this.addEventHandler('settingsBtn', 'click', this.handleSettingsToggle);
-        this.addEventHandler('settingsClose', 'click', this.handleSettingsToggle);
-        this.addEventHandler('saveSettings', 'click', this.handleSaveSettings.bind(this));
-        this.addEventHandler('resetSettings', 'click', this.handleResetSettings.bind(this));
 
-        // Help panel events
-        this.addEventHandler('helpBtn', 'click', this.handleHelpToggle);
-        this.addEventHandler('helpClose', 'click', this.handleHelpToggle);
 
         // Notification popup events
         this.addEventHandler('notificationConfirm', 'click', () => {
@@ -182,6 +133,7 @@ class UIController {
         });
 
         this.addEventHandler('waterReset', 'click', () => {
+            console.log('Water Reset button clicked!');
             this.triggerEvent('waterReset');
         });
 
@@ -190,83 +142,28 @@ class UIController {
         });
 
         // Standup reminder control buttons
-        this.addEventHandler('postureToggle', 'click', () => {
-            this.triggerEvent('postureToggle', { isActive: !this.uiState.posture.isActive });
+        this.addEventHandler('standupToggle', 'click', () => {
+            this.triggerEvent('standupToggle', { isActive: !this.uiState.standup.isActive });
         });
 
-        this.addEventHandler('postureReset', 'click', () => {
-            this.triggerEvent('postureReset');
+        this.addEventHandler('standupReset', 'click', () => {
+            console.log('Standup Reset button clicked!');
+            this.triggerEvent('standupReset');
         });
 
-        this.addEventHandler('postureActivity', 'click', () => {
-            this.triggerEvent('postureActivity');
+        this.addEventHandler('standupActivity', 'click', () => {
+            this.triggerEvent('standupActivity');
         });
 
-        // Global control buttons
-        this.addEventHandler('startAllBtn', 'click', () => {
-            this.triggerEvent('startAll');
-        });
 
-        this.addEventHandler('pauseAllBtn', 'click', () => {
-            this.triggerEvent('pauseAll');
-        });
 
-        // Settings panel slider linkage
-        if (this.elements.waterIntervalSlider && this.elements.waterInterval) {
-            this.elements.waterIntervalSlider.addEventListener('input', () => {
-                this.elements.waterInterval.value = this.elements.waterIntervalSlider.value;
-                if (this.elements.waterIntervalDisplay) {
-                    this.elements.waterIntervalDisplay.value = this.elements.waterIntervalSlider.value;
-                }
-                // Trigger interval change event for real-time updates
-                const value = parseInt(this.elements.waterIntervalSlider.value);
-                this.triggerEvent('waterIntervalChanged', { interval: value });
-            });
-
-            this.elements.waterInterval.addEventListener('change', () => {
-                this.elements.waterIntervalSlider.value = this.elements.waterInterval.value;
-                if (this.elements.waterIntervalDisplay) {
-                    this.elements.waterIntervalDisplay.value = this.elements.waterInterval.value;
-                }
-                // Trigger interval change event
-                const value = parseInt(this.elements.waterInterval.value);
-                this.triggerEvent('waterIntervalChanged', { interval: value });
-            });
-        }
-
-        if (this.elements.postureIntervalSlider && this.elements.postureInterval) {
-            this.elements.postureIntervalSlider.addEventListener('input', () => {
-                this.elements.postureInterval.value = this.elements.postureIntervalSlider.value;
-                if (this.elements.postureIntervalDisplay) {
-                    this.elements.postureIntervalDisplay.value = this.elements.postureIntervalSlider.value;
-                }
-                // Trigger interval change event for real-time updates
-                const value = parseInt(this.elements.postureIntervalSlider.value);
-                this.triggerEvent('postureIntervalChanged', { interval: value });
-            });
-
-            this.elements.postureInterval.addEventListener('change', () => {
-                this.elements.postureIntervalSlider.value = this.elements.postureInterval.value;
-                if (this.elements.postureIntervalDisplay) {
-                    this.elements.postureIntervalDisplay.value = this.elements.postureInterval.value;
-                }
-                // Trigger interval change event
-                const value = parseInt(this.elements.postureInterval.value);
-                this.triggerEvent('postureIntervalChanged', { interval: value });
-            });
-        }
+        // Main display interval input linkage (only these elements exist in HTML)
 
         // Main display interval input linkage
         if (this.elements.waterIntervalDisplay) {
             this.elements.waterIntervalDisplay.addEventListener('change', () => {
                 const value = parseInt(this.elements.waterIntervalDisplay.value);
                 if (value >= 1 && value <= 60) {
-                    if (this.elements.waterInterval) {
-                        this.elements.waterInterval.value = value;
-                    }
-                    if (this.elements.waterIntervalSlider) {
-                        this.elements.waterIntervalSlider.value = value;
-                    }
                     this.triggerEvent('waterIntervalChanged', { interval: value });
                 } else {
                     // Reset to valid range
@@ -278,28 +175,16 @@ class UIController {
                     }
 
                     this.elements.waterIntervalDisplay.value = validValue;
-                    if (this.elements.waterInterval) {
-                        this.elements.waterInterval.value = validValue;
-                    }
-                    if (this.elements.waterIntervalSlider) {
-                        this.elements.waterIntervalSlider.value = validValue;
-                    }
                     this.triggerEvent('waterIntervalChanged', { interval: validValue });
                 }
             });
         }
 
-        if (this.elements.postureIntervalDisplay) {
-            this.elements.postureIntervalDisplay.addEventListener('change', () => {
-                const value = parseInt(this.elements.postureIntervalDisplay.value);
+        if (this.elements.standupIntervalDisplay) {
+            this.elements.standupIntervalDisplay.addEventListener('change', () => {
+                const value = parseInt(this.elements.standupIntervalDisplay.value);
                 if (value >= 1 && value <= 60) {
-                    if (this.elements.postureInterval) {
-                        this.elements.postureInterval.value = value;
-                    }
-                    if (this.elements.postureIntervalSlider) {
-                        this.elements.postureIntervalSlider.value = value;
-                    }
-                    this.triggerEvent('postureIntervalChanged', { interval: value });
+                    this.triggerEvent('standupIntervalChanged', { interval: value });
                 } else {
                     // Reset to valid range
                     let validValue = 30; // default
@@ -309,14 +194,8 @@ class UIController {
                         validValue = 60; // maximum
                     }
 
-                    this.elements.postureIntervalDisplay.value = validValue;
-                    if (this.elements.postureInterval) {
-                        this.elements.postureInterval.value = validValue;
-                    }
-                    if (this.elements.postureIntervalSlider) {
-                        this.elements.postureIntervalSlider.value = validValue;
-                    }
-                    this.triggerEvent('postureIntervalChanged', { interval: validValue });
+                    this.elements.standupIntervalDisplay.value = validValue;
+                    this.triggerEvent('standupIntervalChanged', { interval: validValue });
                 }
             });
         }
@@ -407,10 +286,15 @@ class UIController {
      * @param {*} data - Event data
      */
     triggerEvent(eventName, data = null) {
+        console.log(`Triggering event: ${eventName}`, data);
+        
         if (!this.eventListeners._custom || !this.eventListeners._custom[eventName]) {
+            console.warn(`No listeners found for event: ${eventName}`);
             return;
         }
 
+        console.log(`Found ${this.eventListeners._custom[eventName].length} listeners for event: ${eventName}`);
+        
         this.eventListeners._custom[eventName].forEach(callback => {
             try {
                 callback(data);
@@ -434,15 +318,15 @@ class UIController {
             status: 'Inactive'
         });
 
-        this.updateReminderStatus('posture', {
+        this.updateReminderStatus('standup', {
             isActive: false,
             timeRemaining: 0,
             status: 'Inactive'
         });
 
-        // Initialize progress bars
-        this.updateDailyProgress('water', 0, 8);
-        this.updateDailyProgress('posture', 0, 8);
+        // Initialize countdown displays
+        this.updateCountdown('water', 0);
+        this.updateCountdown('standup', 0);
 
         // Set application status summary
         this.updateAppStatusSummary(false);
@@ -451,11 +335,9 @@ class UIController {
 
 
 
-        // Set health score
-        this.updateHealthScore(0, 0);
 
-        // Hide settings panel
-        this.hideSettings();
+
+
 
         // Set theme
         this.applyTheme('light');
@@ -519,18 +401,28 @@ class UIController {
 
     /**
      * Update reminder time display
-     * @param {string} type - 'water' | 'posture'
+     * @param {string} type - 'water' | 'standup'
      * @param {Object} timeInfo - Time information object
      */
     updateReminderTime(type, timeInfo) {
-        // This method is called by reminder managers to update time display
-        // For now, we don't need to do anything special as time is handled in updateReminderStatus
+        // Update countdown display with current time remaining
+        if (timeInfo && typeof timeInfo.timeRemaining !== 'undefined') {
+            this.updateCountdown(type, timeInfo.timeRemaining);
+            
+            // Update UI state
+            if (type === 'water') {
+                this.uiState.water.timeRemaining = timeInfo.timeRemaining;
+            } else if (type === 'standup') {
+                this.uiState.standup.timeRemaining = timeInfo.timeRemaining;
+            }
+        }
+        
         console.log(`${type} reminder time updated:`, timeInfo);
     }
 
     /**
      * Update reminder status display
-     * @param {string} type - 'water' | 'posture'
+     * @param {string} type - 'water' | 'standup'
      * @param {Object} status - Status object
      */
     updateReminderStatus(type, status) {
@@ -539,7 +431,7 @@ class UIController {
         const timeElement = this.elements[`${type}Time`];
         const toggleButton = this.elements[`${type}Toggle`];
         const resetButton = this.elements[`${type}Reset`];
-        const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'postureActivity'}`];
+        const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'standupActivity'}`];
 
         if (!card || !timeElement || !toggleButton) {
             return;
@@ -556,11 +448,18 @@ class UIController {
 
         // Update status badge
         if (statusBadge) {
-            statusBadge.textContent = status.isActive ? 'Active' : 'Inactive';
-            if (status.isActive) {
+            if (status.isActive && !status.isPaused) {
+                statusBadge.textContent = 'Active';
                 statusBadge.classList.add('active');
+                statusBadge.classList.remove('inactive', 'paused');
+            } else if (status.isActive && status.isPaused) {
+                statusBadge.textContent = 'Paused';
+                statusBadge.classList.add('paused');
+                statusBadge.classList.remove('active', 'inactive');
             } else {
-                statusBadge.classList.remove('active');
+                statusBadge.textContent = 'Inactive';
+                statusBadge.classList.add('inactive');
+                statusBadge.classList.remove('active', 'paused');
             }
         }
 
@@ -569,13 +468,21 @@ class UIController {
             timeElement.style.display = 'block';
         }
 
-        // Update button states
-        if (status.isActive) {
+        // Update button states based on isActive and isPaused
+        if (status.isActive && !status.isPaused) {
+            // Running state
             toggleButton.textContent = 'Pause';
             toggleButton.className = 'btn-secondary';
             if (resetButton) resetButton.style.display = 'inline-block';
             if (actionButton) actionButton.style.display = 'inline-block';
+        } else if (status.isActive && status.isPaused) {
+            // Paused state
+            toggleButton.textContent = 'Resume';
+            toggleButton.className = 'btn-primary';
+            if (resetButton) resetButton.style.display = 'inline-block';
+            if (actionButton) actionButton.style.display = 'inline-block';
         } else {
+            // Stopped state
             toggleButton.textContent = 'Start';
             toggleButton.className = 'btn-primary';
             if (resetButton) resetButton.style.display = 'none';
@@ -587,15 +494,18 @@ class UIController {
             this.uiState.water.isActive = status.isActive;
             this.uiState.water.status = status.status || (status.isActive ? 'Active' : 'Inactive');
             this.uiState.water.timeRemaining = status.timeRemaining || 0;
-        } else if (type === 'posture') {
-            this.uiState.posture.isActive = status.isActive;
-            this.uiState.posture.status = status.status || (status.isActive ? 'Active' : 'Inactive');
-            this.uiState.posture.timeRemaining = status.timeRemaining || 0;
+        } else if (type === 'standup') {
+            this.uiState.standup.isActive = status.isActive;
+            this.uiState.standup.status = status.status || (status.isActive ? 'Active' : 'Inactive');
+            this.uiState.standup.timeRemaining = status.timeRemaining || 0;
         }
+
+        // Update countdown display
+        this.updateCountdown(type, status.timeRemaining || 0);
 
         // Update application status summary after updating UI state
         this.updateAppStatusSummary(
-            this.uiState.water.isActive || this.uiState.posture.isActive
+            this.uiState.water.isActive || this.uiState.standup.isActive
         );
     }
 
@@ -764,13 +674,13 @@ class UIController {
         return {
             water: {
                 enabled: this.elements.waterEnabled ? this.elements.waterEnabled.checked : true,
-                interval: this.elements.waterInterval ? parseInt(this.elements.waterInterval.value) : 30,
+                interval: this.elements.waterIntervalDisplay ? parseInt(this.elements.waterIntervalDisplay.value) : 30,
                 target: this.elements.waterTarget ? parseInt(this.elements.waterTarget.value) : 8
             },
-            posture: {
-                enabled: this.elements.postureEnabled ? this.elements.postureEnabled.checked : true,
-                interval: this.elements.postureInterval ? parseInt(this.elements.postureInterval.value) : 30,
-                target: this.elements.postureTarget ? parseInt(this.elements.postureTarget.value) : 8,
+            standup: {
+                enabled: this.elements.standupEnabled ? this.elements.standupEnabled.checked : true,
+                interval: this.elements.standupIntervalDisplay ? parseInt(this.elements.standupIntervalDisplay.value) : 30,
+                target: this.elements.standupTarget ? parseInt(this.elements.standupTarget.value) : 8,
                 activityDetection: this.elements.activityDetection ? this.elements.activityDetection.checked : true
             },
             notifications: {
@@ -796,12 +706,7 @@ class UIController {
             if (this.elements.waterEnabled) {
                 this.elements.waterEnabled.checked = settings.water.enabled !== false;
             }
-            if (this.elements.waterInterval) {
-                this.elements.waterInterval.value = settings.water.interval || 30;
-            }
-            if (this.elements.waterIntervalSlider) {
-                this.elements.waterIntervalSlider.value = settings.water.interval || 30;
-            }
+
             if (this.elements.waterIntervalDisplay) {
                 this.elements.waterIntervalDisplay.value = settings.water.interval || 30;
             }
@@ -811,24 +716,19 @@ class UIController {
         }
 
         // Apply standup reminder settings
-        if (settings.posture) {
-            if (this.elements.postureEnabled) {
-                this.elements.postureEnabled.checked = settings.posture.enabled !== false;
+        if (settings.standup) {
+            if (this.elements.standupEnabled) {
+                this.elements.standupEnabled.checked = settings.standup.enabled !== false;
             }
-            if (this.elements.postureInterval) {
-                this.elements.postureInterval.value = settings.posture.interval || 30;
+
+            if (this.elements.standupIntervalDisplay) {
+                this.elements.standupIntervalDisplay.value = settings.standup.interval || 30;
             }
-            if (this.elements.postureIntervalSlider) {
-                this.elements.postureIntervalSlider.value = settings.posture.interval || 30;
-            }
-            if (this.elements.postureIntervalDisplay) {
-                this.elements.postureIntervalDisplay.value = settings.posture.interval || 30;
-            }
-            if (this.elements.postureTarget) {
-                this.elements.postureTarget.value = settings.posture.target || 8;
+            if (this.elements.standupTarget) {
+                this.elements.standupTarget.value = settings.standup.target || 8;
             }
             if (this.elements.activityDetection) {
-                this.elements.activityDetection.checked = settings.posture.activityDetection !== false;
+                this.elements.activityDetection.checked = settings.standup.activityDetection !== false;
             }
         }
 
@@ -895,6 +795,17 @@ class UIController {
     }
 
     /**
+     * Handle force reset settings (reset to defaults)
+     * @private
+     */
+    handleForceResetSettings() {
+        // Show confirmation dialog
+        if (confirm('确定要强制重置所有设置为默认值吗？这将把所有提醒间隔重置为30分钟。')) {
+            this.triggerEvent('forceResetSettings');
+        }
+    }
+
+    /**
      * Format time display
      * @param {number} timeRemaining - Time remaining in milliseconds
      * @returns {string} Formatted time string
@@ -952,27 +863,34 @@ class UIController {
 
 
     /**
-     * Update daily progress display
-     * @param {string} type - 'water' | 'posture'
+     * Update countdown display
+     * @param {string} type - 'water' | 'standup'
+     * @param {number} timeRemaining - Time remaining in milliseconds
+     */
+    updateCountdown(type, timeRemaining) {
+        const countdownElement = this.elements[`${type}Countdown`];
+        
+        if (countdownElement) {
+            if (timeRemaining <= 0) {
+                countdownElement.textContent = '--:--';
+            } else {
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+    }
+
+    /**
+     * Update daily progress display (kept for compatibility, but now updates countdown)
+     * @param {string} type - 'water' | 'standup'
      * @param {number} current - Current completion count
      * @param {number} target - Target count
      */
     updateDailyProgress(type, current, target) {
-        const statsElement = this.elements[`${type}Stats`];
-        const progressElement = this.elements[`${type}Progress`];
-
-        if (statsElement) {
-            const statsText = statsElement.querySelector('.stats-text');
-            if (statsText) {
-                const unit = type === 'water' ? 'glasses' : 'activities';
-                statsText.textContent = `Today: ${current}/${target} ${unit}`;
-            }
-        }
-
-        if (progressElement) {
-            const percentage = Math.min((current / target) * 100, 100);
-            progressElement.style.width = `${percentage}%`;
-        }
+        // This method is kept for compatibility but no longer updates progress bars
+        // The countdown display is updated through updateCountdown method
+        console.log(`Daily progress updated for ${type}: ${current}/${target}`);
     }
 
     /**
@@ -1178,7 +1096,8 @@ class UIController {
             this.elements.appStatusText.textContent = 'Wellness Reminders Active';
         } else {
             this.elements.appStatusIndicator.classList.remove('active');
-            this.elements.appStatusText.textContent = 'Wellness Reminders Inactive';
+            // Remove the inactive status text - just hide the status
+            this.elements.appStatusText.textContent = '';
         }
     }
 
@@ -1197,7 +1116,7 @@ class UIController {
         }
 
         // Simple health score calculation (max 100)
-        const score = Math.round((waterCompletionRate * 0.5 + postureCompletionRate * 0.5) * 100);
+        const score = Math.round((waterCompletionRate * 0.5 + standupCompletionRate * 0.5) * 100);
 
         // Set different colors based on score
         let scoreClass = '';
@@ -1223,3 +1142,6 @@ class UIController {
         this.elements.healthScore.textContent = score;
     }
 }
+
+// Export for browser use
+window.UIController = UIController;

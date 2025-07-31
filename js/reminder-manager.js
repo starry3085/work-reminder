@@ -235,6 +235,9 @@ class ReminderManager {
             // Clear timers
             this.clearTimer();
             this.clearUpdateTimer();
+            // Set to inactive so start() can work properly
+            this.isActive = false;
+            this.isPaused = false;
         }
         
         // Reset state
@@ -243,6 +246,14 @@ class ReminderManager {
         if (wasActive) {
             // If previously active, restart
             this.start();
+        } else {
+            // If not active, still trigger status change to update UI
+            this.triggerStatusChange({
+                status: 'reset',
+                isActive: false,
+                isPaused: false,
+                timeRemaining: 0
+            });
         }
         
         console.log(`${this.type} reminder reset`);
@@ -593,3 +604,6 @@ class ReminderManager {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ReminderManager;
 }
+
+// Export for browser use
+window.ReminderManager = ReminderManager;
