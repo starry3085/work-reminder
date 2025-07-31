@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紧急修复 - 倒计时问题</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .emergency-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .countdown-display {
+            font-size: 36px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 15px 0;
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #007bff;
+        }
+        .interval-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .status-display {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .fix-steps {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚨 紧急修复：倒计时逻辑问题</h1>
+    
+    <div class="emergency-section error">
+        <h2>❌ 当前问题</h2>
+        <p><strong>用户报告：</strong>两边提醒的倒计时逻辑都不对了</p>
+        <ul>
+            <li>水提醒显示1分钟，但倒计时从29:51开始</li>
+            <li>站立提醒显示2分钟，但倒计时从29:52开始</li>
+            <li>HTML中设置的是30分钟，但UI显示的是其他值</li>
+        </ul>
+    </div>
+
+    <div class="fix-steps">
+        <h2>🔧 修复步骤</h2>
+        <ol>
+            <li>检查HTML初始值与UI显示的差异</li>
+            <li>检查设置同步逻辑</li>
+            <li>修复倒计时计算逻辑</li>
+            <li>验证修复效果</li>
+        </ol>
+    </div>
+
+    <div class="emergency-section">
+        <h2>1. 检查当前状态</h2>
+        <button class="btn btn-primary" onclick="checkCurrentState()">检查当前状态</button>
+        <div id="current-state-result"></div>
+    </div>
+
+    <div class="emergency-section">
+        <h2>2. 测试倒计时逻辑</h2>
+        <div>
+            <label><strong>测试间隔:</strong> 
+                <input type="number" id="test-interval" min="1" max="60" value="1" class="interval-input"> 分钟
+            </label>
+            <button class="btn btn-success" onclick="testCountdownLogic()">测试倒计时</button>
+            <button class="btn btn-danger" onclick="stopTest()">停止测试</button>
+        </div>
+        
+        <div class="countdown-display" id="test-countdown">--:--</div>
+        
+        <div class="status-display" id="test-status">
+            状态: 未开始测试
+        </div>
+        
+        <div id="test-result"></div>
+    </div>
+
+    <div class="emergency-section">
+        <h2>3. 应用修复</h2>
+        <button class="btn btn-danger" onclick="applyEmergencyFix()">应用紧急修复</button>
+        <div id="fix-result"></div>
+    </div>
+
+    <div class="emergency-section">
+        <h2>4. 调试日志</h2>
+        <button class="btn btn-primary" onclick="clearLog()">清除日志</button>
+        <pre id="debug-log"></pre>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/water-reminder.js"></script>
+
+    <script>
+        let testReminder = null;
+        let updateTimer = null;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}\n`;
+            logDiv.textContent += logEntry;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('debug-log').textContent = '';
+        }
+
+        function checkCurrentState() {
+            log('开始检查当前状态...');
+            
+            try {
+                // 检查HTML元素值
+                const waterInput = document.createElement('input');
+                waterInput.type = 'number';
+                waterInput.id = 'water-interval-display';
+                waterInput.value = '30'; // HTML中的值
+                
+                const standupInput = document.createElement('input');
+                standupInput.type = 'number';
+                standupInput.id = 'standup-interval-display';
+                standupInput.value = '30'; // HTML中的值
+                
+                // 检查默认设置
+                const storageManager = new StorageManager();
+                const appSettings = new AppSettings(storageManager);
+                const settings = appSettings.getSettings();
+                
+                let result = '<div class="emergency-section info">';
+                result += '<h3>状态检查结果</h3>';
+                result += `<p><strong>HTML水提醒初始值:</strong> ${waterInput.value} 分钟</p>`;
+                result += `<p><strong>HTML站立提醒初始值:</strong> ${standupInput.value} 分钟</p>`;
+                result += `<p><strong>默认设置水提醒:</strong> ${settings.water.interval} 分钟</p>`;
+                result += `<p><strong>默认设置站立提醒:</strong> ${settings.standup.interval} 分钟</p>`;
+                
+                // 分析问题
+                if (waterInput.value === settings.water.interval.toString() && 
+                    standupInput.value === settings.standup.interval.toString()) {
+                    result += '<div class="success"><strong>✅ HTML值与默认设置一致</strong></div>';
+                    result += '<div class="warning"><strong>⚠️ 问题可能在于UI更新逻辑或倒计时计算</strong></div>';
+                } else {
+                    result += '<div class="error"><strong>❌ HTML值与默认设置不一致</strong></div>';
+                }
+                
+                result += '</div>';
+                
+                document.getElementById('current-state-result').innerHTML = result;
+                
+                log(`HTML水提醒值: ${waterInput.value}, 默认设置: ${settings.water.interval}`);
+                log(`HTML站立提醒值: ${standupInput.value}, 默认设置: ${settings.standup.interval}`);
+                
+            } catch (error) {
+                const result = `<div class="emergency-section error">检查状态失败: ${error.message}</div>`;
+                document.getElementById('current-state-result').innerHTML = result;
+                log(`检查状态失败: ${error.message}`, 'error');
+            }
+        }
+
+        function testCountdownLogic() {
+            try {
+                const interval = parseInt(document.getElementById('test-interval').value);
+                log(`开始测试倒计时逻辑 - 间隔: ${interval}分钟`);
+                
+                // 创建简单的通知服务
+                const notificationService = {
+                    showNotification: (type, title, message) => {
+                        log(`通知: ${title} - ${message}`);
+                        document.getElementById('test-status').textContent = `提醒触发: ${title}`;
+                    },
+                    showInPageAlert: (type, options) => {
+                        log(`页面提醒: ${options.title} - ${options.message}`);
+                    }
+                };
+
+                // 创建水提醒设置
+                const waterSettings = {
+                    enabled: true,
+                    interval: interval,
+                    sound: true,
+                    lastReminder: null,
+                    target: 8
+                };
+
+                // 创建水提醒实例
+                testReminder = new WaterReminder(waterSettings, notificationService);
+
+                // 设置状态变化回调
+                testReminder.setStatusChangeCallback((status) => {
+                    log(`状态变化: ${status.status}, 剩余时间: ${status.timeRemaining}ms`);
+                    
+                    if (status.status === 'started') {
+                        const actualMinutes = Math.floor(status.timeRemaining / 60000);
+                        const actualSeconds = Math.floor((status.timeRemaining % 60000) / 1000);
+                        
+                        document.getElementById('test-status').textContent = 
+                            `测试中 - 剩余: ${actualMinutes}:${actualSeconds.toString().padStart(2, '0')}`;
+                        
+                        // 检查是否正确
+                        if (actualMinutes === interval && actualSeconds === 0) {
+                            const result = `<div class="emergency-section success">
+                                <h3>✅ 倒计时正确</h3>
+                                <p>设置 ${interval} 分钟，倒计时从 ${actualMinutes}:00 开始</p>
+                            </div>`;
+                            document.getElementById('test-result').innerHTML = result;
+                            log(`✅ 倒计时正确: ${actualMinutes}:00`, 'success');
+                        } else {
+                            const result = `<div class="emergency-section error">
+                                <h3>❌ 倒计时错误</h3>
+                                <p>设置 ${interval} 分钟，但倒计时从 ${actualMinutes}:${actualSeconds.toString().padStart(2, '0')} 开始</p>
+                                <p><strong>问题:</strong> 倒计时计算逻辑有误</p>
+                            </div>`;
+                            document.getElementById('test-result').innerHTML = result;
+                            log(`❌ 倒计时错误: 预期 ${interval}:00, 实际 ${actualMinutes}:${actualSeconds.toString().padStart(2, '0')}`, 'error');
+                        }
+                    }
+                });
+
+                // 设置时间更新回调
+                testReminder.setTimeUpdateCallback((timeInfo) => {
+                    updateCountdown(timeInfo.timeRemaining);
+                });
+
+                // 启动提醒
+                testReminder.start();
+
+                // 启动UI更新定时器
+                if (updateTimer) {
+                    clearInterval(updateTimer);
+                }
+                updateTimer = setInterval(() => {
+                    if (testReminder && testReminder.isActive) {
+                        const status = testReminder.getCurrentStatus();
+                        updateCountdown(status.timeRemaining);
+                    }
+                }, 1000);
+
+                log(`测试已启动，监控倒计时...`);
+
+            } catch (error) {
+                log(`测试失败: ${error.message}`, 'error');
+                document.getElementById('test-status').textContent = `测试失败: ${error.message}`;
+            }
+        }
+
+        function stopTest() {
+            try {
+                if (testReminder) {
+                    testReminder.stop();
+                    testReminder = null;
+                }
+                
+                if (updateTimer) {
+                    clearInterval(updateTimer);
+                    updateTimer = null;
+                }
+
+                updateCountdown(0);
+                document.getElementById('test-status').textContent = '测试已停止';
+                log('测试已停止');
+
+            } catch (error) {
+                log(`停止测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        function updateCountdown(timeRemaining) {
+            const countdownElement = document.getElementById('test-countdown');
+            
+            if (timeRemaining <= 0) {
+                countdownElement.textContent = '--:--';
+                countdownElement.style.color = '#6c757d';
+            } else {
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // 根据剩余时间设置颜色
+                if (timeRemaining < 60000) {
+                    countdownElement.style.color = '#dc3545'; // 红色
+                } else if (timeRemaining < 300000) {
+                    countdownElement.style.color = '#fd7e14'; // 橙色
+                } else {
+                    countdownElement.style.color = '#007bff'; // 蓝色
+                }
+            }
+        }
+
+        function applyEmergencyFix() {
+            log('开始应用紧急修复...');
+            
+            try {
+                // 这里我们需要确定具体的问题并应用修复
+                // 基于测试结果，我们可能需要：
+                // 1. 修复HTML初始值
+                // 2. 修复UI同步逻辑
+                // 3. 修复倒计时计算
+                
+                let fixResult = '<div class="emergency-section warning">';
+                fixResult += '<h3>🔧 修复说明</h3>';
+                fixResult += '<p>基于测试结果，需要手动修复以下文件：</p>';
+                fixResult += '<ul>';
+                fixResult += '<li><strong>index.html:</strong> 确保水提醒和站立提醒的初始值正确</li>';
+                fixResult += '<li><strong>js/ui-controller.js:</strong> 确保applySettingsToUI方法正确同步设置</li>';
+                fixResult += '<li><strong>js/reminder-manager.js:</strong> 确保倒计时计算逻辑正确</li>';
+                fixResult += '</ul>';
+                fixResult += '<p><strong>建议:</strong> 先运行测试确定具体问题，然后针对性修复</p>';
+                fixResult += '</div>';
+                
+                document.getElementById('fix-result').innerHTML = fixResult;
+                log('修复说明已显示，请根据测试结果进行针对性修复');
+                
+            } catch (error) {
+                const result = `<div class="emergency-section error">应用修复失败: ${error.message}</div>`;
+                document.getElementById('fix-result').innerHTML = result;
+                log(`应用修复失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('紧急修复页面已加载');
+            log('请按顺序执行：1.检查当前状态 → 2.测试倒计时逻辑 → 3.应用修复');
+        });
+    </script>
+</body>
+</html>

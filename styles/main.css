@@ -256,6 +256,11 @@ body {
     color: var(--text-secondary);
 }
 
+.status-badge.paused {
+    background: #fff3cd;
+    color: #856404;
+}
+
 .card-content {
     flex: 1;
     display: flex;

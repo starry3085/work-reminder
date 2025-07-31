@@ -157,62 +157,13 @@ class UIController {
 
 
 
-        // Settings panel slider linkage
-        if (this.elements.waterIntervalSlider && this.elements.waterInterval) {
-            this.elements.waterIntervalSlider.addEventListener('input', () => {
-                this.elements.waterInterval.value = this.elements.waterIntervalSlider.value;
-                if (this.elements.waterIntervalDisplay) {
-                    this.elements.waterIntervalDisplay.value = this.elements.waterIntervalSlider.value;
-                }
-                // Trigger interval change event for real-time updates
-                const value = parseInt(this.elements.waterIntervalSlider.value);
-                this.triggerEvent('waterIntervalChanged', { interval: value });
-            });
-
-            this.elements.waterInterval.addEventListener('change', () => {
-                this.elements.waterIntervalSlider.value = this.elements.waterInterval.value;
-                if (this.elements.waterIntervalDisplay) {
-                    this.elements.waterIntervalDisplay.value = this.elements.waterInterval.value;
-                }
-                // Trigger interval change event
-                const value = parseInt(this.elements.waterInterval.value);
-                this.triggerEvent('waterIntervalChanged', { interval: value });
-            });
-        }
-
-        if (this.elements.standupIntervalSlider && this.elements.standupInterval) {
-            this.elements.standupIntervalSlider.addEventListener('input', () => {
-                this.elements.standupInterval.value = this.elements.standupIntervalSlider.value;
-                if (this.elements.standupIntervalDisplay) {
-                    this.elements.standupIntervalDisplay.value = this.elements.standupIntervalSlider.value;
-                }
-                // Trigger interval change event for real-time updates
-                const value = parseInt(this.elements.standupIntervalSlider.value);
-                this.triggerEvent('standupIntervalChanged', { interval: value });
-            });
-
-            this.elements.standupInterval.addEventListener('change', () => {
-                this.elements.standupIntervalSlider.value = this.elements.standupInterval.value;
-                if (this.elements.standupIntervalDisplay) {
-                    this.elements.standupIntervalDisplay.value = this.elements.standupInterval.value;
-                }
-                // Trigger interval change event
-                const value = parseInt(this.elements.standupInterval.value);
-                this.triggerEvent('standupIntervalChanged', { interval: value });
-            });
-        }
+        // Main display interval input linkage (only these elements exist in HTML)
 
         // Main display interval input linkage
         if (this.elements.waterIntervalDisplay) {
             this.elements.waterIntervalDisplay.addEventListener('change', () => {
                 const value = parseInt(this.elements.waterIntervalDisplay.value);
                 if (value >= 1 && value <= 60) {
-                    if (this.elements.waterInterval) {
-                        this.elements.waterInterval.value = value;
-                    }
-                    if (this.elements.waterIntervalSlider) {
-                        this.elements.waterIntervalSlider.value = value;
-                    }
                     this.triggerEvent('waterIntervalChanged', { interval: value });
                 } else {
                     // Reset to valid range
@@ -224,12 +175,6 @@ class UIController {
                     }
 
                     this.elements.waterIntervalDisplay.value = validValue;
-                    if (this.elements.waterInterval) {
-                        this.elements.waterInterval.value = validValue;
-                    }
-                    if (this.elements.waterIntervalSlider) {
-                        this.elements.waterIntervalSlider.value = validValue;
-                    }
                     this.triggerEvent('waterIntervalChanged', { interval: validValue });
                 }
             });
@@ -239,12 +184,6 @@ class UIController {
             this.elements.standupIntervalDisplay.addEventListener('change', () => {
                 const value = parseInt(this.elements.standupIntervalDisplay.value);
                 if (value >= 1 && value <= 60) {
-                    if (this.elements.standupInterval) {
-                        this.elements.standupInterval.value = value;
-                    }
-                    if (this.elements.standupIntervalSlider) {
-                        this.elements.standupIntervalSlider.value = value;
-                    }
                     this.triggerEvent('standupIntervalChanged', { interval: value });
                 } else {
                     // Reset to valid range
@@ -256,12 +195,6 @@ class UIController {
                     }
 
                     this.elements.standupIntervalDisplay.value = validValue;
-                    if (this.elements.standupInterval) {
-                        this.elements.standupInterval.value = validValue;
-                    }
-                    if (this.elements.standupIntervalSlider) {
-                        this.elements.standupIntervalSlider.value = validValue;
-                    }
                     this.triggerEvent('standupIntervalChanged', { interval: validValue });
                 }
             });
@@ -515,13 +448,18 @@ class UIController {
 
         // Update status badge
         if (statusBadge) {
-            statusBadge.textContent = status.isActive ? 'Active' : 'Inactive';
-            if (status.isActive) {
+            if (status.isActive && !status.isPaused) {
+                statusBadge.textContent = 'Active';
                 statusBadge.classList.add('active');
-                statusBadge.classList.remove('inactive');
+                statusBadge.classList.remove('inactive', 'paused');
+            } else if (status.isActive && status.isPaused) {
+                statusBadge.textContent = 'Paused';
+                statusBadge.classList.add('paused');
+                statusBadge.classList.remove('active', 'inactive');
             } else {
-                statusBadge.classList.remove('active');
+                statusBadge.textContent = 'Inactive';
                 statusBadge.classList.add('inactive');
+                statusBadge.classList.remove('active', 'paused');
             }
         }
 
@@ -530,13 +468,21 @@ class UIController {
             timeElement.style.display = 'block';
         }
 
-        // Update button states
-        if (status.isActive) {
+        // Update button states based on isActive and isPaused
+        if (status.isActive && !status.isPaused) {
+            // Running state
             toggleButton.textContent = 'Pause';
             toggleButton.className = 'btn-secondary';
             if (resetButton) resetButton.style.display = 'inline-block';
             if (actionButton) actionButton.style.display = 'inline-block';
+        } else if (status.isActive && status.isPaused) {
+            // Paused state
+            toggleButton.textContent = 'Resume';
+            toggleButton.className = 'btn-primary';
+            if (resetButton) resetButton.style.display = 'inline-block';
+            if (actionButton) actionButton.style.display = 'inline-block';
         } else {
+            // Stopped state
             toggleButton.textContent = 'Start';
             toggleButton.className = 'btn-primary';
             if (resetButton) resetButton.style.display = 'none';
@@ -728,12 +674,12 @@ class UIController {
         return {
             water: {
                 enabled: this.elements.waterEnabled ? this.elements.waterEnabled.checked : true,
-                interval: this.elements.waterInterval ? parseInt(this.elements.waterInterval.value) : 30,
+                interval: this.elements.waterIntervalDisplay ? parseInt(this.elements.waterIntervalDisplay.value) : 30,
                 target: this.elements.waterTarget ? parseInt(this.elements.waterTarget.value) : 8
             },
             standup: {
                 enabled: this.elements.standupEnabled ? this.elements.standupEnabled.checked : true,
-                interval: this.elements.standupInterval ? parseInt(this.elements.standupInterval.value) : 30,
+                interval: this.elements.standupIntervalDisplay ? parseInt(this.elements.standupIntervalDisplay.value) : 30,
                 target: this.elements.standupTarget ? parseInt(this.elements.standupTarget.value) : 8,
                 activityDetection: this.elements.activityDetection ? this.elements.activityDetection.checked : true
             },
@@ -760,12 +706,7 @@ class UIController {
             if (this.elements.waterEnabled) {
                 this.elements.waterEnabled.checked = settings.water.enabled !== false;
             }
-            if (this.elements.waterInterval) {
-                this.elements.waterInterval.value = settings.water.interval || 30;
-            }
-            if (this.elements.waterIntervalSlider) {
-                this.elements.waterIntervalSlider.value = settings.water.interval || 30;
-            }
+
             if (this.elements.waterIntervalDisplay) {
                 this.elements.waterIntervalDisplay.value = settings.water.interval || 30;
             }
@@ -775,24 +716,19 @@ class UIController {
         }
 
         // Apply standup reminder settings
-        if (settings.posture) {
-            if (this.elements.postureEnabled) {
-                this.elements.postureEnabled.checked = settings.posture.enabled !== false;
+        if (settings.standup) {
+            if (this.elements.standupEnabled) {
+                this.elements.standupEnabled.checked = settings.standup.enabled !== false;
             }
-            if (this.elements.postureInterval) {
-                this.elements.postureInterval.value = settings.posture.interval || 30;
+
+            if (this.elements.standupIntervalDisplay) {
+                this.elements.standupIntervalDisplay.value = settings.standup.interval || 30;
             }
-            if (this.elements.postureIntervalSlider) {
-                this.elements.postureIntervalSlider.value = settings.posture.interval || 30;
-            }
-            if (this.elements.postureIntervalDisplay) {
-                this.elements.postureIntervalDisplay.value = settings.posture.interval || 30;
-            }
-            if (this.elements.postureTarget) {
-                this.elements.postureTarget.value = settings.posture.target || 8;
+            if (this.elements.standupTarget) {
+                this.elements.standupTarget.value = settings.standup.target || 8;
             }
             if (this.elements.activityDetection) {
-                this.elements.activityDetection.checked = settings.posture.activityDetection !== false;
+                this.elements.activityDetection.checked = settings.standup.activityDetection !== false;
             }
         }
 

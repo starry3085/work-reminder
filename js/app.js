@@ -506,12 +506,59 @@ class OfficeWellnessApp {
         
         // 获取当前设置并应用到UI
         const currentSettings = this.appSettings.getSettings();
+        console.log('应用设置到UI:', currentSettings);
+        
         this.uiController.applySettingsToUI(currentSettings);
+        
+        // 强制同步UI显示值（修复初始化时序问题）
+        this.forceUISync(currentSettings);
         
         // 绑定UI事件到应用逻辑
         this.setupUIEventHandlers();
         
         console.log('UI初始化完成');
+    }
+
+    /**
+     * 强制同步UI显示值（修复初始化时序问题）
+     * @param {Object} settings - 当前设置
+     * @private
+     */
+    forceUISync(settings) {
+        try {
+            // 强制更新水提醒间隔显示
+            const waterDisplay = document.getElementById('water-interval-display');
+            if (waterDisplay && settings.water) {
+                const oldValue = waterDisplay.value;
+                waterDisplay.value = settings.water.interval || 30;
+                console.log(`强制同步水提醒间隔: ${oldValue} → ${waterDisplay.value}`);
+            }
+            
+            // 强制更新站立提醒间隔显示
+            const standupDisplay = document.getElementById('standup-interval-display');
+            if (standupDisplay && settings.standup) {
+                const oldValue = standupDisplay.value;
+                standupDisplay.value = settings.standup.interval || 30;
+                console.log(`强制同步站立提醒间隔: ${oldValue} → ${standupDisplay.value}`);
+            }
+            
+            // 强制更新UI控制器的内部状态
+            if (this.uiController) {
+                // 更新提醒管理器的设置
+                if (this.waterReminder && settings.water) {
+                    this.waterReminder.updateSettings(settings.water);
+                }
+                if (this.standupReminder && settings.standup) {
+                    this.standupReminder.updateSettings(settings.standup);
+                }
+                
+                console.log('提醒管理器设置已更新');
+            }
+            
+            console.log('UI强制同步完成');
+        } catch (error) {
+            console.error('UI强制同步失败:', error);
+        }
     }
 
     /**
@@ -530,7 +577,7 @@ class OfficeWellnessApp {
             if (data.isActive) {
                 this.startReminder('water');
             } else {
-                this.stopReminder('water');
+                this.pauseReminder('water');
             }
         });
 
@@ -553,7 +600,7 @@ class OfficeWellnessApp {
             if (data.isActive) {
                 this.startReminder('standup');
             } else {
-                this.stopReminder('standup');
+                this.pauseReminder('standup');
             }
         });
 
@@ -1320,6 +1367,48 @@ class OfficeWellnessApp {
             }
         } catch (error) {
             console.error(`Failed to stop ${type} reminder:`, error);
+        }
+    }
+
+    /**
+     * 暂停提醒
+     * @param {string} type - 'water' | 'standup'
+     */
+    pauseReminder(type) {
+        try {
+            if (type === 'water' && this.waterReminder) {
+                console.log('Pausing water reminder...');
+                this.waterReminder.pause();
+                
+                // 保存应用状态
+                this.saveAppState();
+                console.log('Water reminder paused successfully');
+                
+                // 手动触发状态更新以确保UI同步
+                if (this.uiController) {
+                    const status = this.waterReminder.getCurrentStatus();
+                    console.log('Manual status update for water:', status);
+                    this.uiController.updateReminderStatus('water', status);
+                }
+            } else if (type === 'standup' && this.standupReminder) {
+                console.log('Pausing standup reminder...');
+                this.standupReminder.pause();
+                
+                // 保存应用状态
+                this.saveAppState();
+                console.log('Standup reminder paused successfully');
+                
+                // 手动触发状态更新以确保UI同步
+                if (this.uiController) {
+                    const status = this.standupReminder.getCurrentStatus();
+                    console.log('Manual status update for standup:', status);
+                    this.uiController.updateReminderStatus('standup', status);
+                }
+            } else {
+                console.warn(`Cannot pause ${type} reminder: reminder not initialized`);
+            }
+        } catch (error) {
+            console.error(`Failed to pause ${type} reminder:`, error);
         }
     }
 

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最终修复验证</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .btn {
+            padding: 8px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .countdown-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 15px 0;
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .interval-input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .status-display {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .fix-summary {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>喝水提醒倒计时问题 - 最终修复验证</h1>
+    
+    <div class="fix-summary">
+        <h2>🔧 已修复的问题</h2>
+        <ul>
+            <li><strong>修复1：</strong> HTML中水提醒间隔初始值从1分钟改为30分钟</li>
+            <li><strong>修复2：</strong> UI控制器中设置同步问题（settings.posture → settings.standup）</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 完整功能测试</h2>
+        <div>
+            <label><strong>设置间隔:</strong> 
+                <input type="number" id="water-interval" min="1" max="60" value="1" class="interval-input"> 分钟
+            </label>
+            <button class="btn btn-primary" onclick="startTest()">开始测试</button>
+            <button class="btn btn-danger" onclick="stopTest()">停止测试</button>
+        </div>
+        
+        <div class="countdown-display" id="countdown-display">--:--</div>
+        
+        <div class="status-display" id="status-display">
+            状态: 未开始测试
+        </div>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 测试结果分析</h2>
+        <div id="analysis-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 详细日志</h2>
+        <button class="btn btn-success" onclick="clearLog()">清除日志</button>
+        <pre id="test-log"></pre>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/water-reminder.js"></script>
+
+    <script>
+        let waterReminder = null;
+        let updateTimer = null;
+        let testStartTime = null;
+        let expectedInterval = 0;
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}\n`;
+            logDiv.textContent += logEntry;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').textContent = '';
+        }
+
+        function updateCountdown(timeRemaining) {
+            const countdownElement = document.getElementById('countdown-display');
+            
+            if (timeRemaining <= 0) {
+                countdownElement.textContent = '--:--';
+                countdownElement.style.color = '#6c757d';
+            } else {
+                const minutes = Math.floor(timeRemaining / 60000);
+                const seconds = Math.floor((timeRemaining % 60000) / 1000);
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // 根据剩余时间设置颜色
+                if (timeRemaining < 60000) { // 小于1分钟
+                    countdownElement.style.color = '#dc3545'; // 红色
+                } else if (timeRemaining < 300000) { // 小于5分钟
+                    countdownElement.style.color = '#fd7e14'; // 橙色
+                } else {
+                    countdownElement.style.color = '#007bff'; // 蓝色
+                }
+            }
+        }
+
+        function updateStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status-display');
+            statusElement.textContent = message;
+            
+            // 根据类型设置样式
+            statusElement.className = 'status-display';
+            if (type === 'success') {
+                statusElement.style.borderLeftColor = '#28a745';
+                statusElement.style.backgroundColor = '#d4edda';
+            } else if (type === 'error') {
+                statusElement.style.borderLeftColor = '#dc3545';
+                statusElement.style.backgroundColor = '#f8d7da';
+            } else if (type === 'warning') {
+                statusElement.style.borderLeftColor = '#ffc107';
+                statusElement.style.backgroundColor = '#fff3cd';
+            } else {
+                statusElement.style.borderLeftColor = '#007bff';
+                statusElement.style.backgroundColor = '#f8f9fa';
+            }
+        }
+
+        function startTest() {
+            try {
+                expectedInterval = parseInt(document.getElementById('water-interval').value);
+                testStartTime = Date.now();
+                
+                log(`开始测试 - 设置间隔: ${expectedInterval}分钟`);
+                updateStatus(`正在启动测试... 设置间隔: ${expectedInterval}分钟`);
+
+                // 创建通知服务
+                const notificationService = {
+                    showNotification: (type, title, message) => {
+                        log(`通知触发: ${title} - ${message}`);
+                        updateStatus(`提醒触发: ${title}`, 'warning');
+                        
+                        // 分析结果
+                        analyzeResults('reminder_triggered');
+                    },
+                    showInPageAlert: (type, options) => {
+                        log(`页面提醒: ${options.title} - ${options.message}`);
+                    }
+                };
+
+                // 创建水提醒设置
+                const waterSettings = {
+                    enabled: true,
+                    interval: expectedInterval,
+                    sound: true,
+                    lastReminder: null,
+                    target: 8
+                };
+
+                // 创建水提醒实例
+                waterReminder = new WaterReminder(waterSettings, notificationService);
+
+                // 设置状态变化回调
+                waterReminder.setStatusChangeCallback((status) => {
+                    log(`状态变化: ${status.status}, 活跃: ${status.isActive}, 剩余: ${Math.floor(status.timeRemaining/1000)}秒`);
+                    
+                    if (status.status === 'started') {
+                        const actualMinutes = Math.floor(status.timeRemaining / 60000);
+                        const actualSeconds = Math.floor((status.timeRemaining % 60000) / 1000);
+                        
+                        updateStatus(`测试进行中 - 倒计时: ${actualMinutes}:${actualSeconds.toString().padStart(2, '0')}`, 'info');
+                        
+                        // 检查初始倒计时是否正确
+                        if (actualMinutes === expectedInterval && actualSeconds === 0) {
+                            log(`✅ 初始倒计时正确: ${actualMinutes}:00`, 'success');
+                            analyzeResults('correct_initial_countdown');
+                        } else {
+                            log(`❌ 初始倒计时错误: 预期 ${expectedInterval}:00, 实际 ${actualMinutes}:${actualSeconds.toString().padStart(2, '0')}`, 'error');
+                            analyzeResults('incorrect_initial_countdown', {
+                                expected: `${expectedInterval}:00`,
+                                actual: `${actualMinutes}:${actualSeconds.toString().padStart(2, '0')}`
+                            });
+                        }
+                    }
+                });
+
+                // 设置时间更新回调
+                waterReminder.setTimeUpdateCallback((timeInfo) => {
+                    updateCountdown(timeInfo.timeRemaining);
+                });
+
+                // 启动提醒
+                waterReminder.start();
+
+                // 启动UI更新定时器
+                if (updateTimer) {
+                    clearInterval(updateTimer);
+                }
+                updateTimer = setInterval(() => {
+                    if (waterReminder && waterReminder.isActive) {
+                        const status = waterReminder.getCurrentStatus();
+                        updateCountdown(status.timeRemaining);
+                    }
+                }, 1000);
+
+                log(`水提醒已启动，开始监控倒计时...`);
+
+            } catch (error) {
+                log(`启动测试失败: ${error.message}`, 'error');
+                updateStatus(`测试启动失败: ${error.message}`, 'error');
+                console.error('启动测试失败:', error);
+            }
+        }
+
+        function stopTest() {
+            try {
+                if (waterReminder) {
+                    waterReminder.stop();
+                    waterReminder = null;
+                }
+                
+                if (updateTimer) {
+                    clearInterval(updateTimer);
+                    updateTimer = null;
+                }
+
+                updateCountdown(0);
+                updateStatus('测试已停止', 'info');
+                log('测试已停止');
+
+            } catch (error) {
+                log(`停止测试失败: ${error.message}`, 'error');
+                updateStatus(`停止测试失败: ${error.message}`, 'error');
+                console.error('停止测试失败:', error);
+            }
+        }
+
+        function analyzeResults(eventType, data = null) {
+            const analysisDiv = document.getElementById('analysis-results');
+            let analysis = '';
+
+            switch (eventType) {
+                case 'correct_initial_countdown':
+                    analysis = `
+                        <div class="test-result success">
+                            <strong>✅ 测试通过</strong><br>
+                            初始倒计时显示正确，从设置的 ${expectedInterval} 分钟开始倒计时。<br>
+                            问题已修复！
+                        </div>
+                    `;
+                    break;
+
+                case 'incorrect_initial_countdown':
+                    analysis = `
+                        <div class="test-result error">
+                            <strong>❌ 测试失败</strong><br>
+                            初始倒计时显示错误：<br>
+                            预期: ${data.expected}<br>
+                            实际: ${data.actual}<br>
+                            问题仍然存在，需要进一步调试。
+                        </div>
+                    `;
+                    break;
+
+                case 'reminder_triggered':
+                    const elapsedTime = Date.now() - testStartTime;
+                    const elapsedMinutes = Math.floor(elapsedTime / 60000);
+                    const elapsedSeconds = Math.floor((elapsedTime % 60000) / 1000);
+                    
+                    analysis = `
+                        <div class="test-result info">
+                            <strong>⏰ 提醒触发</strong><br>
+                            经过时间: ${elapsedMinutes}:${elapsedSeconds.toString().padStart(2, '0')}<br>
+                            设置间隔: ${expectedInterval}:00<br>
+                            ${Math.abs(elapsedMinutes - expectedInterval) <= 1 ? '✅ 时间准确' : '❌ 时间不准确'}
+                        </div>
+                    `;
+                    break;
+            }
+
+            analysisDiv.innerHTML = analysis;
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('最终修复验证页面已加载');
+            log('请设置间隔时间并点击"开始测试"按钮');
+            log('预期结果: 倒计时应该从设置的间隔时间开始，而不是从30分钟开始');
+            
+            updateStatus('准备就绪 - 请设置间隔并开始测试');
+        });
+    </script>
+</body>
+</html>
