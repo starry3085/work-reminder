@@ -343,20 +343,20 @@ class PostureReminder extends ReminderManager {
         }
         
         // Show in-page notification
-        this.notificationService.showInPageAlert('success', {
-            title: '🧘 Activity Confirmed',
-            message: message,
-            duration: 3000
-        });
+        this.notificationService.showInPageAlert(
+            'standup',
+            '🧘 Activity Confirmed',
+            message
+        );
         
         // If goal completed, show celebration notification
         if (this.dailyActivityCount === this.dailyGoal) {
             setTimeout(() => {
-                this.notificationService.showInPageAlert('celebration', {
-                    title: '🎉 Goal Reached!',
-                    message: 'Congratulations! You\'ve completed your daily activity goal! Keep up the healthy work habits!',
-                    duration: 5000
-                });
+                this.notificationService.showInPageAlert(
+                    'standup',
+                    '🎉 Goal Reached!',
+                    'Congratulations! You\'ve completed your daily activity goal! Keep up the healthy work habits!'
+                );
             }, 1000);
         }
     }
