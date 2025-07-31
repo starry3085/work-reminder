@@ -948,97 +948,220 @@ class OfficeWellnessApp {
             // 创建引导弹窗
             const guideOverlay = document.createElement('div');
             guideOverlay.className = 'guide-overlay';
+            guideOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.6);
+                z-index: 2000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+            
             guideOverlay.innerHTML = `
-                <div class="guide-modal">
-                    <div class="guide-header">
-                        <h2>Welcome to Office Wellness Reminder</h2>
-                        <button class="btn-close" id="guide-close">X</button>
+                <div class="guide-modal" style="
+                    background-color: white;
+                    border-radius: 12px;
+                    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+                    width: 90%;
+                    max-width: 500px;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    padding: 0;
+                ">
+                    <div class="guide-header" style="
+                        padding: 1rem 1.5rem;
+                        border-bottom: 1px solid #e0e0e0;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    ">
+                        <h2 style="margin: 0; color: #333;">Welcome to Office Wellness Reminder</h2>
+                        <button class="btn-close" id="guide-close" style="
+                            background: #dc3545;
+                            color: white;
+                            border: none;
+                            border-radius: 50%;
+                            width: 30px;
+                            height: 30px;
+                            cursor: pointer;
+                            font-size: 16px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">×</button>
                     </div>
-                    <div class="guide-content">
-                        <div class="guide-step">
-                            <div class="guide-step-number">1</div>
+                    <div class="guide-content" style="padding: 1.5rem;">
+                        <div class="guide-step" style="display: flex; margin-bottom: 1.5rem; align-items: flex-start;">
+                            <div class="guide-step-number" style="
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 50%;
+                                background-color: #3498db;
+                                color: white;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                font-weight: bold;
+                                margin-right: 1rem;
+                                flex-shrink: 0;
+                            ">1</div>
                             <div class="guide-step-content">
-                                <h3>Set Reminder Intervals</h3>
-                                <p>Set water and standup reminder intervals according to your needs</p>
+                                <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: #333;">Set Reminder Intervals</h3>
+                                <p style="margin: 0; color: #666;">Set water and standup reminder intervals according to your needs</p>
                             </div>
                         </div>
-                        <div class="guide-step">
-                            <div class="guide-step-number">2</div>
+                        <div class="guide-step" style="display: flex; margin-bottom: 1.5rem; align-items: flex-start;">
+                            <div class="guide-step-number" style="
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 50%;
+                                background-color: #3498db;
+                                color: white;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                font-weight: bold;
+                                margin-right: 1rem;
+                                flex-shrink: 0;
+                            ">2</div>
                             <div class="guide-step-content">
-                                <h3>Enable Reminders</h3>
-                                <p>Click the "Start" button to activate reminders</p>
+                                <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: #333;">Enable Reminders</h3>
+                                <p style="margin: 0; color: #666;">Click the "Start" button to activate reminders</p>
                             </div>
                         </div>
-                        <div class="guide-step">
-                            <div class="guide-step-number">3</div>
+                        <div class="guide-step" style="display: flex; margin-bottom: 0; align-items: flex-start;">
+                            <div class="guide-step-number" style="
+                                width: 32px;
+                                height: 32px;
+                                border-radius: 50%;
+                                background-color: #3498db;
+                                color: white;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                font-weight: bold;
+                                margin-right: 1rem;
+                                flex-shrink: 0;
+                            ">3</div>
                             <div class="guide-step-content">
-                                <h3>Confirm Completion</h3>
-                                <p>After receiving a reminder, click the "Done" button to confirm and reset the timer</p>
+                                <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: #333;">Confirm Completion</h3>
+                                <p style="margin: 0; color: #666;">After receiving a reminder, click the "Done" button to confirm and reset the timer</p>
                             </div>
                         </div>
                     </div>
-                    <div class="guide-footer">
-                        <button class="btn-primary" id="guide-settings">Configure Settings</button>
-                        <button class="btn-secondary" id="guide-start">Start Now</button>
+                    <div class="guide-footer" style="
+                        padding: 1rem 1.5rem;
+                        border-top: 1px solid #e0e0e0;
+                        display: flex;
+                        justify-content: flex-end;
+                        gap: 1rem;
+                    ">
+                        <button class="btn-primary" id="guide-settings" style="
+                            background: #3498db;
+                            color: white;
+                            border: none;
+                            padding: 0.75rem 1.5rem;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            font-size: 14px;
+                        ">Configure Settings</button>
+                        <button class="btn-secondary" id="guide-start" style="
+                            background: #28a745;
+                            color: white;
+                            border: none;
+                            padding: 0.75rem 1.5rem;
+                            border-radius: 5px;
+                            cursor: pointer;
+                            font-size: 14px;
+                        ">Start Now</button>
                     </div>
                 </div>
             `;
             
             document.body.appendChild(guideOverlay);
+            console.log('Guide overlay added to DOM');
             
-            // 使用setTimeout确保DOM元素已经完全添加
-            setTimeout(() => {
-                // 添加事件监听
-                const closeBtn = document.getElementById('guide-close');
-                const settingsBtn = document.getElementById('guide-settings');
-                const startBtn = document.getElementById('guide-start');
-                
-                console.log('Guide buttons found:', {
-                    closeBtn: !!closeBtn,
-                    settingsBtn: !!settingsBtn,
-                    startBtn: !!startBtn
-                });
-                
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log('Guide close button clicked');
-                        this.closeFirstUseGuide(guideOverlay);
-                        // 标记首次使用完成
-                        this.appSettings.markFirstUseComplete();
-                    });
-                }
-                
-                if (settingsBtn) {
-                    settingsBtn.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log('Guide settings button clicked');
-                        this.closeFirstUseGuide(guideOverlay);
-                        // 标记首次使用完成
-                        this.appSettings.markFirstUseComplete();
-                        // 打开设置面板
-                        if (this.uiController) {
-                            this.uiController.showSettings();
-                        }
-                    });
-                }
-                
-                if (startBtn) {
-                    startBtn.addEventListener('click', (event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        console.log('Guide start button clicked');
-                        this.closeFirstUseGuide(guideOverlay);
-                        // 标记首次使用完成
-                        this.appSettings.markFirstUseComplete();
-                        // 直接开始提醒
+            // 立即绑定事件，不使用setTimeout
+            const closeBtn = document.getElementById('guide-close');
+            const settingsBtn = document.getElementById('guide-settings');
+            const startBtn = document.getElementById('guide-start');
+            
+            console.log('Guide buttons found:', {
+                closeBtn: !!closeBtn,
+                settingsBtn: !!settingsBtn,
+                startBtn: !!startBtn
+            });
+            
+            // 绑定关闭按钮事件
+            if (closeBtn) {
+                closeBtn.onclick = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('Guide close button clicked');
+                    this.closeFirstUseGuide(guideOverlay);
+                    this.appSettings.markFirstUseComplete();
+                };
+                console.log('Close button event bound');
+            }
+            
+            // 绑定设置按钮事件
+            if (settingsBtn) {
+                settingsBtn.onclick = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('Guide settings button clicked');
+                    this.closeFirstUseGuide(guideOverlay);
+                    this.appSettings.markFirstUseComplete();
+                    // 打开设置面板
+                    if (this.uiController && typeof this.uiController.showSettings === 'function') {
+                        this.uiController.showSettings();
+                    }
+                };
+                console.log('Settings button event bound');
+            }
+            
+            // 绑定开始按钮事件
+            if (startBtn) {
+                startBtn.onclick = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    console.log('Guide start button clicked');
+                    this.closeFirstUseGuide(guideOverlay);
+                    this.appSettings.markFirstUseComplete();
+                    // 直接开始提醒
+                    try {
                         this.startReminder('water');
                         this.startReminder('standup');
-                    });
+                    } catch (startError) {
+                        console.warn('Failed to start reminders:', startError);
+                    }
+                };
+                console.log('Start button event bound');
+            }
+            
+            // 添加点击外部关闭功能
+            guideOverlay.onclick = (event) => {
+                if (event.target === guideOverlay) {
+                    console.log('Clicked outside guide modal');
+                    this.closeFirstUseGuide(guideOverlay);
+                    this.appSettings.markFirstUseComplete();
                 }
-            }, 100);
+            };
+            
+            // 添加ESC键关闭功能
+            const handleEscKey = (event) => {
+                if (event.key === 'Escape') {
+                    console.log('ESC key pressed, closing guide');
+                    this.closeFirstUseGuide(guideOverlay);
+                    this.appSettings.markFirstUseComplete();
+                    document.removeEventListener('keydown', handleEscKey);
+                }
+            };
+            document.addEventListener('keydown', handleEscKey);
             
         } catch (error) {
             console.error('显示首次使用引导失败:', error);
@@ -1052,11 +1175,33 @@ class OfficeWellnessApp {
      */
     closeFirstUseGuide(guideOverlay) {
         console.log('Closing first use guide');
-        if (guideOverlay && guideOverlay.parentNode) {
-            guideOverlay.parentNode.removeChild(guideOverlay);
-            console.log('Guide overlay removed');
-        } else {
-            console.warn('Guide overlay not found or already removed');
+        try {
+            if (guideOverlay && guideOverlay.parentNode) {
+                // 添加淡出动画
+                guideOverlay.style.opacity = '0';
+                guideOverlay.style.transition = 'opacity 0.3s ease';
+                
+                // 延迟移除元素
+                setTimeout(() => {
+                    if (guideOverlay.parentNode) {
+                        guideOverlay.parentNode.removeChild(guideOverlay);
+                        console.log('Guide overlay removed from DOM');
+                    }
+                }, 300);
+            } else {
+                console.warn('Guide overlay not found or already removed');
+                // 尝试查找并移除任何残留的guide-overlay
+                const existingOverlay = document.querySelector('.guide-overlay');
+                if (existingOverlay) {
+                    existingOverlay.remove();
+                    console.log('Removed existing guide overlay');
+                }
+            }
+        } catch (error) {
+            console.error('Error closing first use guide:', error);
+            // 强制移除所有guide-overlay元素
+            const overlays = document.querySelectorAll('.guide-overlay');
+            overlays.forEach(overlay => overlay.remove());
         }
     }
 
