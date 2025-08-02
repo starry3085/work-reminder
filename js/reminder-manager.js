@@ -262,55 +262,7 @@ class ReminderManager {
         console.log(`${this.type} reminder reset and restarted with ${this.settings.interval}min interval`);
     }
 
-    /**
-     * Update settings
-     * @param {Object} newSettings - New settings
-     */
-    updateSettings(newSettings) {
-        const oldInterval = this.settings.interval;
-        
-        // Update settings
-        this.settings = { ...this.settings, ...newSettings };
-        
-        // If interval changed and reminder is running, need to recalculate
-        if (newSettings.interval && newSettings.interval !== oldInterval && this.isActive) {
-            const newIntervalMs = newSettings.interval * 60 * 1000;
-            
-            if (!this.isPaused) {
-                // If not paused, recalculate remaining time
-                const elapsed = Date.now() - this.startTime;
-                const progress = elapsed / (oldInterval * 60 * 1000);
-                this.timeRemaining = Math.max(0, newIntervalMs * (1 - progress));
-                this.nextReminderTime = Date.now() + this.timeRemaining;
-                
-                // Restart timer
-                this.clearTimer();
-                this.startTimer();
-            } else {
-                // If paused, adjust remaining time proportionally
-                const progress = 1 - (this.timeRemaining / (oldInterval * 60 * 1000));
-                this.timeRemaining = Math.max(0, newIntervalMs * (1 - progress));
-            }
-        }
-        
-        console.log(`${this.type} reminder settings updated:`, this.settings);
-    }
 
-    /**
-     * Get current status
-     * @returns {Object} Current status information
-     */
-    getCurrentStatus() {
-        return {
-            type: this.type,
-            isActive: this.isActive,
-            isPaused: this.isPaused,
-            timeRemaining: this.timeRemaining,
-            nextReminderTime: this.nextReminderTime,
-            settings: { ...this.settings },
-            lastUpdate: Date.now()
-        };
-    }
 
     /**
      * Set status change callback
@@ -358,22 +310,24 @@ class ReminderManager {
 
     /**
      * Get current reminder status for state persistence
-     * @returns {Object} Current status object
+     * @returns {Object} Current status object with unified format
      */
     getCurrentStatus() {
         return {
+            type: this.type,
             isActive: this.isActive,
             isPaused: this.isPaused,
             timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime,
+            nextReminderTime: this.nextReminderTime,
             lastAcknowledged: this.settings.lastReminder,
             interval: this.settings.interval,
-            enabled: this.settings.enabled !== false
+            enabled: this.settings.enabled !== false,
+            settings: { ...this.settings }
         };
     }
 
     /**
-     * Save current state to storage through callback
+     * Save current state to storage through centralized state manager
      * @private
      */
     saveState() {

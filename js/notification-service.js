@@ -42,30 +42,13 @@ class NotificationService {
     }
 
     /**
-     * 请求通知权限
+     * 请求通知权限（已委托给 app.js）
      * @returns {Promise<boolean>} 是否获得权限
+     * @deprecated 请使用应用层权限管理
      */
     async requestPermission() {
-        if (!this.isSupported) {
-            console.warn('Browser does not support notifications');
-            return false;
-        }
-
-        try {
-            const permission = await Notification.requestPermission();
-            this.hasPermission = permission === 'granted';
-            
-            if (this.hasPermission) {
-                console.log('Notification permission granted');
-            } else {
-                console.warn('User denied notification permission');
-            }
-            
-            return this.hasPermission;
-        } catch (error) {
-            console.error('Error requesting notification permission:', error);
-            return false;
-        }
+        console.warn('NotificationService.requestPermission 已废弃。请使用应用层权限管理。');
+        return this.hasPermission || false;
     }
 
     /**
