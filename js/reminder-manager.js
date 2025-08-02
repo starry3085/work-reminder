@@ -8,13 +8,11 @@ class ReminderManager {
      * @param {string} type - Reminder type ('water' | 'standup')
      * @param {Object} settings - Reminder settings
      * @param {NotificationService} notificationService - Notification service instance
-     * @param {ActivityDetector} activityDetector - Activity detector instance (only needed for standup reminders)
      */
-    constructor(type, settings, notificationService, activityDetector = null) {
+    constructor(type, settings, notificationService) {
         this.type = type;
         this.settings = { ...settings };
         this.notificationService = notificationService;
-        this.activityDetector = activityDetector;
         
         // State management
         this.isActive = false;
@@ -33,60 +31,12 @@ class ReminderManager {
         this.updateInterval = 1000;
         this.updateTimer = null;
         
-        // If standup reminder, set up activity detector callback
-        if (this.type === 'standup' && this.activityDetector) {
-            this.setupActivityDetection();
-        }
+        // Activity detection removed for MVP - using simpler time-based reminders
         
         console.log(`${this.type} reminder manager created`);
     }
 
-    /**
-     * Set up activity detection (standup reminders only)
-     * @private
-     */
-    setupActivityDetection() {
-        if (!this.activityDetector) return;
-        
-        // Save original callback
-        const originalCallback = this.activityDetector.callback;
-        
-        // Set new callback, including original callback and our handling
-        this.activityDetector.callback = (event) => {
-            // Call original callback
-            if (originalCallback) {
-                originalCallback(event);
-            }
-            
-            // Handle activity detection event
-            this.handleActivityEvent(event);
-        };
-    }
-
-    /**
-     * Handle user activity events (standup reminders only)
-     * @param {Object} event - Activity event
-     * @private
-     */
-    handleActivityEvent(event) {
-        if (this.type !== 'standup') return;
-        
-        switch (event.type) {
-            case 'user-away':
-                // User away, auto-pause standup reminder
-                if (this.isActive && !this.isPaused) {
-                    this.pause(true); // true means auto-pause
-                }
-                break;
-                
-            case 'user-return':
-                // User returned, auto-resume standup reminder
-                if (this.isActive && this.isPaused) {
-                    this.resume(true); // true means auto-resume
-                }
-                break;
-        }
-    }
+    // Activity detection removed for MVP - using simpler time-based reminders
 
     /**
      * Start reminder
@@ -109,10 +59,7 @@ class ReminderManager {
         // Start time update timer
         this.startUpdateTimer();
         
-        // If standup reminder, start activity detection
-        if (this.type === 'standup' && this.activityDetector) {
-            this.activityDetector.startMonitoring();
-        }
+        // Activity detection removed for MVP - using simpler time-based reminders
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -141,10 +88,7 @@ class ReminderManager {
         this.clearTimer();
         this.clearUpdateTimer();
         
-        // If standup reminder, stop activity detection
-        if (this.type === 'standup' && this.activityDetector) {
-            this.activityDetector.stopMonitoring();
-        }
+        // Activity detection removed for MVP - using simpler time-based reminders
         
         // Reset state
         this.resetState();
@@ -535,10 +479,7 @@ class ReminderManager {
                 this.startTimer();
                 this.startUpdateTimer();
                 
-                // If standup reminder, start activity detection
-                if (this.type === 'standup' && this.activityDetector) {
-                    this.activityDetector.startMonitoring();
-                }
+                // Activity detection removed for MVP - using simpler time-based reminders
                 
                 // Trigger status change callback
                 this.triggerStatusChange({
@@ -582,10 +523,7 @@ class ReminderManager {
         this.statusChangeCallback = null;
         this.timeUpdateCallback = null;
         
-        // If standup reminder, clean up activity detector
-        if (this.type === 'standup' && this.activityDetector) {
-            this.activityDetector.stopMonitoring();
-        }
+        // Activity detection cleanup removed for MVP
         
         console.log(`${this.type} reminder manager destroyed`);
     }

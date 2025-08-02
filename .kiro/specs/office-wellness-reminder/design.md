@@ -62,21 +62,10 @@ class ReminderManager {
 - Handle reminder trigger logic
 - Integrate with notification system
 
-#### 2. ActivityDetector (Activity Detector)
-```javascript
-class ActivityDetector {
-  constructor(callback)       // Activity detection callback
-  startMonitoring()          // Start monitoring user activity
-  stopMonitoring()           // Stop monitoring
-  getLastActivityTime()      // Get last activity time
-  isUserActive()             // Check if user is active
-}
-```
-
-**Responsibilities:**
-- Listen for mouse movement, clicks, keyboard input events
-- Detect user away state (page unfocused for more than 5 minutes)
-- Provide intelligent pause functionality for sedentary reminders
+#### 2. ActivityDetector (Removed for MVP)
+- **Status**: Removed for MVP - using simpler time-based reminders instead
+- **Original Purpose**: Monitor user activity status to intelligently pause/resume reminders
+- **Rationale**: Simplified to focus on core functionality for MVP release
 
 #### 3. NotificationService (Notification Service)
 ```javascript
@@ -236,7 +225,7 @@ class ErrorHandler {
 
 ### Unit Testing
 - **ReminderManager**: Test timer logic and state management
-- **ActivityDetector**: Test event listening and activity detection algorithms
+- **ActivityDetector**: Removed for MVP - feature deferred to future release
 - **StorageManager**: Test data storage and retrieval functionality
 - **NotificationService**: Test notification sending and permission handling
 
