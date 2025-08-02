@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首次使用测试工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .danger {
+            background: #dc3545;
+        }
+        .danger:hover {
+            background: #c82333;
+        }
+        .success {
+            background: #28a745;
+        }
+        .success:hover {
+            background: #218838;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>首次使用测试工具</h1>
+        
+        <div class="info">
+            这个工具可以帮助你测试首次打开应用时是否会出现引导弹窗。
+        </div>
+
+        <div id="status">
+            <strong>当前状态：</strong>
+            <div id="current-status">正在检测...</div>
+        </div>
+
+        <div class="test-section">
+            <h3>测试步骤：</h3>
+            <ol>
+                <li>点击"清除本地存储"按钮重置应用状态</li>
+                <li>在新标签页中打开 <a href="http://localhost:8000" target="_blank">http://localhost:8000</a></li>
+                <li>观察是否出现首次使用引导弹窗</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>操作按钮：</h3>
+            <button onclick="clearLocalStorage()" class="danger">清除本地存储</button>
+            <button onclick="checkCurrentStatus()" class="success">检查当前状态</button>
+            <button onclick="viewLocalStorage()">查看存储内容</button>
+            <button onclick="openApp()" class="success">打开应用</button>
+        </div>
+
+        <div class="test-section">
+            <h3>本地存储内容：</h3>
+            <pre id="storage-content" style="background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto;">正在加载...</pre>
+        </div>
+    </div>
+
+    <script>
+        function clearLocalStorage() {
+            const prefix = 'wellness_reminder_';
+            const keysToRemove = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(prefix)) {
+                    keysToRemove.push(key);
+                }
+            }
+            
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            alert(`已清除 ${keysToRemove.length} 个本地存储项\n应用现在会认为你是首次使用`);
+            checkCurrentStatus();
+            viewLocalStorage();
+        }
+
+        function checkCurrentStatus() {
+            const prefix = 'wellness_reminder_';
+            const settingsKey = prefix + 'appSettings';
+            const settings = localStorage.getItem(settingsKey);
+            
+            let statusText = '';
+            if (settings) {
+                try {
+                    const parsed = JSON.parse(settings);
+                    statusText = `已找到设置，首次使用状态: ${parsed.firstUse ? '是' : '否'}`;
+                } catch (e) {
+                    statusText = '设置文件格式错误';
+                }
+            } else {
+                statusText = '未找到设置，应用会认为你是首次使用';
+            }
+            
+            document.getElementById('current-status').textContent = statusText;
+        }
+
+        function viewLocalStorage() {
+            const prefix = 'wellness_reminder_';
+            const content = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(prefix)) {
+                    try {
+                        const value = localStorage.getItem(key);
+                        content[key.replace(prefix, '')] = JSON.parse(value);
+                    } catch (e) {
+                        content[key.replace(prefix, '')] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            document.getElementById('storage-content').textContent = 
+                Object.keys(content).length > 0 ? JSON.stringify(content, null, 2) : '无数据';
+        }
+
+        function openApp() {
+            window.open('http://localhost:8000', '_blank');
+        }
+
+        // 页面加载时检查状态
+        window.onload = function() {
+            checkCurrentStatus();
+            viewLocalStorage();
+        };
+    </script>
+</body>
+</html>
