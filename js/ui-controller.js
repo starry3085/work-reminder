@@ -4,38 +4,16 @@
 class UIController {
     constructor() {
         this.elements = {};
-        this.isSettingsOpen = false;
         this.currentNotification = null;
         this.eventListeners = {};
-        this.uiState = {
-            water: {
-                isActive: false,
-                isPaused: false,
-                timeRemaining: 0,
-                status: 'Inactive',
-                completedToday: 0,
-                targetToday: 8
-            },
-            standup: {
-                isActive: false,
-                isPaused: false,
-                timeRemaining: 0,
-                status: 'Inactive',
-                completedToday: 0,
-                targetToday: 8
-            },
-            settings: {
-                isOpen: false
-            },
-            help: {
-                isOpen: false
-            }
+        
+        // Simplified state - only track what UI needs to know
+        this.reminderStates = {
+            water: { isActive: false, isPaused: false, timeRemaining: 0 },
+            standup: { isActive: false, isPaused: false, timeRemaining: 0 }
         };
 
         // Bind methods
-        this.bindEvents = this.bindEvents.bind(this);
-
-        this.handleOutsideClick = this.handleOutsideClick.bind(this);
         this.handleNotificationKeydown = this.handleNotificationKeydown.bind(this);
     }
 
@@ -124,12 +102,10 @@ class UIController {
     }
 
     /**
-     * Bind event listeners
+     * Bind event listeners - simplified approach
      * @private
      */
     bindEvents() {
-        console.log('GitHub Pages Debug - Starting to bind events');
-
         // Notification popup events
         this.addEventHandler('notificationConfirm', 'click', () => {
             this.hideNotificationModal();
@@ -145,28 +121,12 @@ class UIController {
             }
         });
 
-        // Water reminder control buttons
+        // Simplified button handlers - let the app determine the action
         this.addEventHandler('waterToggle', 'click', () => {
-            const currentState = this.uiState.water;
-            console.log('Water toggle clicked, current state:', currentState);
-            
-            if (!currentState.isActive) {
-                // Currently stopped, start it
-                console.log('Triggering water start');
-                this.triggerEvent('waterToggle', { action: 'start' });
-            } else if (currentState.isPaused) {
-                // Currently paused, resume it
-                console.log('Triggering water resume');
-                this.triggerEvent('waterToggle', { action: 'resume' });
-            } else {
-                // Currently running, pause it
-                console.log('Triggering water pause');
-                this.triggerEvent('waterToggle', { action: 'pause' });
-            }
+            this.triggerEvent('waterToggle');
         });
 
         this.addEventHandler('waterReset', 'click', () => {
-            console.log('Water Reset button clicked!');
             this.triggerEvent('waterReset');
         });
 
@@ -174,29 +134,11 @@ class UIController {
             this.triggerEvent('waterDrink');
         });
 
-        // Standup reminder control buttons
         this.addEventHandler('standupToggle', 'click', () => {
-            const currentState = this.uiState.standup;
-            console.log('Standup toggle clicked, current state:', currentState);
-            console.log('GitHub Pages Debug - Button click detected');
-            
-            if (!currentState.isActive) {
-                // Currently stopped, start it
-                console.log('Triggering standup start');
-                this.triggerEvent('standupToggle', { action: 'start' });
-            } else if (currentState.isPaused) {
-                // Currently paused, resume it
-                console.log('Triggering standup resume');
-                this.triggerEvent('standupToggle', { action: 'resume' });
-            } else {
-                // Currently running, pause it
-                console.log('Triggering standup pause');
-                this.triggerEvent('standupToggle', { action: 'pause' });
-            }
+            this.triggerEvent('standupToggle');
         });
 
         this.addEventHandler('standupReset', 'click', () => {
-            console.log('Standup Reset button clicked!');
             this.triggerEvent('standupReset');
         });
 
@@ -204,66 +146,28 @@ class UIController {
             this.triggerEvent('standupActivity');
         });
 
+        // Interval input handlers
+        this.addEventHandler('waterIntervalDisplay', 'change', (e) => {
+            const value = this.validateInterval(parseInt(e.target.value));
+            e.target.value = value;
+            this.triggerEvent('waterIntervalChanged', { interval: value });
+        });
 
+        this.addEventHandler('standupIntervalDisplay', 'change', (e) => {
+            const value = this.validateInterval(parseInt(e.target.value));
+            e.target.value = value;
+            this.triggerEvent('standupIntervalChanged', { interval: value });
+        });
+    }
 
-        // Main display interval input linkage (only these elements exist in HTML)
-
-        // Main display interval input linkage
-        if (this.elements.waterIntervalDisplay) {
-            this.elements.waterIntervalDisplay.addEventListener('change', () => {
-                const value = parseInt(this.elements.waterIntervalDisplay.value);
-                if (value >= 1 && value <= 60) {
-                    this.triggerEvent('waterIntervalChanged', { interval: value });
-                } else {
-                    // Reset to valid range
-                    let validValue = 30; // default
-                    if (value < 1) {
-                        validValue = 1; // minimum
-                    } else if (value > 60) {
-                        validValue = 60; // maximum
-                    }
-
-                    this.elements.waterIntervalDisplay.value = validValue;
-                    this.triggerEvent('waterIntervalChanged', { interval: validValue });
-                }
-            });
-        }
-
-        if (this.elements.standupIntervalDisplay) {
-            this.elements.standupIntervalDisplay.addEventListener('change', () => {
-                const value = parseInt(this.elements.standupIntervalDisplay.value);
-                if (value >= 1 && value <= 60) {
-                    this.triggerEvent('standupIntervalChanged', { interval: value });
-                } else {
-                    // Reset to valid range
-                    let validValue = 30; // default
-                    if (value < 1) {
-                        validValue = 1; // minimum
-                    } else if (value > 60) {
-                        validValue = 60; // maximum
-                    }
-
-                    this.elements.standupIntervalDisplay.value = validValue;
-                    this.triggerEvent('standupIntervalChanged', { interval: validValue });
-                }
-            });
-        }
-
-        // Theme selector
-        if (this.elements.themeSelector) {
-            const themeOptions = this.elements.themeSelector.querySelectorAll('.theme-option');
-            themeOptions.forEach(option => {
-                option.addEventListener('click', () => {
-                    // Remove all active classes
-                    themeOptions.forEach(opt => opt.classList.remove('active'));
-                    // Add active class to selected option
-                    option.classList.add('active');
-                    // Apply theme
-                    const theme = option.getAttribute('data-theme');
-                    this.applyTheme(theme);
-                });
-            });
-        }
+    /**
+     * Validate interval input
+     * @private
+     */
+    validateInterval(value) {
+        if (isNaN(value) || value < 1) return 1;
+        if (value > 60) return 60;
+        return value;
     }
 
     /**
@@ -476,98 +380,85 @@ class UIController {
     }
 
     /**
-     * Update reminder status display
+     * Update reminder status display - simplified
      * @param {string} type - 'water' | 'standup'
      * @param {Object} status - Status object
      */
     updateReminderStatus(type, status) {
+        // Update internal state
+        this.reminderStates[type] = {
+            isActive: status.isActive || false,
+            isPaused: status.isPaused || false,
+            timeRemaining: status.timeRemaining || 0
+        };
+
+        // Update UI elements
+        this.updateCard(type, status);
+        this.updateButtons(type, status);
+        this.updateCountdown(type, status.timeRemaining || 0);
+        
+        // Update app status
+        const anyActive = this.reminderStates.water.isActive || this.reminderStates.standup.isActive;
+        this.updateAppStatusSummary(anyActive);
+    }
+
+    /**
+     * Update card appearance
+     * @private
+     */
+    updateCard(type, status) {
         const card = this.elements[`${type}Card`];
         const statusBadge = this.elements[`${type}StatusBadge`];
-        const timeElement = this.elements[`${type}Time`];
+        
+        if (!card || !statusBadge) return;
+
+        // Update card active state
+        card.classList.toggle('active', status.isActive);
+
+        // Update status badge
+        if (status.isActive && !status.isPaused) {
+            statusBadge.textContent = 'Active';
+            statusBadge.className = 'status-badge active';
+        } else if (status.isActive && status.isPaused) {
+            statusBadge.textContent = 'Paused';
+            statusBadge.className = 'status-badge paused';
+        } else {
+            statusBadge.textContent = 'Inactive';
+            statusBadge.className = 'status-badge inactive';
+        }
+    }
+
+    /**
+     * Update button states
+     * @private
+     */
+    updateButtons(type, status) {
         const toggleButton = this.elements[`${type}Toggle`];
         const resetButton = this.elements[`${type}Reset`];
         const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'standupActivity'}`];
 
-        if (!card || !timeElement || !toggleButton) {
-            return;
-        }
+        if (!toggleButton) return;
 
-        // Update card status style
-        if (status.isActive) {
-            card.classList.add('active');
-        } else {
-            card.classList.remove('active');
-        }
-
-        // Update status text (removed left status display, only keep badge)
-
-        // Update UI state first (before updating UI elements)
-        if (type === 'water') {
-            this.uiState.water.isActive = status.isActive;
-            this.uiState.water.isPaused = status.isPaused || false;
-            this.uiState.water.status = status.status || (status.isActive ? 'Active' : 'Inactive');
-            this.uiState.water.timeRemaining = status.timeRemaining || 0;
-        } else if (type === 'standup') {
-            this.uiState.standup.isActive = status.isActive;
-            this.uiState.standup.isPaused = status.isPaused || false;
-            this.uiState.standup.status = status.status || (status.isActive ? 'Active' : 'Inactive');
-            this.uiState.standup.timeRemaining = status.timeRemaining || 0;
-        }
-
-        // Update status badge
-        if (statusBadge) {
-            if (status.isActive && !status.isPaused) {
-                statusBadge.textContent = 'Active';
-                statusBadge.classList.add('active');
-                statusBadge.classList.remove('inactive', 'paused');
-            } else if (status.isActive && status.isPaused) {
-                statusBadge.textContent = 'Paused';
-                statusBadge.classList.add('paused');
-                statusBadge.classList.remove('active', 'inactive');
-            } else {
-                statusBadge.textContent = 'Inactive';
-                statusBadge.classList.add('inactive');
-                statusBadge.classList.remove('active', 'paused');
-            }
-        }
-
-        // Keep time display always visible since it now contains the interval input
-        if (timeElement) {
-            timeElement.style.display = 'block';
-        }
-
-        // Update button states based on isActive and isPaused
+        // Update toggle button
         if (status.isActive && !status.isPaused) {
-            // Running state
             toggleButton.textContent = 'Pause';
             toggleButton.className = 'btn-secondary';
-            if (resetButton) resetButton.style.display = 'inline-block';
-            if (actionButton) actionButton.style.display = 'inline-block';
         } else if (status.isActive && status.isPaused) {
-            // Paused state
             toggleButton.textContent = 'Resume';
             toggleButton.className = 'btn-primary';
-            if (resetButton) resetButton.style.display = 'inline-block';
-            if (actionButton) actionButton.style.display = 'inline-block';
         } else {
-            // Stopped state
             toggleButton.textContent = 'Start';
             toggleButton.className = 'btn-primary';
-            if (resetButton) resetButton.style.display = 'none';
-            if (actionButton) actionButton.style.display = 'none';
         }
 
-        // Update countdown display
-        this.updateCountdown(type, status.timeRemaining || 0);
-
-        // Update application status summary after updating UI state
-        this.updateAppStatusSummary(
-            this.uiState.water.isActive || this.uiState.standup.isActive
-        );
+        // Show/hide secondary buttons
+        const showSecondary = status.isActive;
+        if (resetButton) resetButton.style.display = showSecondary ? 'inline-block' : 'none';
+        if (actionButton) actionButton.style.display = showSecondary ? 'inline-block' : 'none';
     }
 
     /**
-     * Show notification modal
+     * Show notification modal - simplified
      * @param {string} type - Notification type
      * @param {string} title - Title
      * @param {string} message - Message
@@ -576,37 +467,34 @@ class UIController {
      */
     showNotificationModal(type, title, message, onConfirm, onSnooze) {
         // Save current notification information
-        this.currentNotification = {
-            type,
-            title,
-            message,
-            onConfirm,
-            onSnooze
-        };
+        this.currentNotification = { type, title, message, onConfirm, onSnooze };
 
-        // Set notification content
+        // Update modal content
+        this.updateModalContent(type, title, message);
+
+        // Show modal
+        if (this.elements.notificationOverlay) {
+            this.elements.notificationOverlay.classList.add('show');
+            document.addEventListener('keydown', this.handleNotificationKeydown);
+        }
+    }
+
+    /**
+     * Update modal content
+     * @private
+     */
+    updateModalContent(type, title, message) {
         if (this.elements.notificationIcon) {
             this.elements.notificationIcon.textContent = type === 'water' ? '💧' : '🧘';
         }
-
         if (this.elements.notificationTitle) {
             this.elements.notificationTitle.textContent = title;
         }
-
         if (this.elements.notificationMessage) {
             this.elements.notificationMessage.textContent = message;
         }
-
         if (this.elements.notificationConfirm) {
             this.elements.notificationConfirm.textContent = type === 'water' ? 'Hydrated' : 'Moved';
-        }
-
-        // Show notification popup
-        if (this.elements.notificationOverlay) {
-            this.elements.notificationOverlay.classList.add('show');
-
-            // Add keyboard event listener
-            document.addEventListener('keydown', this.handleNotificationKeydown);
         }
     }
 

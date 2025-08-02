@@ -440,54 +440,33 @@ class OfficeWellnessApp {
      * @private
      */
     setupEventListeners() {
-        // 设置水提醒状态变化回调
-        if (this.waterReminder && typeof this.waterReminder.setStatusChangeCallback === 'function') {
+        // Set up simplified callbacks
+        if (this.waterReminder) {
             this.waterReminder.setStatusChangeCallback((status) => {
-                console.log('水提醒状态变化:', status);
                 if (this.uiController) {
                     this.uiController.updateReminderStatus('water', status);
                 }
             });
             
-            if (typeof this.waterReminder.setTimeUpdateCallback === 'function') {
-                this.waterReminder.setTimeUpdateCallback((timeInfo) => {
-                    if (this.uiController) {
-                        this.uiController.updateReminderTime('water', timeInfo);
-                    }
-                });
-            }
+            this.waterReminder.setTimeUpdateCallback((timeInfo) => {
+                if (this.uiController) {
+                    this.uiController.updateReminderTime('water', timeInfo);
+                }
+            });
         }
         
-        // 设置久坐提醒状态变化回调
-        if (this.standupReminder && typeof this.standupReminder.setStatusChangeCallback === 'function') {
+        if (this.standupReminder) {
             this.standupReminder.setStatusChangeCallback((status) => {
-                console.log('久坐提醒状态变化:', status);
                 if (this.uiController) {
                     this.uiController.updateReminderStatus('standup', status);
                 }
-                
-                // If auto-pause or resume, show notification
-                if (status.isAuto && this.notificationService) {
-                    const message = status.status === 'paused' 
-                        ? 'Detected you are away, standup reminder auto-paused' 
-                        : 'Detected you have returned, standup reminder auto-resumed';
-                    
-                    if (typeof this.notificationService.showInPageAlert === 'function') {
-                        this.notificationService.showInPageAlert('info', {
-                            title: 'Activity Detection',
-                            message: message
-                        });
-                    }
-                }
             });
             
-            if (typeof this.standupReminder.setTimeUpdateCallback === 'function') {
-                this.standupReminder.setTimeUpdateCallback((timeInfo) => {
-                    if (this.uiController) {
-                        this.uiController.updateReminderTime('standup', timeInfo);
-                    }
-                });
-            }
+            this.standupReminder.setTimeUpdateCallback((timeInfo) => {
+                if (this.uiController) {
+                    this.uiController.updateReminderTime('standup', timeInfo);
+                }
+            });
         }
     }
 
@@ -504,62 +483,17 @@ class OfficeWellnessApp {
         // 初始化UI控制器
         this.uiController.initialize();
         
-        // 获取当前设置并应用到UI
+        // Apply settings to UI
         const currentSettings = this.appSettings.getSettings();
-        console.log('应用设置到UI:', currentSettings);
-        
         this.uiController.applySettingsToUI(currentSettings);
         
-        // 强制同步UI显示值（修复初始化时序问题）
-        this.forceUISync(currentSettings);
-        
-        // 绑定UI事件到应用逻辑
+        // Set up event handlers
         this.setupUIEventHandlers();
         
         console.log('UI初始化完成');
     }
 
-    /**
-     * 强制同步UI显示值（修复初始化时序问题）
-     * @param {Object} settings - 当前设置
-     * @private
-     */
-    forceUISync(settings) {
-        try {
-            // 强制更新水提醒间隔显示
-            const waterDisplay = document.getElementById('water-interval-display');
-            if (waterDisplay && settings.water) {
-                const oldValue = waterDisplay.value;
-                waterDisplay.value = settings.water.interval || 30;
-                console.log(`强制同步水提醒间隔: ${oldValue} → ${waterDisplay.value}`);
-            }
-            
-            // 强制更新站立提醒间隔显示
-            const standupDisplay = document.getElementById('standup-interval-display');
-            if (standupDisplay && settings.standup) {
-                const oldValue = standupDisplay.value;
-                standupDisplay.value = settings.standup.interval || 30;
-                console.log(`强制同步站立提醒间隔: ${oldValue} → ${standupDisplay.value}`);
-            }
-            
-            // 强制更新UI控制器的内部状态
-            if (this.uiController) {
-                // 更新提醒管理器的设置
-                if (this.waterReminder && settings.water) {
-                    this.waterReminder.updateSettings(settings.water);
-                }
-                if (this.standupReminder && settings.standup) {
-                    this.standupReminder.updateSettings(settings.standup);
-                }
-                
-                console.log('提醒管理器设置已更新');
-            }
-            
-            console.log('UI强制同步完成');
-        } catch (error) {
-            console.error('UI强制同步失败:', error);
-        }
-    }
+
 
     /**
      * 设置UI事件处理器
@@ -572,80 +506,32 @@ class OfficeWellnessApp {
             return;
         }
 
-        // 喝水提醒控制事件
-        this.uiController.on('waterToggle', (data) => {
-            switch (data.action) {
-                case 'start':
-                    this.startReminder('water');
-                    break;
-                case 'pause':
-                    this.pauseReminder('water');
-                    break;
-                case 'resume':
-                    this.resumeReminder('water');
-                    break;
-                default:
-                    // Fallback to old logic for compatibility
-                    if (data.isActive) {
-                        this.startReminder('water');
-                    } else {
-                        this.pauseReminder('water');
-                    }
-            }
+        // Simplified event handlers - let app determine the action
+        this.uiController.on('waterToggle', () => {
+            this.toggleReminder('water');
         });
 
         this.uiController.on('waterReset', () => {
-            console.log('Water reset event handler called');
             this.resetReminder('water');
         });
-        console.log('Water reset event handler registered');
 
         this.uiController.on('waterDrink', () => {
             if (this.waterReminder) {
                 this.waterReminder.acknowledge();
-                // 更新每日统计
-                this.updateDailyStats('water');
             }
         });
 
-        // 久坐提醒控制事件
-        this.uiController.on('standupToggle', (data) => {
-            console.log('GitHub Pages Debug - standupToggle event received in app.js:', data);
-            switch (data.action) {
-                case 'start':
-                    console.log('GitHub Pages Debug - Starting standup reminder');
-                    this.startReminder('standup');
-                    break;
-                case 'pause':
-                    console.log('GitHub Pages Debug - Pausing standup reminder');
-                    this.pauseReminder('standup');
-                    break;
-                case 'resume':
-                    console.log('GitHub Pages Debug - Resuming standup reminder');
-                    this.resumeReminder('standup');
-                    break;
-                default:
-                    // Fallback to old logic for compatibility
-                    console.log('GitHub Pages Debug - Using fallback logic');
-                    if (data.isActive) {
-                        this.startReminder('standup');
-                    } else {
-                        this.pauseReminder('standup');
-                    }
-            }
+        this.uiController.on('standupToggle', () => {
+            this.toggleReminder('standup');
         });
 
         this.uiController.on('standupReset', () => {
-            console.log('Standup reset event handler called');
             this.resetReminder('standup');
         });
-        console.log('Standup reset event handler registered');
 
         this.uiController.on('standupActivity', () => {
             if (this.standupReminder) {
                 this.standupReminder.acknowledge();
-                // 更新每日统计
-                this.updateDailyStats('standup');
             }
         });
 
@@ -672,6 +558,25 @@ class OfficeWellnessApp {
         this.uiController.on('forceResetSettings', () => {
             this.handleForceResetSettings();
         });
+    }
+
+    /**
+     * Toggle reminder state - simplified logic
+     * @param {string} type - 提醒类型 ('water' | 'standup')
+     */
+    toggleReminder(type) {
+        const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
+        if (!reminder) return;
+
+        const status = reminder.getCurrentStatus();
+        
+        if (!status.isActive) {
+            this.startReminder(type);
+        } else if (status.isPaused) {
+            this.resumeReminder(type);
+        } else {
+            this.pauseReminder(type);
+        }
     }
 
     /**

@@ -69,7 +69,7 @@ class NotificationService {
     }
 
     /**
-     * 显示通知（自动选择最佳通知方式）
+     * Show notification - simplified approach
      * @param {string} type - 通知类型 ('water' | 'standup')
      * @param {string} title - 通知标题
      * @param {string} message - 通知内容
@@ -78,15 +78,15 @@ class NotificationService {
      * @returns {boolean} 是否成功显示
      */
     showNotification(type, title, message, onConfirm, onSnooze) {
-        // 尝试显示浏览器通知
-        const browserNotificationShown = this.showBrowserNotification(type, title, message);
+        // Always show in-page notification for consistency
+        this.showInPageAlert(type, title, message, onConfirm, onSnooze);
         
-        // 如果浏览器通知失败，显示页面内通知
-        if (!browserNotificationShown) {
-            this.showInPageAlert(type, title, message, onConfirm, onSnooze);
+        // Try browser notification as additional notification (no callbacks needed)
+        if (this.hasPermission) {
+            this.showBrowserNotification(type, title, message);
         }
         
-        // 无论哪种通知方式，都播放提醒音效
+        // Play sound
         if (this.soundEnabled) {
             this.playSound(type);
         }
@@ -148,7 +148,7 @@ class NotificationService {
     }
 
     /**
-     * 显示页面内提醒弹窗
+     * Show in-page alert - simplified
      * @param {string} type - 提醒类型 ('water' | 'standup')
      * @param {string} title - 提醒标题
      * @param {string} message - 提醒内容
@@ -156,114 +156,80 @@ class NotificationService {
      * @param {Function} onSnooze - 稍后提醒回调
      */
     showInPageAlert(type, title, message, onConfirm, onSnooze) {
-        // 移除已存在的通知
+        // Remove existing notification
         this.hideInPageAlert();
 
-        // 检测是否为移动设备
-        const isMobile = window.mobileAdapter && window.mobileAdapter.isMobile;
-
-        // 创建通知容器
+        // Create notification container
         const alertContainer = document.createElement('div');
-        alertContainer.className = `notification-alert notification-${type}${isMobile ? ' mobile' : ''}`;
+        alertContainer.className = `notification-alert notification-${type}`;
         alertContainer.id = 'wellness-notification';
 
-        // 创建通知内容 - 移动设备使用更紧凑的布局
-        if (isMobile) {
-            alertContainer.innerHTML = `
-                <div class="notification-content">
-                    <div class="notification-icon">
-                        ${this.getNotificationEmoji(type)}
-                    </div>
-                    <div class="notification-text">
-                        <h3 class="notification-title">${title}</h3>
-                        <p class="notification-message">${message}</p>
-                    </div>
+        // Simplified layout for all devices
+        alertContainer.innerHTML = `
+            <div class="notification-content">
+                <div class="notification-icon">
+                    ${this.getNotificationEmoji(type)}
                 </div>
-                <div class="notification-actions">
-                    <button class="btn btn-primary mobile-touch-feedback" id="confirm-btn">
-                        ${type === 'water' ? 'Hydrated' : 'Moved'}
-                    </button>
-                    <button class="btn btn-secondary mobile-touch-feedback" id="snooze-btn">
-                        Remind Later
-                    </button>
+                <div class="notification-text">
+                    <h3 class="notification-title">${title}</h3>
+                    <p class="notification-message">${message}</p>
                 </div>
-            `;
-        } else {
-            alertContainer.innerHTML = `
-                <div class="notification-content">
-                    <div class="notification-icon">
-                        ${this.getNotificationEmoji(type)}
-                    </div>
-                    <div class="notification-text">
-                        <h3 class="notification-title">${title}</h3>
-                        <p class="notification-message">${message}</p>
-                    </div>
-                    <button class="btn btn-close" id="close-btn">×</button>
-                </div>
-                <div class="notification-actions">
-                    <button class="btn btn-primary" id="confirm-btn">
-                        ${type === 'water' ? 'Hydrated' : 'Moved'}
-                    </button>
-                    <button class="btn btn-secondary" id="snooze-btn">
-                        Remind Later
-                    </button>
-                </div>
-            `;
-        }
+                <button class="btn btn-close" id="close-btn">×</button>
+            </div>
+            <div class="notification-actions">
+                <button class="btn btn-primary" id="confirm-btn">
+                    ${type === 'water' ? 'Hydrated' : 'Moved'}
+                </button>
+                <button class="btn btn-secondary" id="snooze-btn">
+                    Remind Later
+                </button>
+            </div>
+        `;
 
-        // 添加到页面
+        // Add to page
         document.body.appendChild(alertContainer);
 
-        // 绑定事件
-        const confirmBtn = alertContainer.querySelector('#confirm-btn');
-        const snoozeBtn = alertContainer.querySelector('#snooze-btn');
-        const closeBtn = alertContainer.querySelector('#close-btn');
+        // Bind events - simplified
+        this.bindNotificationEvents(alertContainer, onConfirm, onSnooze);
 
-        confirmBtn.addEventListener('click', () => {
-            this.hideInPageAlert();
-            if (onConfirm) onConfirm();
-        });
+        // Show with animation
+        setTimeout(() => alertContainer.classList.add('show'), 100);
 
-        snoozeBtn.addEventListener('click', () => {
-            this.hideInPageAlert();
-            if (onSnooze) onSnooze();
-        });
+        // Auto-hide after 45 seconds
+        setTimeout(() => {
+            if (document.getElementById('wellness-notification')) {
+                this.hideInPageAlert();
+            }
+        }, 45000);
+    }
+
+    /**
+     * Bind notification events
+     * @private
+     */
+    bindNotificationEvents(container, onConfirm, onSnooze) {
+        const confirmBtn = container.querySelector('#confirm-btn');
+        const snoozeBtn = container.querySelector('#snooze-btn');
+        const closeBtn = container.querySelector('#close-btn');
+
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                this.hideInPageAlert();
+                if (onConfirm) onConfirm();
+            });
+        }
+
+        if (snoozeBtn) {
+            snoozeBtn.addEventListener('click', () => {
+                this.hideInPageAlert();
+                if (onSnooze) onSnooze();
+            });
+        }
 
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 this.hideInPageAlert();
             });
-        }
-
-        // 在移动设备上，点击通知背景也可以关闭
-        if (isMobile) {
-            alertContainer.addEventListener('click', (e) => {
-                // 只有点击背景才关闭，避免点击按钮时关闭
-                if (e.target === alertContainer) {
-                    this.hideInPageAlert();
-                }
-            });
-        }
-
-        // 添加显示动画
-        setTimeout(() => {
-            alertContainer.classList.add('show');
-        }, 100);
-
-        // 自动隐藏（移动设备30秒，桌面60秒）
-        setTimeout(() => {
-            if (document.getElementById('wellness-notification')) {
-                this.hideInPageAlert();
-            }
-        }, isMobile ? 30000 : 60000);
-        
-        // 在移动设备上添加振动反馈（如果支持）
-        if (isMobile && navigator.vibrate) {
-            try {
-                navigator.vibrate([200, 100, 200]);
-            } catch (e) {
-                console.warn('Vibration API not available:', e);
-            }
         }
     }
 
