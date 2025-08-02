@@ -1,16 +1,18 @@
-# Force Refresh and Settings Reset Solution
+# Settings Reset Guide
 
-## Problem Description
+## Overview
 
-Users reported that both REMINDERS default to 30 minutes, but after force refresh:
-- Standup reminder minutes are restored to 30 minutes (correct)
-- Water reminder is not restored, still maintains user-modified value (e.g., 1 minute)
+This document explains how the application handles settings reset and refresh behavior.
 
-## Root Causes
+## Default Behavior
 
-1. **Lack of Force Refresh Detection**: Application cannot distinguish between normal refresh (F5) and force refresh (Ctrl+F5)
-2. **Inconsistent Settings Recovery Logic**: The two reminders' settings loading may have timing or logic differences
-3. **Unclear User Experience**: Users are unclear about when default settings will be restored
+- **Normal Refresh (F5)**: Preserves all user settings
+- **Force Refresh (Ctrl+F5)**: Resets to default 30-minute intervals
+- **Settings Reset**: Manual reset option available in UI
+
+## Technical Implementation
+
+The application detects force refresh events and automatically restores default settings when needed.
 
 ## Solution
 

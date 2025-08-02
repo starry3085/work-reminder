@@ -1,19 +1,16 @@
 {
-  "name": "office-wellness-reminder",
+  "name": "work-reminder",
   "version": "1.0.0",
   "description": "Office Wellness Reminder - Helping office workers develop healthy work habits",
   "main": "index.html",
   "scripts": {
     "start": "npx http-server . -o",
-    "deploy": "gh-pages -d .",
-    "deploy-dual": "node -e \"require('child_process').exec(process.platform === 'win32' ? 'deploy-dual-repos.bat' : './deploy-dual-repos.sh')\"",
-    "quick-deploy": "node -e \"require('child_process').exec(process.platform === 'win32' ? 'quick-deploy.bat' : './quick-deploy.sh')\"",
-    "push-dual": "git push gitee main && git push github main && git push origin main",
+    "deploy": "git add . && git commit -m \"Deploy to GitHub Pages\" && git push origin main",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/office-wellness-reminder.git"
+    "url": "git+https://github.com/starry3085/work-reminder.git"
   },
   "keywords": [
     "health",
@@ -23,14 +20,13 @@
     "water",
     "standup"
   ],
-  "author": "Your Name",
+  "author": "Office Wellness Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yourusername/office-wellness-reminder/issues"
+    "url": "https://github.com/starry3085/work-reminder/issues"
   },
-  "homepage": "https://github.com/yourusername/office-wellness-reminder#readme",
+  "homepage": "https://starry3085.github.io/work-reminder/",
   "devDependencies": {
-    "gh-pages": "^5.0.0",
     "http-server": "^14.1.1"
   }
 }
