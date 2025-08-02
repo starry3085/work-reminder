@@ -10,6 +10,7 @@ class UIController {
         this.uiState = {
             water: {
                 isActive: false,
+                isPaused: false,
                 timeRemaining: 0,
                 status: 'Inactive',
                 completedToday: 0,
@@ -17,6 +18,7 @@ class UIController {
             },
             standup: {
                 isActive: false,
+                isPaused: false,
                 timeRemaining: 0,
                 status: 'Inactive',
                 completedToday: 0,
@@ -129,7 +131,22 @@ class UIController {
 
         // Water reminder control buttons
         this.addEventHandler('waterToggle', 'click', () => {
-            this.triggerEvent('waterToggle', { isActive: !this.uiState.water.isActive });
+            const currentState = this.uiState.water;
+            console.log('Water toggle clicked, current state:', currentState);
+            
+            if (!currentState.isActive) {
+                // Currently stopped, start it
+                console.log('Triggering water start');
+                this.triggerEvent('waterToggle', { action: 'start' });
+            } else if (currentState.isPaused) {
+                // Currently paused, resume it
+                console.log('Triggering water resume');
+                this.triggerEvent('waterToggle', { action: 'resume' });
+            } else {
+                // Currently running, pause it
+                console.log('Triggering water pause');
+                this.triggerEvent('waterToggle', { action: 'pause' });
+            }
         });
 
         this.addEventHandler('waterReset', 'click', () => {
@@ -143,7 +160,22 @@ class UIController {
 
         // Standup reminder control buttons
         this.addEventHandler('standupToggle', 'click', () => {
-            this.triggerEvent('standupToggle', { isActive: !this.uiState.standup.isActive });
+            const currentState = this.uiState.standup;
+            console.log('Standup toggle clicked, current state:', currentState);
+            
+            if (!currentState.isActive) {
+                // Currently stopped, start it
+                console.log('Triggering standup start');
+                this.triggerEvent('standupToggle', { action: 'start' });
+            } else if (currentState.isPaused) {
+                // Currently paused, resume it
+                console.log('Triggering standup resume');
+                this.triggerEvent('standupToggle', { action: 'resume' });
+            } else {
+                // Currently running, pause it
+                console.log('Triggering standup pause');
+                this.triggerEvent('standupToggle', { action: 'pause' });
+            }
         });
 
         this.addEventHandler('standupReset', 'click', () => {
@@ -446,6 +478,19 @@ class UIController {
 
         // Update status text (removed left status display, only keep badge)
 
+        // Update UI state first (before updating UI elements)
+        if (type === 'water') {
+            this.uiState.water.isActive = status.isActive;
+            this.uiState.water.isPaused = status.isPaused || false;
+            this.uiState.water.status = status.status || (status.isActive ? 'Active' : 'Inactive');
+            this.uiState.water.timeRemaining = status.timeRemaining || 0;
+        } else if (type === 'standup') {
+            this.uiState.standup.isActive = status.isActive;
+            this.uiState.standup.isPaused = status.isPaused || false;
+            this.uiState.standup.status = status.status || (status.isActive ? 'Active' : 'Inactive');
+            this.uiState.standup.timeRemaining = status.timeRemaining || 0;
+        }
+
         // Update status badge
         if (statusBadge) {
             if (status.isActive && !status.isPaused) {
@@ -487,17 +532,6 @@ class UIController {
             toggleButton.className = 'btn-primary';
             if (resetButton) resetButton.style.display = 'none';
             if (actionButton) actionButton.style.display = 'none';
-        }
-
-        // Update UI state first
-        if (type === 'water') {
-            this.uiState.water.isActive = status.isActive;
-            this.uiState.water.status = status.status || (status.isActive ? 'Active' : 'Inactive');
-            this.uiState.water.timeRemaining = status.timeRemaining || 0;
-        } else if (type === 'standup') {
-            this.uiState.standup.isActive = status.isActive;
-            this.uiState.standup.status = status.status || (status.isActive ? 'Active' : 'Inactive');
-            this.uiState.standup.timeRemaining = status.timeRemaining || 0;
         }
 
         // Update countdown display
@@ -800,7 +834,7 @@ class UIController {
      */
     handleForceResetSettings() {
         // Show confirmation dialog
-        if (confirm('确定要强制重置所有设置为默认值吗？这将把所有提醒间隔重置为30分钟。')) {
+        if (confirm('Are you sure you want to force reset all settings to default values? This will reset all reminder intervals to 30 minutes.')) {
             this.triggerEvent('forceResetSettings');
         }
     }

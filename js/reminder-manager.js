@@ -175,9 +175,8 @@ class ReminderManager {
         this.isPaused = true;
         this.pauseTime = Date.now();
         
-        // Calculate remaining time
-        const elapsed = this.pauseTime - this.startTime;
-        this.timeRemaining = Math.max(0, this.timeRemaining - elapsed);
+        // Calculate remaining time based on nextReminderTime
+        this.timeRemaining = Math.max(0, this.nextReminderTime - this.pauseTime);
         
         // Clear timer
         this.clearTimer();

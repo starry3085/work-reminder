@@ -1,113 +1,113 @@
-# 部署检查清单
+# Deployment Checklist
 
-本文档提供了将办公族健康提醒应用部署到GitHub Pages的完整步骤和验证流程。
+This document provides complete steps and verification process for deploying the Office Wellness Reminder application to GitHub Pages.
 
-## 部署前检查
+## Pre-deployment Checks
 
-- [ ] 所有功能测试通过
-- [ ] 响应式设计在不同设备上测试通过
-- [ ] 所有资源文件（图片、音频等）都已包含在项目中
-- [ ] 所有JavaScript和CSS文件已压缩（可选）
-- [ ] 确保favicon.ico和其他图标文件存在
-- [ ] 确保manifest.json文件正确配置
-- [ ] 确保Service Worker正确实现
-- [ ] 文档已通过自动化系统更新并保持同步
+- [ ] All functionality tests passed
+- [ ] Responsive design tested on different devices
+- [ ] All resource files (images, audio, etc.) included in project
+- [ ] All JavaScript and CSS files compressed (optional)
+- [ ] Ensure favicon.ico and other icon files exist
+- [ ] Ensure manifest.json file is correctly configured
+- [ ] Ensure Service Worker is correctly implemented
+- [ ] Documentation updated and synchronized through automated system
 
-## 部署步骤
+## Deployment Steps
 
-1. **准备GitHub仓库**
-   - [ ] 创建新的GitHub仓库或使用现有仓库
-   - [ ] 确保仓库是公开的（对于GitHub免费账户）
+1. **Prepare GitHub Repository**
+   - [ ] Create new GitHub repository or use existing repository
+   - [ ] Ensure repository is public (for GitHub free accounts)
 
-2. **推送代码**
-   - [ ] 将所有代码推送到GitHub仓库的主分支（通常是`main`或`master`）
+2. **Push Code**
+   - [ ] Push all code to main branch of GitHub repository (usually `main` or `master`)
    ```bash
    git add .
-   git commit -m "准备部署到GitHub Pages"
+   git commit -m "Prepare for GitHub Pages deployment"
    git push origin main
    ```
 
-3. **配置GitHub Pages**
-   - [ ] 进入仓库设置 -> Pages
-   - [ ] 选择部署源（Source）为`gh-pages`分支
-   - [ ] 点击保存
+3. **Configure GitHub Pages**
+   - [ ] Go to repository settings -> Pages
+   - [ ] Select deployment source as `gh-pages` branch
+   - [ ] Click save
 
-4. **触发自动部署**
-   - [ ] 推送代码到主分支会自动触发GitHub Actions工作流
-   - [ ] 等待部署完成（通常需要1-2分钟）
-   - [ ] 在仓库的Actions标签页查看部署状态
+4. **Trigger Automatic Deployment**
+   - [ ] Pushing code to main branch will automatically trigger GitHub Actions workflow
+   - [ ] Wait for deployment completion (usually takes 1-2 minutes)
+   - [ ] Check deployment status in repository's Actions tab
 
-## 部署后验证
+## Post-deployment Verification
 
-1. **访问部署网站**
-   - [ ] 访问`https://<username>.github.io/<repository-name>/`
-   - [ ] 确保页面正常加载
+1. **Access Deployed Website**
+   - [ ] Visit `https://<username>.github.io/<repository-name>/`
+   - [ ] Ensure page loads normally
 
-2. **运行部署验证**
-   - [ ] 在URL后添加`?verify=true`参数
-   - [ ] 检查验证结果是否全部通过
+2. **Run Deployment Verification**
+   - [ ] Add `?verify=true` parameter to URL
+   - [ ] Check if all verification results pass
 
-3. **功能验证**
-   - [ ] 测试喝水提醒功能
-   - [ ] 测试久坐提醒功能
-   - [ ] 测试设置保存功能
-   - [ ] 测试通知功能
-   - [ ] 测试响应式设计（在移动设备上查看）
+3. **Functionality Verification**
+   - [ ] Test water reminder functionality
+   - [ ] Test standup reminder functionality
+   - [ ] Test settings save functionality
+   - [ ] Test notification functionality
+   - [ ] Test responsive design (view on mobile devices)
 
-4. **兼容性检查**
-   - [ ] 在Chrome浏览器中测试
-   - [ ] 在Firefox浏览器中测试
-   - [ ] 在Safari浏览器中测试
-   - [ ] 在Edge浏览器中测试
-   - [ ] 在移动设备浏览器中测试
+4. **Compatibility Check**
+   - [ ] Test in Chrome browser
+   - [ ] Test in Firefox browser
+   - [ ] Test in Safari browser
+   - [ ] Test in Edge browser
+   - [ ] Test in mobile device browsers
 
-## 常见问题排查
+## Common Issue Troubleshooting
 
-### 页面无法访问
-- 检查仓库设置中的GitHub Pages配置是否正确
-- 确认部署是否成功完成
-- 检查URL是否正确（注意大小写）
+### Page Cannot Be Accessed
+- Check if GitHub Pages configuration in repository settings is correct
+- Confirm deployment completed successfully
+- Check if URL is correct (pay attention to case sensitivity)
 
-### 资源文件无法加载
-- 检查资源文件路径是否正确
-- 确保所有资源文件都已推送到仓库
-- 检查浏览器控制台是否有404错误
+### Resource Files Cannot Load
+- Check if resource file paths are correct
+- Ensure all resource files have been pushed to repository
+- Check browser console for 404 errors
 
-### JavaScript错误
-- 检查浏览器控制台是否有错误信息
-- 确保所有依赖的JavaScript文件都已正确加载
-- 验证Service Worker注册是否成功
+### JavaScript Errors
+- Check browser console for error messages
+- Ensure all dependent JavaScript files are loaded correctly
+- Verify Service Worker registration is successful
 
-### 本地存储问题
-- 确保浏览器支持并启用了localStorage
-- 检查是否有足够的存储空间
-- 验证存储操作是否有错误
+### Local Storage Issues
+- Ensure browser supports and has localStorage enabled
+- Check if there is sufficient storage space
+- Verify storage operations have no errors
 
-## 自定义域名设置（可选）
+## Custom Domain Setup (Optional)
 
-如果需要使用自定义域名，请按照以下步骤操作：
+If you need to use a custom domain, follow these steps:
 
-1. 在DNS提供商处添加CNAME记录，指向`<username>.github.io`
-2. 在仓库根目录添加CNAME文件，内容为自定义域名
-3. 在GitHub仓库设置中的Pages部分，填写自定义域名
-4. 勾选"Enforce HTTPS"选项（如果可用）
+1. Add CNAME record at DNS provider, pointing to `<username>.github.io`
+2. Add CNAME file in repository root directory with custom domain as content
+3. Fill in custom domain in Pages section of GitHub repository settings
+4. Check "Enforce HTTPS" option (if available)
 
-## 开发自动化说明
+## Development Automation Notes
 
-本项目使用 Kiro AI Assistant 进行开发辅助，包含以下自动化功能：
+This project uses Kiro AI Assistant for development assistance, including the following automated features:
 
-### 文档自动更新
-- 当代码发生变更时，系统会自动检查并更新相关文档
-- 包括 README.md、API 文档、用户指南等
-- 自动维护代码注释和内联文档的一致性
+### Automatic Documentation Updates
+- When code changes occur, the system automatically checks and updates related documentation
+- Includes README.md, API documentation, user guides, etc.
+- Automatically maintains consistency of code comments and inline documentation
 
-### 配置文件
-- `.kiro/hooks/prompt-doc-updater.kiro.hook`: 文档更新自动化钩子
-- 版本 2: 增强了对代码注释和内联文档的检查
+### Configuration Files
+- `.kiro/hooks/prompt-doc-updater.kiro.hook`: Documentation update automation hook
+- Version 2: Enhanced checking of code comments and inline documentation
 
-## 联系与支持
+## Contact and Support
 
-如有部署问题，请通过以下方式获取支持：
-- 提交GitHub Issue
-- 发送邮件至支持邮箱
-- 查阅GitHub Pages官方文档：https://docs.github.com/en/pages
+For deployment issues, get support through the following methods:
+- Submit GitHub Issue
+- Send email to support mailbox
+- Refer to GitHub Pages official documentation: https://docs.github.com/en/pages
