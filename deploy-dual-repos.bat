@@ -59,9 +59,6 @@ if errorlevel 1 (
     git push -u origin main
 )
 
-echo Step 8: Deploying to GitHub Pages...
-npm run deploy
-
 echo ========================================
 echo Deployment Summary:
 echo - Gitee: https://gitee.com/starry3085/work-reminder
@@ -69,6 +66,7 @@ echo - GitHub: https://github.com/starry3085/work-reminder
 echo - GitHub Pages: https://starry3085.github.io/work-reminder/
 echo ========================================
 echo Deployment complete!
+echo GitHub Pages will auto-deploy from main branch.
 echo Please wait 1-2 minutes for GitHub Pages to update.
 
 pause
