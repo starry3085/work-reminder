@@ -1,18 +1,18 @@
 /**
- * Posture Reminder Class - Handles posture/standup reminder logic
- * Extends ReminderManager, adds posture-specific functionality and intelligent activity detection
+ * Standup Reminder Class - Handles standup reminder logic
+ * Extends ReminderManager, adds standup-specific functionality and intelligent activity detection
  */
-class PostureReminder extends ReminderManager {
+class StandupReminder extends ReminderManager {
     /**
-     * Create posture reminder instance
-     * @param {Object} settings - Posture reminder settings
+     * Create standup reminder instance
+     * @param {Object} settings - Standup reminder settings
      * @param {NotificationService} notificationService - Notification service instance
      * @param {ActivityDetector} activityDetector - Activity detector instance
      */
     constructor(settings, notificationService, activityDetector) {
         super('standup', settings, notificationService, activityDetector);
         
-        // Posture-specific state
+        // Standup-specific state
         this.dailyActivityCount = 0;
         this.dailyGoal = 8; // Daily activity goal (times)
         this.lastActivityTime = null;
@@ -32,11 +32,11 @@ class PostureReminder extends ReminderManager {
         // Set up enhanced activity detection
         this.setupEnhancedActivityDetection();
         
-        console.log('Posture reminder created');
+        console.log('Standup reminder created');
     }
 
     /**
-     * Load today's posture data
+     * Load today's standup data
      * @private
      */
     loadDailyData() {
@@ -65,7 +65,7 @@ class PostureReminder extends ReminderManager {
     }
 
     /**
-     * Save today's posture data
+     * Save today's standup data
      * @private
      */
     saveDailyData() {
@@ -139,19 +139,19 @@ class PostureReminder extends ReminderManager {
                     this.handleUserReturn();
                 }
                 
-                // Check if should auto-extend posture timer
+                // Check if should auto-extend standup timer
                 if (this.isActive && !this.isPaused) {
                     this.handleActivityDuringReminder();
                 }
                 break;
                 
             case 'user-away':
-                // User away, pause posture reminder
+                // User away, pause standup reminder
                 this.handleUserAway();
                 break;
                 
             case 'user-return':
-                // User returned, resume posture reminder
+                // User returned, resume standup reminder
                 this.handleUserReturn();
                 break;
         }
@@ -173,12 +173,12 @@ class PostureReminder extends ReminderManager {
             this.currentSittingStart = null;
         }
         
-        // Auto-pause posture reminder
+        // Auto-pause standup reminder
         if (this.isActive && !this.isPaused) {
             this.pause(true); // true means auto-pause
         }
         
-        console.log('User away, posture reminder auto-paused');
+        console.log('User away, standup reminder auto-paused');
     }
 
     /**
@@ -199,7 +199,7 @@ class PostureReminder extends ReminderManager {
             this.recordActivity('away-break', awayDuration);
         }
         
-        // Auto-resume posture reminder
+        // Auto-resume standup reminder
         if (this.isActive && this.isPaused) {
             this.resume(true); // true means auto-resume
         }
@@ -226,7 +226,7 @@ class PostureReminder extends ReminderManager {
             this.clearTimer();
             this.startTimer();
             
-            console.log('User activity detected, posture reminder extended by 5 minutes');
+            console.log('User activity detected, standup reminder extended by 5 minutes');
         }
     }
 
@@ -362,7 +362,7 @@ class PostureReminder extends ReminderManager {
     }
 
     /**
-     * Trigger posture reminder
+     * Trigger standup reminder
      * @private
      */
     triggerReminder() {
@@ -427,7 +427,7 @@ class PostureReminder extends ReminderManager {
             }
         }, 60000); // Auto-reset after 1 minute
         
-        console.log('Posture reminder triggered');
+        console.log('Standup reminder triggered');
     }
 
     /**
@@ -529,7 +529,7 @@ class PostureReminder extends ReminderManager {
     }
 
     /**
-     * Start reminder (override parent method, add posture-specific logic)
+     * Start reminder (override parent method, add standup-specific logic)
      */
     start() {
         // Record start sitting time
@@ -542,7 +542,7 @@ class PostureReminder extends ReminderManager {
     }
 
     /**
-     * Stop reminder (override parent method, add posture-specific logic)
+     * Stop reminder (override parent method, add standup-specific logic)
      */
     stop() {
         // Record sitting time
@@ -563,7 +563,7 @@ class PostureReminder extends ReminderManager {
     }
 
     /**
-     * Reset reminder timer (override parent method, add posture-specific logic)
+     * Reset reminder timer (override parent method, add standup-specific logic)
      */
     reset() {
         super.reset();
@@ -585,7 +585,7 @@ class PostureReminder extends ReminderManager {
     }
 
     /**
-     * Destroy posture reminder (override parent method)
+     * Destroy standup reminder (override parent method)
      */
     destroy() {
         // Record final sitting time
@@ -605,14 +605,14 @@ class PostureReminder extends ReminderManager {
         // Call parent destroy method
         super.destroy();
         
-        console.log('Posture reminder destroyed');
+        console.log('Standup reminder destroyed');
     }
 }
 
 // Export class for use by other modules
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = PostureReminder;
+    module.exports = StandupReminder;
 }
 
 // Export for browser use
-window.PostureReminder = PostureReminder;
+window.StandupReminder = StandupReminder;
