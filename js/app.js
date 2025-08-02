@@ -574,10 +574,23 @@ class OfficeWellnessApp {
 
         // 喝水提醒控制事件
         this.uiController.on('waterToggle', (data) => {
-            if (data.isActive) {
-                this.startReminder('water');
-            } else {
-                this.pauseReminder('water');
+            switch (data.action) {
+                case 'start':
+                    this.startReminder('water');
+                    break;
+                case 'pause':
+                    this.pauseReminder('water');
+                    break;
+                case 'resume':
+                    this.resumeReminder('water');
+                    break;
+                default:
+                    // Fallback to old logic for compatibility
+                    if (data.isActive) {
+                        this.startReminder('water');
+                    } else {
+                        this.pauseReminder('water');
+                    }
             }
         });
 
@@ -597,10 +610,23 @@ class OfficeWellnessApp {
 
         // 久坐提醒控制事件
         this.uiController.on('standupToggle', (data) => {
-            if (data.isActive) {
-                this.startReminder('standup');
-            } else {
-                this.pauseReminder('standup');
+            switch (data.action) {
+                case 'start':
+                    this.startReminder('standup');
+                    break;
+                case 'pause':
+                    this.pauseReminder('standup');
+                    break;
+                case 'resume':
+                    this.resumeReminder('standup');
+                    break;
+                default:
+                    // Fallback to old logic for compatibility
+                    if (data.isActive) {
+                        this.startReminder('standup');
+                    } else {
+                        this.pauseReminder('standup');
+                    }
             }
         });
 
@@ -1523,37 +1549,57 @@ class OfficeWellnessApp {
         try {
             if (type === 'water' && this.waterReminder) {
                 console.log('Pausing water reminder...');
+                console.log('Water reminder status before pause:', this.waterReminder.getCurrentStatus());
                 this.waterReminder.pause();
+                console.log('Water reminder status after pause:', this.waterReminder.getCurrentStatus());
                 
                 // 保存应用状态
                 this.saveAppState();
                 console.log('Water reminder paused successfully');
                 
-                // 手动触发状态更新以确保UI同步
-                if (this.uiController) {
-                    const status = this.waterReminder.getCurrentStatus();
-                    console.log('Manual status update for water:', status);
-                    this.uiController.updateReminderStatus('water', status);
-                }
             } else if (type === 'standup' && this.standupReminder) {
                 console.log('Pausing standup reminder...');
+                console.log('Standup reminder status before pause:', this.standupReminder.getCurrentStatus());
                 this.standupReminder.pause();
+                console.log('Standup reminder status after pause:', this.standupReminder.getCurrentStatus());
                 
                 // 保存应用状态
                 this.saveAppState();
                 console.log('Standup reminder paused successfully');
-                
-                // 手动触发状态更新以确保UI同步
-                if (this.uiController) {
-                    const status = this.standupReminder.getCurrentStatus();
-                    console.log('Manual status update for standup:', status);
-                    this.uiController.updateReminderStatus('standup', status);
-                }
             } else {
                 console.warn(`Cannot pause ${type} reminder: reminder not initialized`);
             }
         } catch (error) {
             console.error(`Failed to pause ${type} reminder:`, error);
+        }
+    }
+
+    /**
+     * 恢复提醒
+     * @param {string} type - 'water' | 'standup'
+     */
+    resumeReminder(type) {
+        try {
+            if (type === 'water' && this.waterReminder) {
+                console.log('Resuming water reminder...');
+                this.waterReminder.resume();
+                
+                // 保存应用状态
+                this.saveAppState();
+                console.log('Water reminder resumed successfully');
+                
+            } else if (type === 'standup' && this.standupReminder) {
+                console.log('Resuming standup reminder...');
+                this.standupReminder.resume();
+                
+                // 保存应用状态
+                this.saveAppState();
+                console.log('Standup reminder resumed successfully');
+            } else {
+                console.warn(`Cannot resume ${type} reminder: reminder not initialized`);
+            }
+        } catch (error) {
+            console.error(`Failed to resume ${type} reminder:`, error);
         }
     }
 
@@ -1804,11 +1850,11 @@ function setupFallbackButtons() {
             const isStart = standupToggle.textContent.trim() === 'Start';
             
             // 尝试调用主应用的方法
-            if (window.app && window.app.startReminder && window.app.stopReminder) {
+            if (window.app && window.app.startReminder && window.app.pauseReminder) {
                 if (isStart) {
                     window.app.startReminder('standup');
                 } else {
-                    window.app.stopReminder('standup');
+                    window.app.pauseReminder('standup');
                 }
             } else {
                 // 备用逻辑：手动更新UI
@@ -1936,11 +1982,11 @@ function bindFallbackHandlers() {
             const isActive = this.textContent.trim() === 'Start';
             
             // 尝试调用主应用的方法
-            if (window.app && window.app.startReminder && window.app.stopReminder) {
+            if (window.app && window.app.startReminder && window.app.pauseReminder) {
                 if (isActive) {
                     window.app.startReminder('water');
                 } else {
-                    window.app.stopReminder('water');
+                    window.app.pauseReminder('water');
                 }
             } else {
                 // 备用逻辑：手动更新UI
@@ -1986,11 +2032,11 @@ function bindFallbackHandlers() {
             const isActive = this.textContent.trim() === 'Start';
             
             // 尝试调用主应用的方法
-            if (window.app && window.app.startReminder && window.app.stopReminder) {
+            if (window.app && window.app.startReminder && window.app.pauseReminder) {
                 if (isActive) {
                     window.app.startReminder('standup');
                 } else {
-                    window.app.stopReminder('standup');
+                    window.app.pauseReminder('standup');
                 }
             } else {
                 // 备用逻辑：手动更新UI
