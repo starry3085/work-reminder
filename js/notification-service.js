@@ -69,27 +69,40 @@ class NotificationService {
     }
 
     /**
-     * Show notification - simplified for MVP
+     * Show notification - unified for MVP
      * @param {string} type - 通知类型 ('water' | 'standup')
      * @param {string} title - 通知标题
      * @param {string} message - 通知内容
      * @returns {boolean} 是否成功显示
      */
     showNotification(type, title, message) {
-        // Always show in-page notification for consistency
-        this.showInPageAlert(type, title, message);
-        
-        // Try browser notification as additional notification
-        if (this.hasPermission) {
-            this.showBrowserNotification(type, title, message);
-        }
+        // Unified notification strategy
+        const notificationShown = this.showUnifiedNotification(type, title, message);
         
         // Play sound
         if (this.soundEnabled) {
             this.playSound(type);
         }
         
-        return true;
+        return notificationShown;
+    }
+
+    /**
+     * Unified notification display
+     * @private
+     */
+    showUnifiedNotification(type, title, message) {
+        let shown = false;
+        
+        // Try browser notification first if supported
+        if (this.hasPermission) {
+            shown = this.showBrowserNotification(type, title, message);
+        }
+        
+        // Always show in-page notification as fallback
+        this.showInPageAlert(type, title, message);
+        
+        return shown || true; // At least in-page notification will show
     }
 
     /**

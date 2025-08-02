@@ -5,6 +5,12 @@
 class StorageManager {
     constructor() {
         this.storagePrefix = 'wellness_reminder_';
+        this.storageKeys = {
+            settings: 'settings',
+            state: 'state',
+            waterState: 'water_state',
+            standupState: 'standup_state'
+        };
         this.isStorageAvailable = this.checkStorageAvailability();
         this.memoryStorage = new Map(); // Backup memory storage
     }
@@ -163,6 +169,42 @@ class StorageManager {
                 type: 'localStorage'
             };
         }
+    }
+
+    /**
+     * Save settings
+     * @param {Object} settings - 设置对象
+     */
+    saveSettings(settings) {
+        this.setItem(this.storageKeys.settings, settings);
+    }
+
+    /**
+     * Load settings
+     * @returns {Object|null} 设置对象
+     */
+    loadSettings() {
+        return this.getItem(this.storageKeys.settings);
+    }
+
+    /**
+     * Save state
+     * @param {string} type - 提醒类型 ('water' | 'standup')
+     * @param {Object} state - 状态对象
+     */
+    saveState(type, state) {
+        const key = type === 'water' ? this.storageKeys.waterState : this.storageKeys.standupState;
+        this.setItem(key, state);
+    }
+
+    /**
+     * Load state
+     * @param {string} type - 提醒类型 ('water' | 'standup')
+     * @returns {Object|null} 状态对象
+     */
+    loadState(type) {
+        const key = type === 'water' ? this.storageKeys.waterState : this.storageKeys.standupState;
+        return this.getItem(key);
     }
 
     /**
