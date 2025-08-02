@@ -834,7 +834,7 @@ class UIController {
      */
     handleForceResetSettings() {
         // Show confirmation dialog
-        if (confirm('确定要强制重置所有设置为默认值吗？这将把所有提醒间隔重置为30分钟。')) {
+        if (confirm('Are you sure you want to force reset all settings to default values? This will reset all reminder intervals to 30 minutes.')) {
             this.triggerEvent('forceResetSettings');
         }
     }

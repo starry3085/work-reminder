@@ -129,26 +129,26 @@
 
     <!-- Application Initialization -->
     <script>
-        // 应用初始化
+        // Application initialization
         let app;
 
         async function initializeApp() {
             try {
                 console.log('Initializing Office Wellness App...');
 
-                // 运行诊断检查
+                // Run diagnostic checks
                 let diagnostics = null;
                 if (typeof DebugHelper !== 'undefined') {
                     const debugHelper = new DebugHelper();
                     diagnostics = await debugHelper.runDiagnostics();
 
-                    // 如果有严重错误，显示诊断信息
+                    // If there are critical errors, show diagnostic information
                     if (diagnostics.overall.status === 'error') {
                         throw new Error(`Diagnostic check failed: ${diagnostics.classes.message}`);
                     }
                 }
 
-                // 检查必要的类是否存在
+                // Check if required classes exist
                 const requiredClasses = [
                     'ErrorHandler', 'StorageManager', 'AppSettings',
                     'NotificationService', 'ActivityDetector', 'ReminderManager',
@@ -160,14 +160,14 @@
                     throw new Error(`Missing required classes: ${missingClasses.join(', ')}`);
                 }
 
-                // 隐藏启动错误提示（如果存在）
+                // Hide startup error notification (if exists)
                 hideStartupError();
 
                 app = new OfficeWellnessApp();
                 await app.initialize();
                 console.log('App initialized successfully');
 
-                // 显示成功状态
+                // Show success status
                 showAppStatus('success', 'Application loaded successfully');
 
             } catch (error) {

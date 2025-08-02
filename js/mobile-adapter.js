@@ -14,8 +14,8 @@ class MobileAdapter {
     }
 
     /**
-     * 检测本地存储是否可用
-     * @returns {boolean} 是否可用
+     * Check if local storage is available
+     * @returns {boolean} Whether local storage is available
      * @private
      */
     isLocalStorageAvailable() {
@@ -31,7 +31,7 @@ class MobileAdapter {
     }
 
     /**
-     * 检测是否为移动设备
+     * Detect if current device is mobile
      * @returns {boolean} 是否为移动设备
      */
     isMobileDevice() {

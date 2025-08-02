@@ -304,7 +304,7 @@ class OfficeWellnessApp {
     }
     
     /**
-     * 检查浏览器兼容性
+     * Check browser compatibility
      * @private
      */
     checkBrowserCompatibility() {
@@ -313,15 +313,15 @@ class OfficeWellnessApp {
         }
         
         try {
-            // 检查功能支持和替代方案
+            // Check feature support and fallbacks
             const compatibilityResult = this.mobileAdapter.checkFeaturesAndFallbacks();
             
-            // 标记已检查兼容性
+            // Mark compatibility as checked
             this.appState.compatibilityChecked = true;
             
-            // 如果有不支持的功能，在UI初始化后显示提示
+            // If there are unsupported features, show notification after UI initialization
             if (Object.values(compatibilityResult.supported).includes(false)) {
-                // 在DOM加载完成后显示兼容性提示
+                // Show compatibility notification after DOM is loaded
                 document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => {
                         if (this.uiController && this.uiController.isInitialized) {

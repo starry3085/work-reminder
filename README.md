@@ -1,110 +1,110 @@
-# 办公族健康提醒 - Office Wellness Reminder
+# Office Wellness Reminder
 
-一个专为办公族设计的健康提醒网页应用，帮助您养成良好的工作习惯。
+A health reminder web application designed specifically for office workers to help develop good work habits.
 
-## 功能特性
+## Features
 
-- 🥤 **喝水提醒** - 定时提醒补充水分，保持身体健康
-- 🪑 **久坐提醒** - 智能检测用户活动，提醒起身活动
-- 🔔 **多种通知方式** - 支持浏览器通知和页面内提醒
-- ⚙️ **个性化设置** - 可自定义提醒间隔和通知方式
-- 📱 **响应式设计** - 完美适配桌面和移动设备
-- 💾 **本地存储** - 设置自动保存，无需注册账号
+- 🥤 **Water Reminder** - Timed reminders to stay hydrated and maintain good health
+- 🪑 **Standup Reminder** - Smart activity detection to remind you to get up and move
+- 🔔 **Multiple Notification Types** - Support for browser notifications and in-page alerts
+- ⚙️ **Personalized Settings** - Customizable reminder intervals and notification preferences
+- 📱 **Responsive Design** - Perfect compatibility with desktop and mobile devices
+- 💾 **Local Storage** - Automatic settings save, no account registration required
 
-## 技术栈
+## Tech Stack
 
-- **前端**: 原生 JavaScript (ES6+)
-- **样式**: CSS3 + Flexbox/Grid
-- **存储**: localStorage API
-- **通知**: Web Notifications API
-- **部署**: GitHub Pages
-- **开发工具**: Kiro AI Assistant with automated documentation updates
+- **Frontend**: Vanilla JavaScript (ES6+)
+- **Styling**: CSS3 + Flexbox/Grid
+- **Storage**: localStorage API
+- **Notifications**: Web Notifications API
+- **Deployment**: GitHub Pages
+- **Development Tools**: Kiro AI Assistant with automated documentation updates
 
-## 项目结构
+## Project Structure
 
 ```
 office-wellness-reminder/
-├── index.html              # 主页面
-├── 404.html               # 错误页面
+├── index.html              # Main page
+├── 404.html               # Error page
 ├── styles/
-│   └── main.css           # 主样式文件
+│   └── main.css           # Main stylesheet
 ├── js/
-│   ├── app.js             # 主应用文件
-│   ├── storage-manager.js # 存储管理器
-│   ├── app-settings.js    # 应用设置
-│   ├── notification-service.js # 通知服务
-│   ├── activity-detector.js    # 活动检测器
-│   ├── reminder-manager.js     # 提醒管理器
-│   ├── water-reminder.js       # 喝水提醒
-│   ├── standup-reminder.js     # 久坐提醒
-│   ├── ui-controller.js        # UI控制器
-│   ├── error-handler.js        # 错误处理
-│   └── mobile-adapter.js       # 移动适配
-├── assets/                # 静态资源（图标、音频）
-├── manifest.json          # PWA配置
-├── package.json           # 项目配置
-└── README.md              # 项目说明
+│   ├── app.js             # Main application file
+│   ├── storage-manager.js # Storage manager
+│   ├── app-settings.js    # Application settings
+│   ├── notification-service.js # Notification service
+│   ├── activity-detector.js    # Activity detector
+│   ├── reminder-manager.js     # Reminder manager
+│   ├── water-reminder.js       # Water reminder
+│   ├── standup-reminder.js     # Standup reminder
+│   ├── ui-controller.js        # UI controller
+│   ├── error-handler.js        # Error handler
+│   └── mobile-adapter.js       # Mobile adapter
+├── assets/                # Static resources (icons, audio)
+├── manifest.json          # PWA configuration
+├── package.json           # Project configuration
+└── README.md              # Project documentation
 ```
 
-## 开发说明
+## Development Notes
 
-本项目为 Kiro Hackathon 参赛作品，严格遵循比赛规则：
-- 纯前端实现，无需后端服务器
-- 可直接部署到 GitHub Pages
-- 使用现代 Web 技术栈
-- 注重用户体验和可访问性
+This project is a Kiro Hackathon entry, strictly following competition rules:
+- Pure frontend implementation, no backend server required
+- Direct deployment to GitHub Pages
+- Modern web technology stack
+- Focus on user experience and accessibility
 
-### 开发自动化
+### Development Automation
 
-项目使用 Kiro AI Assistant 进行开发辅助，包含以下自动化功能：
-- **文档同步**: 自动检测代码变更并更新相关文档
-- **代码注释**: 自动维护内联文档和代码注释的一致性
-- **开发工作流**: 智能提示和代码质量检查
+The project uses Kiro AI Assistant for development assistance, including the following automated features:
+- **Documentation Sync**: Automatically detect code changes and update related documentation
+- **Code Comments**: Automatically maintain consistency of inline documentation and code comments
+- **Development Workflow**: Smart suggestions and code quality checks
 
-## 浏览器支持
+## Browser Support
 
 - Chrome 60+
 - Firefox 55+
 - Safari 12+
 - Edge 79+
 
-## 开发进度
+## Development Progress
 
-- [x] 项目基础结构
-- [x] 存储管理系统
-- [x] 通知服务
-- [x] 用户活动检测
-- [x] 提醒管理核心功能
-- [x] UI交互控制
-- [x] 响应式设计
-- [x] 测试和优化
-- [x] GitHub Pages 部署
+- [x] Project foundation structure
+- [x] Storage management system
+- [x] Notification service
+- [x] User activity detection
+- [x] Reminder management core functionality
+- [x] UI interaction control
+- [x] Responsive design
+- [x] Testing and optimization
+- [x] GitHub Pages deployment
 
-## 部署指南
+## Deployment Guide
 
-### GitHub Pages 部署
+### GitHub Pages Deployment
 
-1. Fork 或克隆此仓库
-2. 启用 GitHub Pages:
-   - 进入仓库设置 -> Pages
-   - 选择 `gh-pages` 分支作为源
-   - 点击保存
-3. 自动部署将在每次推送到 `main` 分支后执行
-4. 访问 `https://<your-username>.github.io/office-wellness-reminder/` 查看应用
+1. Fork or clone this repository
+2. Enable GitHub Pages:
+   - Go to repository settings -> Pages
+   - Select `gh-pages` branch as source
+   - Click save
+3. Automatic deployment will execute after each push to `main` branch
+4. Visit `https://<your-username>.github.io/office-wellness-reminder/` to view the application
 
-### 本地开发
+### Local Development
 
-1. 克隆仓库: `git clone https://github.com/yourusername/office-wellness-reminder.git`
-2. 进入项目目录: `cd office-wellness-reminder`
-3. 使用本地服务器运行项目:
-   - 使用 Python: `python -m http.server`
-   - 或使用 Node.js: `npx serve`
-4. 在浏览器中访问 `http://localhost:8000`
+1. Clone repository: `git clone https://github.com/yourusername/office-wellness-reminder.git`
+2. Enter project directory: `cd office-wellness-reminder`
+3. Run project using local server:
+   - Using Python: `python -m http.server`
+   - Or using Node.js: `npx serve`
+4. Access `http://localhost:8000` in browser
 
-## 许可证
+## License
 
 MIT License
 
 ---
 
-为办公族的健康工作而设计 ❤️
+Designed for healthy office work ❤️
