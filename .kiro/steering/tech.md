@@ -38,7 +38,7 @@ office-wellness-reminder/
 │   ├── storage-manager.js # localStorage abstraction layer
 │   ├── app-settings.js    # Settings and state management
 │   ├── notification-service.js # Notification handling
-│   ├── activity-detector.js    # User activity detection
+│   ├── activity-detector.js    # User activity detection (removed for MVP)
 │   ├── reminder-manager.js     # Base reminder functionality
 │   ├── water-reminder.js       # Water reminder implementation
 │   ├── standup-reminder.js     # Standup reminder implementation

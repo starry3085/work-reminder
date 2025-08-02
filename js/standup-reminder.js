@@ -7,30 +7,20 @@ class StandupReminder extends ReminderManager {
      * Create standup reminder instance
      * @param {Object} settings - Standup reminder settings
      * @param {NotificationService} notificationService - Notification service instance
-     * @param {ActivityDetector} activityDetector - Activity detector instance
      */
-    constructor(settings, notificationService, activityDetector) {
-        super('standup', settings, notificationService, activityDetector);
+    constructor(settings, notificationService) {
+        super('standup', settings, notificationService);
         
         // Standup-specific state
         this.dailyActivityCount = 0;
         this.dailyGoal = 8; // Daily activity goal (times)
-        this.lastActivityTime = null;
+        // Activity tracking removed for MVP
         this.activityHistory = []; // Today's activity records
         this.totalSittingTime = 0; // Total sitting time today (milliseconds)
         this.currentSittingStart = null; // Current sitting start time
         
-        // Activity detection related
-        this.isUserAway = false;
-        this.awayStartTime = null;
-        this.lastUserActivity = Date.now();
-        this.activityThreshold = (settings.activityThreshold || 5) * 60 * 1000; // Convert to milliseconds
-        
         // Load today's data from local storage
         this.loadDailyData();
-        
-        // Set up enhanced activity detection
-        this.setupEnhancedActivityDetection();
         
         console.log('Standup reminder created');
     }
@@ -51,7 +41,7 @@ class StandupReminder extends ReminderManager {
                 if (data.date === today) {
                     this.dailyActivityCount = data.count || 0;
                     this.activityHistory = data.history || [];
-                    this.lastActivityTime = data.lastActivityTime || null;
+                    // Activity tracking removed for MVP
                     this.totalSittingTime = data.totalSittingTime || 0;
                 } else {
                     // New day, reset data
@@ -75,7 +65,7 @@ class StandupReminder extends ReminderManager {
                 date: today,
                 count: this.dailyActivityCount,
                 history: this.activityHistory,
-                lastActivityTime: this.lastActivityTime,
+                // Activity tracking removed for MVP
                 totalSittingTime: this.totalSittingTime
             };
             
@@ -92,173 +82,13 @@ class StandupReminder extends ReminderManager {
     resetDailyData() {
         this.dailyActivityCount = 0;
         this.activityHistory = [];
-        this.lastActivityTime = null;
+        // Activity tracking removed for MVP
         this.totalSittingTime = 0;
         this.currentSittingStart = Date.now();
         this.saveDailyData();
     }
 
-    /**
-     * Set up enhanced activity detection
-     * @private
-     */
-    setupEnhancedActivityDetection() {
-        if (!this.activityDetector) return;
-        
-        // Save original callback
-        const originalCallback = this.activityDetector.callback;
-        
-        // Set new callback, including original callback and our handling
-        this.activityDetector.callback = (event) => {
-            // Call original callback
-            if (originalCallback) {
-                originalCallback(event);
-            }
-            
-            // Handle activity detection events
-            this.handleEnhancedActivityEvent(event);
-        };
-        
-        // Start continuous activity monitoring
-        this.startContinuousMonitoring();
-    }
-
-    /**
-     * Handle enhanced user activity events
-     * @param {Object} event - Activity event
-     * @private
-     */
-    handleEnhancedActivityEvent(event) {
-        const now = Date.now();
-        this.lastUserActivity = now;
-        
-        switch (event.type) {
-            case 'user-activity':
-                // User has activity, reset away state
-                if (this.isUserAway) {
-                    this.handleUserReturn();
-                }
-                
-                // Check if should auto-extend standup timer
-                if (this.isActive && !this.isPaused) {
-                    this.handleActivityDuringReminder();
-                }
-                break;
-                
-            case 'user-away':
-                // User away, pause standup reminder
-                this.handleUserAway();
-                break;
-                
-            case 'user-return':
-                // User returned, resume standup reminder
-                this.handleUserReturn();
-                break;
-        }
-    }
-
-    /**
-     * Handle user away event
-     * @private
-     */
-    handleUserAway() {
-        if (this.isUserAway) return;
-        
-        this.isUserAway = true;
-        this.awayStartTime = Date.now();
-        
-        // Record sitting time
-        if (this.currentSittingStart) {
-            this.totalSittingTime += this.awayStartTime - this.currentSittingStart;
-            this.currentSittingStart = null;
-        }
-        
-        // Auto-pause standup reminder
-        if (this.isActive && !this.isPaused) {
-            this.pause(true); // true means auto-pause
-        }
-        
-        console.log('User away, standup reminder auto-paused');
-    }
-
-    /**
-     * Handle user return event
-     * @private
-     */
-    handleUserReturn() {
-        if (!this.isUserAway) return;
-        
-        const returnTime = Date.now();
-        const awayDuration = returnTime - this.awayStartTime;
-        
-        this.isUserAway = false;
-        this.currentSittingStart = returnTime;
-        
-        // If away time exceeds 5 minutes, consider it valid activity
-        if (awayDuration > this.activityThreshold) {
-            this.recordActivity('away-break', awayDuration);
-        }
-        
-        // Auto-resume standup reminder
-        if (this.isActive && this.isPaused) {
-            this.resume(true); // true means auto-resume
-        }
-        
-        console.log(`User returned, away duration: ${Math.round(awayDuration / 60000)} minutes`);
-    }
-
-    /**
-     * Handle user activity during reminder
-     * @private
-     */
-    handleActivityDuringReminder() {
-        // If user has continuous activity during reminder, extend timer appropriately
-        const activityWindow = 30000; // 30-second activity window
-        const now = Date.now();
-        
-        if (now - this.lastUserActivity < activityWindow) {
-            // Extend by 5 minutes
-            const extensionTime = 5 * 60 * 1000;
-            this.timeRemaining = Math.min(this.timeRemaining + extensionTime, this.settings.interval * 60 * 1000);
-            this.nextReminderTime = now + this.timeRemaining;
-            
-            // Restart timer
-            this.clearTimer();
-            this.startTimer();
-            
-            console.log('User activity detected, standup reminder extended by 5 minutes');
-        }
-    }
-
-    /**
-     * Start continuous monitoring
-     * @private
-     */
-    startContinuousMonitoring() {
-        // Check user status every minute
-        this.monitoringInterval = setInterval(() => {
-            this.checkUserStatus();
-        }, 60000);
-    }
-
-    /**
-     * Check user status
-     * @private
-     */
-    checkUserStatus() {
-        const now = Date.now();
-        const timeSinceLastActivity = now - this.lastUserActivity;
-        
-        // If exceeds activity threshold and user hasn't been marked as away
-        if (timeSinceLastActivity > this.activityThreshold && !this.isUserAway) {
-            this.handleUserAway();
-        }
-        
-        // Update sitting time
-        if (this.currentSittingStart && !this.isUserAway) {
-            this.totalSittingTime += 60000; // Add 1 minute
-        }
-    }
+    // Activity detection methods removed for MVP - using simpler time-based reminders
 
     /**
      * Confirm user standup activity
@@ -288,7 +118,7 @@ class StandupReminder extends ReminderManager {
             timeRemaining: this.timeRemaining,
             dailyCount: this.dailyActivityCount,
             dailyGoal: this.dailyGoal,
-            lastActivityTime: this.lastActivityTime
+            // Activity tracking removed for MVP
         });
         
         console.log(`Activity confirmed, ${this.dailyActivityCount} times today`);
@@ -304,7 +134,7 @@ class StandupReminder extends ReminderManager {
         const now = Date.now();
         
         this.dailyActivityCount++;
-        this.lastActivityTime = now;
+        // Activity tracking removed for MVP
         this.activityHistory.push({
             time: now,
             type: type,
@@ -447,7 +277,7 @@ class StandupReminder extends ReminderManager {
             totalActivityTime: totalActivityTime,
             totalSittingTime: this.totalSittingTime,
             sittingHours: sittingHours,
-            lastActivityTime: this.lastActivityTime,
+            // Activity tracking removed for MVP
             history: [...this.activityHistory],
             isGoalReached: this.dailyActivityCount >= this.dailyGoal,
             averageActivityDuration: this.activityHistory.length > 0 
@@ -471,20 +301,7 @@ class StandupReminder extends ReminderManager {
         }
     }
 
-    /**
-     * Set activity threshold
-     * @param {number} threshold - Activity threshold (minutes)
-     */
-    setActivityThreshold(threshold) {
-        if (threshold > 0 && threshold <= 30) { // Reasonable range
-            this.activityThreshold = threshold * 60 * 1000; // Convert to milliseconds
-            this.settings.activityThreshold = threshold;
-            
-            console.log(`Activity threshold set to ${threshold} minutes`);
-        } else {
-            console.warn('Activity threshold should be between 1-30 minutes');
-        }
-    }
+    // Activity threshold setting removed for MVP - using simpler time-based reminders
 
     /**
      * Get health suggestion
@@ -521,10 +338,7 @@ class StandupReminder extends ReminderManager {
         return {
             ...baseStatus,
             dailyStats: this.getDailyStats(),
-            suggestion: this.getHealthSuggestion(),
-            isUserAway: this.isUserAway,
-            lastUserActivity: this.lastUserActivity,
-            activityThreshold: this.activityThreshold
+            suggestion: this.getHealthSuggestion()
         };
     }
 
@@ -552,11 +366,7 @@ class StandupReminder extends ReminderManager {
             this.saveDailyData();
         }
         
-        // Stop continuous monitoring
-        if (this.monitoringInterval) {
-            clearInterval(this.monitoringInterval);
-            this.monitoringInterval = null;
-        }
+        // Activity detection cleanup removed for MVP
         
         // Call parent stop method
         super.stop();
@@ -596,11 +406,7 @@ class StandupReminder extends ReminderManager {
         // Save data
         this.saveDailyData();
         
-        // Stop continuous monitoring
-        if (this.monitoringInterval) {
-            clearInterval(this.monitoringInterval);
-            this.monitoringInterval = null;
-        }
+        // Activity detection cleanup removed for MVP
         
         // Call parent destroy method
         super.destroy();

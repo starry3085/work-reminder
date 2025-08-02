@@ -33,7 +33,7 @@ work-reminder/
 │   ├── storage-manager.js # Storage manager
 │   ├── app-settings.js    # Application settings
 │   ├── notification-service.js # Notification service
-│   ├── activity-detector.js    # Activity detector
+│   ├── activity-detector.js    # Activity detector (removed for MVP)
 │   ├── reminder-manager.js     # Reminder manager
 │   ├── water-reminder.js       # Water reminder
 │   ├── standup-reminder.js     # Standup reminder

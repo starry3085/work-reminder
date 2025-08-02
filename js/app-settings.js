@@ -22,9 +22,7 @@ class AppSettings {
                 interval: 30, // 分钟
                 sound: true,
                 lastReminder: null,
-                activityThreshold: 5, // 分钟
                 target: 8, // 每日目标次数
-                activityDetection: true // 活动检测
             },
             notifications: {
                 browserNotifications: true,
@@ -53,9 +51,7 @@ class AppSettings {
                 lastAcknowledged: null
             },
             userActivity: {
-                isActive: true,
-                lastActivityTime: Date.now(),
-                awayStartTime: null
+                isActive: true
             },
             lastSaved: Date.now()
         };

@@ -33,7 +33,7 @@
   - _Requirements: 3.3, 1.3, 2.2_
 
 - [x] 4. Implement user activity detection system
-- [x] 4.1 Create ActivityDetector class
+- [x] 4.1 Create ActivityDetector class (removed for MVP - deferred)
   - Implement mouse and keyboard event listening
   - Add user activity status judgment logic
   - Implement page unfocus detection functionality

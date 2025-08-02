@@ -26,7 +26,7 @@ The application follows a modular class-based architecture with clear separation
 - `WaterReminder` - Water reminder implementation
 - `StandupReminder` - Standup reminder with activity detection
 - `NotificationService` - Handles browser and in-page notifications
-- `ActivityDetector` - User activity monitoring for smart pause/resume
+- `ActivityDetector` - User activity monitoring for smart pause/resume (removed for MVP)
 
 #### Utility Layer
 - `MobileAdapter` - Mobile device optimizations and compatibility checks
@@ -36,7 +36,7 @@ The application follows a modular class-based architecture with clear separation
 
 ### JavaScript Files
 - Use kebab-case: `water-reminder.js`, `activity-detector.js`
-- Class names use PascalCase: `WaterReminder`, `ActivityDetector`
+- Class names use PascalCase: `WaterReminder`
 - One class per file, matching the filename
 
 ### CSS Classes

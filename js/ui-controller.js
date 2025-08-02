@@ -626,7 +626,7 @@ class UIController {
                 enabled: this.elements.standupEnabled ? this.elements.standupEnabled.checked : true,
                 interval: this.elements.standupIntervalDisplay ? parseInt(this.elements.standupIntervalDisplay.value) : 30,
                 target: this.elements.standupTarget ? parseInt(this.elements.standupTarget.value) : 8,
-                activityDetection: this.elements.activityDetection ? this.elements.activityDetection.checked : true
+                // Activity detection settings removed for MVP
             },
             notifications: {
                 browserNotifications: this.elements.browserNotifications ? this.elements.browserNotifications.checked : true,
@@ -672,9 +672,7 @@ class UIController {
             if (this.elements.standupTarget) {
                 this.elements.standupTarget.value = settings.standup.target || 8;
             }
-            if (this.elements.activityDetection) {
-                this.elements.activityDetection.checked = settings.standup.activityDetection !== false;
-            }
+            // Activity detection settings removed for MVP
         }
 
         // Apply notification settings

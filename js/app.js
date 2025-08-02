@@ -13,7 +13,6 @@ class OfficeWellnessApp {
         this.storageManager = null;
         this.appSettings = null;
         this.notificationService = null;
-        this.activityDetector = null;
         this.waterReminder = null;
         this.standupReminder = null;
         this.uiController = null;
@@ -194,37 +193,7 @@ class OfficeWellnessApp {
                 };
             }
             
-            // Initialize activity detector (for standup reminders)
-            try {
-                if (typeof ActivityDetector !== 'undefined') {
-                    this.activityDetector = new ActivityDetector((event) => {
-                        console.log('User activity status changed:', event);
-                        // Activity detector callback will be handled in ReminderManager
-                        
-                        // Update user activity information in app state
-                        if (this.appSettings) {
-                            try {
-                                const currentState = this.appSettings.getState();
-                                currentState.userActivity = {
-                                    isActive: event.isActive,
-                                    lastActivityTime: event.lastActivityTime,
-                                    awayStartTime: event.awayStartTime
-                                };
-                                this.appSettings.updateState(currentState);
-                            } catch (stateError) {
-                                console.warn('Failed to update activity state:', stateError);
-                            }
-                        }
-                    });
-                    console.log('Activity detector initialized');
-                } else {
-                    console.warn('ActivityDetector class not found');
-                    this.activityDetector = null;
-                }
-            } catch (error) {
-                console.warn('Failed to initialize activity detector:', error);
-                this.activityDetector = null;
-            }
+            // Activity detector removed for MVP - using simpler time-based reminders
             
             // Get current settings
             const currentSettings = this.appSettings.getSettings();
@@ -251,8 +220,7 @@ class OfficeWellnessApp {
                 if (typeof StandupReminder !== 'undefined') {
                     this.standupReminder = new StandupReminder(
                         currentSettings.standup, 
-                        this.notificationService,
-                        this.activityDetector // Pass activity detector to standup reminder
+                        this.notificationService
                     );
                     console.log('Standup reminder initialized');
                 } else {
@@ -860,10 +828,7 @@ class OfficeWellnessApp {
                 }
             }
             
-            // 恢复用户活动状态
-            if (currentState.userActivity && this.activityDetector) {
-                this.activityDetector.setLastActivityTime(currentState.userActivity.lastActivityTime || Date.now());
-            }
+            // Activity detector removed for MVP - user activity state no longer tracked
             
             console.log('会话状态恢复完成');
             return true;
