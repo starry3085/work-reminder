@@ -59,7 +59,7 @@ class AppSettings {
     }
 
     /**
-     * 加载应用设置
+     * 加载应用设置和状态（原子操作，确保一致性）
      * @param {boolean} forceDefault - 是否强制使用默认设置（强制刷新时）
      * @returns {Object} 加载的设置
      */
@@ -69,26 +69,57 @@ class AppSettings {
             const isForceRefresh = this.detectForceRefresh();
             
             if (forceDefault || isForceRefresh) {
-                console.log('检测到强制刷新或强制使用默认设置，恢复默认设置');
+                console.log('检测到强制刷新或强制使用默认设置，恢复默认设置和状态');
                 this.currentSettings = { ...this.defaultSettings };
+                this.currentState = { ...this.defaultState };
                 // 清除强制刷新标记
                 this.clearForceRefreshFlag();
+                this.saveSettings();
+                this.saveState();
                 return this.currentSettings;
             }
             
             const savedSettings = this.storageManager.loadSettings(this.settingsKey);
-            if (savedSettings) {
-                // 深度合并保存的设置和默认设置
+            const savedState = this.storageManager.loadSettings(this.stateKey);
+            
+            // 确保设置和状态的一致性
+            let settingsValid = false;
+            let stateValid = false;
+            
+            if (savedSettings && this.validateSettings(savedSettings)) {
                 this.currentSettings = this.mergeSettings(this.defaultSettings, savedSettings);
+                settingsValid = true;
                 console.log('已加载用户设置:', this.currentSettings);
             } else {
                 console.log('使用默认设置');
                 this.currentSettings = { ...this.defaultSettings };
             }
+            
+            if (savedState && this.isStateValid(savedState)) {
+                this.currentState = this.mergeSettings(this.defaultState, savedState);
+                stateValid = true;
+                console.log('已加载应用状态:', this.currentState);
+            } else {
+                console.log('使用默认状态');
+                this.currentState = { ...this.defaultState };
+            }
+            
+            // 如果设置或状态无效，确保两者都重置为默认值
+            if (!settingsValid || !stateValid) {
+                console.log('设置或状态无效，重置为默认值');
+                this.currentSettings = { ...this.defaultSettings };
+                this.currentState = { ...this.defaultState };
+                this.saveSettings();
+                this.saveState();
+            }
+            
             return this.currentSettings;
         } catch (error) {
-            console.warn('加载设置失败，使用默认设置:', error);
+            console.warn('加载设置失败，使用默认设置和状态:', error);
             this.currentSettings = { ...this.defaultSettings };
+            this.currentState = { ...this.defaultState };
+            this.saveSettings();
+            this.saveState();
             return this.currentSettings;
         }
     }

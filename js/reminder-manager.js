@@ -437,7 +437,7 @@ class ReminderManager {
             if (this.isActive && this.timeRemaining === 0) {
                 this.reset();
             }
-        }, 60000); // Auto-reset after 1 minute
+        }, 5000); // Auto-reset after 5 seconds
         
         console.log(`${this.type} reminder triggered`);
     }

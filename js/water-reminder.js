@@ -41,15 +41,8 @@ class WaterReminder extends ReminderManager {
             timeRemaining: 0
         });
         
-        // Auto-reset timer after 5 seconds
-        setTimeout(() => {
-            if (this.isActive) {
-                this.reset();
-                console.log('Water reminder auto-reset after 5 seconds');
-            }
-        }, 5000);
-        
-        console.log('Water reminder triggered');
+        // Use parent auto-reset mechanism (1 minute)
+        console.log('Water reminder triggered, using unified auto-reset mechanism');
     }
 
     /**

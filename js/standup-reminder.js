@@ -39,13 +39,8 @@ class StandupReminder extends ReminderManager {
             timeRemaining: 0
         });
         
-        // Auto-reset timer after 5 seconds
-        setTimeout(() => {
-            if (this.isActive) {
-                this.reset();
-                console.log('Standup reminder auto-reset after 5 seconds');
-            }
-        }, 5000);
+        // 使用父类的统一自动重置机制（5秒）
+        console.log('Standup reminder triggered, using unified auto-reset mechanism');
         
         console.log('Standup reminder triggered');
     }
