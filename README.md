@@ -80,26 +80,73 @@ The project uses Kiro AI Assistant for development assistance, including the fol
 - [x] Testing and optimization
 - [x] GitHub Pages deployment
 
-## Deployment Guide
+## Quick Start
 
-### GitHub Pages Deployment
-
-1. Fork or clone this repository
-2. Enable GitHub Pages:
-   - Go to repository settings -> Pages
-   - Select `gh-pages` branch as source
-   - Click save
-3. Automatic deployment will execute after each push to `main` branch
-4. Visit `https://<your-username>.github.io/office-wellness-reminder/` to view the application
+### Online Access
+Visit the live demo: [Office Wellness Reminder](https://starry3085.github.io/work-reminder/)
 
 ### Local Development
 
-1. Clone repository: `git clone https://github.com/yourusername/office-wellness-reminder.git`
-2. Enter project directory: `cd office-wellness-reminder`
-3. Run project using local server:
-   - Using Python: `python -m http.server`
-   - Or using Node.js: `npx serve`
-4. Access `http://localhost:8000` in browser
+1. **Clone and Setup**
+   ```bash
+   git clone https://github.com/yourusername/office-wellness-reminder.git
+   cd office-wellness-reminder
+   npm install
+   ```
+
+2. **Start Development Server**
+   ```bash
+   npm start
+   # Or manually: npx http-server . -o
+   # Or with Python: python -m http.server 8000
+   ```
+
+3. **Access Application**
+   - Open `http://localhost:8000` in your browser
+   - Test all features work correctly
+
+## Deployment
+
+### Automatic Deployment (Recommended)
+
+This project uses **GitHub Actions** for automatic deployment:
+
+1. **Push to Main Branch**
+   ```bash
+   git add .
+   git commit -m "Your changes"
+   git push origin main
+   ```
+
+2. **Automatic Process**
+   - GitHub Actions detects the push
+   - Automatically deploys to `gh-pages` branch
+   - GitHub Pages serves the updated site
+   - Usually takes 1-2 minutes to go live
+
+3. **Setup GitHub Pages** (One-time setup)
+   - Go to repository Settings → Pages
+   - Source: Deploy from a branch
+   - Branch: `gh-pages` / `/ (root)`
+   - Save settings
+
+### Verification After Deployment
+
+- ✅ Visit your GitHub Pages URL
+- ✅ Test water reminder functionality
+- ✅ Test standup reminder functionality  
+- ✅ Test on mobile devices
+- ✅ Check browser console for errors
+
+### Troubleshooting
+
+**Common Issues:**
+- **404 Error**: Check GitHub Pages settings and branch configuration
+- **JavaScript Errors**: Check browser console, ensure all files are pushed
+- **Features Not Working**: Verify localStorage is enabled in browser
+- **Mobile Issues**: Test responsive design on actual devices
+
+For detailed troubleshooting, see `FORCE_REFRESH_SOLUTION.md`
 
 ## License
 

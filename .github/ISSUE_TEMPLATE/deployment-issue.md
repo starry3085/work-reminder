@@ -1,44 +1,44 @@
 ---
-name: 部署问题报告
-about: 报告GitHub Pages部署相关的问题
-title: '[部署] '
+name: Deployment Issue Report
+about: Report GitHub Pages deployment related issues
+title: '[Deployment] '
 labels: deployment, bug
 assignees: ''
 ---
 
-## 问题描述
-<!-- 请详细描述您遇到的部署问题 -->
+## Issue Description
+<!-- Please describe the deployment issue you encountered in detail -->
 
-## 环境信息
-- 操作系统: <!-- 例如: Windows 10, macOS 11.2, Ubuntu 20.04 -->
-- 浏览器: <!-- 例如: Chrome 91, Firefox 89, Safari 14 -->
-- 设备类型: <!-- 例如: 桌面电脑, iPhone 12, iPad Pro -->
+## Environment Information
+- Operating System: <!-- e.g., Windows 10, macOS 11.2, Ubuntu 20.04 -->
+- Browser: <!-- e.g., Chrome 91, Firefox 89, Safari 14 -->
+- Device Type: <!-- e.g., Desktop, iPhone 12, iPad Pro -->
 
-## 复现步骤
+## Steps to Reproduce
 1. 
 2. 
 3. 
 
-## 预期行为
-<!-- 描述您期望看到的结果 -->
+## Expected Behavior
+<!-- Describe the result you expected to see -->
 
-## 实际行为
-<!-- 描述实际发生的情况 -->
+## Actual Behavior
+<!-- Describe what actually happened -->
 
-## 错误信息
-<!-- 如果有错误信息，请粘贴在这里 -->
+## Error Messages
+<!-- If there are error messages, please paste them here -->
 ```
-错误信息
+Error messages
 ```
 
-## 截图
-<!-- 如果有截图，请添加在这里 -->
+## Screenshots
+<!-- If you have screenshots, please add them here -->
 
-## 部署验证结果
-<!-- 如果运行了部署验证，请提供结果 -->
-- 总测试数: 
-- 通过: 
-- 失败: 
+## Deployment Verification Results
+<!-- If you ran deployment verification, please provide the results -->
+- Total Tests: 
+- Passed: 
+- Failed: 
 
-## 其他信息
-<!-- 其他可能有助于解决问题的信息 -->
+## Additional Information
+<!-- Any other information that might help resolve the issue -->

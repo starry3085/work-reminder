@@ -1,70 +1,70 @@
-# 需求文档
+# Requirements Document
 
-## 介绍
+## Introduction
 
-办公族健康提醒系统是一个纯前端网页应用，旨在帮助长时间在电脑前工作的办公人员养成健康的工作习惯。该系统提供定时喝水提醒和防久坐提醒功能，通过友好的界面和可自定义的提醒设置，帮助用户在工作中保持身体健康。应用将部署在GitHub Pages上，无需后端服务器，完全在浏览器中运行。
+The Office Wellness Reminder System is a pure frontend web application designed to help office workers who spend long hours at computers develop healthy work habits. The system provides timed water reminders and anti-sedentary reminders through a friendly interface and customizable reminder settings, helping users maintain physical health during work. The application will be deployed on GitHub Pages, requiring no backend server and running entirely in the browser.
 
-## 需求
+## Requirements
 
-### 需求 1 - 喝水提醒功能
+### Requirement 1 - Water Reminder Functionality
 
-**用户故事：** 作为一名办公族，我希望能够设置定时喝水提醒，这样我就能在专注工作时不忘记补充水分，保持身体健康。
+**User Story:** As an office worker, I want to be able to set timed water reminders so that I don't forget to stay hydrated while focused on work, maintaining my physical health.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. 当用户首次访问应用时，系统应当显示喝水提醒设置选项
-2. 当用户设置喝水提醒间隔时间时，系统应当保存该设置到本地存储
-3. 当到达设置的提醒时间时，系统应当显示喝水提醒通知
-4. 当用户点击"已喝水"按钮时，系统应当重置提醒计时器
-5. 当用户暂停喝水提醒时，系统应当停止计时并保存状态
-6. 如果用户关闭浏览器标签页，系统应当在重新打开时恢复提醒状态
+1. When the user first visits the application, the system should display water reminder setting options
+2. When the user sets water reminder interval time, the system should save this setting to local storage
+3. When the set reminder time is reached, the system should display a water reminder notification
+4. When the user clicks the "Hydrated" button, the system should reset the reminder timer
+5. When the user pauses the water reminder, the system should stop timing and save the state
+6. If the user closes the browser tab, the system should restore the reminder state when reopened
 
-### 需求 2 - 防久坐提醒功能
+### Requirement 2 - Anti-Sedentary Reminder Functionality
 
-**用户故事：** 作为一名需要长时间坐着工作的办公族，我希望能够设置定时起身活动提醒，这样我就能避免久坐对健康的危害。
+**User Story:** As an office worker who needs to sit for long periods, I want to be able to set timed stand-up activity reminders so that I can avoid the health hazards of prolonged sitting.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. 当用户设置久坐提醒间隔时间时，系统应当保存该设置到本地存储
-2. 当到达设置的久坐提醒时间时，系统应当显示起身活动提醒通知
-3. 当用户点击"已起身活动"按钮时，系统应当重置久坐计时器
-4. 当用户暂停久坐提醒时，系统应当停止计时并保存状态
-5. 当用户在设定时间内有鼠标或键盘活动时，系统应当自动延长久坐计时
-6. 如果用户离开电脑超过5分钟，系统应当暂停久坐计时
+1. When the user sets sedentary reminder interval time, the system should save this setting to local storage
+2. When the set sedentary reminder time is reached, the system should display a stand-up activity reminder notification
+3. When the user clicks the "Moved" button, the system should reset the sedentary timer
+4. When the user pauses the sedentary reminder, the system should stop timing and save the state
+5. When the user has mouse or keyboard activity within the set time, the system should automatically extend the sedentary timing
+6. If the user leaves the computer for more than 5 minutes, the system should pause the sedentary timing
 
-### 需求 3 - 用户界面和体验
+### Requirement 3 - User Interface and Experience
 
-**用户故事：** 作为一名用户，我希望应用界面简洁友好且易于使用，这样我就能快速设置和管理我的健康提醒。
+**User Story:** As a user, I want the application interface to be simple, friendly, and easy to use so that I can quickly set up and manage my health reminders.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. 当用户访问应用时，系统应当显示清晰的主界面，包含当前状态和设置选项
-2. 当用户需要调整设置时，系统应当提供直观的设置面板
-3. 当提醒触发时，系统应当显示非侵入式的通知，不影响用户当前工作
-4. 当用户在移动设备上访问时，系统应当提供响应式设计适配不同屏幕尺寸
-5. 如果浏览器支持通知API，系统应当请求权限并发送浏览器通知
-6. 当用户首次使用时，系统应当显示简单的使用指导
+1. When the user visits the application, the system should display a clear main interface including current status and setting options
+2. When the user needs to adjust settings, the system should provide an intuitive settings panel
+3. When reminders are triggered, the system should display non-intrusive notifications that don't interfere with the user's current work
+4. When the user accesses on mobile devices, the system should provide responsive design adapted to different screen sizes
+5. If the browser supports notification API, the system should request permission and send browser notifications
+6. When the user uses it for the first time, the system should display simple usage guidance
 
-### 需求 4 - 数据持久化和设置管理
+### Requirement 4 - Data Persistence and Settings Management
 
-**用户故事：** 作为一名用户，我希望我的设置和使用数据能够被保存，这样我就不需要每次打开应用都重新配置。
+**User Story:** As a user, I want my settings and usage data to be saved so that I don't need to reconfigure every time I open the application.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. 当用户修改任何设置时，系统应当立即保存到浏览器本地存储
-2. 当用户重新打开应用时，系统应当自动加载之前保存的设置
-3. 当用户清除浏览器数据时，系统应当能够优雅地处理数据丢失情况
-4. 当用户想要重置所有设置时，系统应当提供重置选项
-5. 如果本地存储不可用，系统应当使用默认设置并提示用户
+1. When the user modifies any settings, the system should immediately save to browser local storage
+2. When the user reopens the application, the system should automatically load previously saved settings
+3. When the user clears browser data, the system should gracefully handle data loss situations
+4. When the user wants to reset all settings, the system should provide a reset option
+5. If local storage is unavailable, the system should use default settings and notify the user
 
-### 需求 5 - 部署和兼容性
+### Requirement 5 - Deployment and Compatibility
 
-**用户故事：** 作为一名用户，我希望能够在任何现代浏览器中访问这个应用，并且应用能够稳定运行。
+**User Story:** As a user, I want to be able to access this application in any modern browser and have it run stably.
 
-#### 验收标准
+#### Acceptance Criteria
 
-1. 当应用部署到GitHub Pages时，系统应当能够正常访问和运行
-2. 当用户使用Chrome、Firefox、Safari、Edge等主流浏览器时，系统应当正常工作
-3. 当用户在不同操作系统（Windows、macOS、Linux）上访问时，系统应当保持一致的功能
-4. 当网络连接不稳定时，系统应当能够离线运行（因为是纯前端应用）
-5. 如果用户使用较旧的浏览器，系统应当提供基本功能或友好的不支持提示
+1. When the application is deployed to GitHub Pages, the system should be accessible and run normally
+2. When the user uses mainstream browsers like Chrome, Firefox, Safari, Edge, the system should work normally
+3. When the user accesses from different operating systems (Windows, macOS, Linux), the system should maintain consistent functionality
+4. When network connection is unstable, the system should be able to run offline (since it's a pure frontend application)
+5. If the user uses older browsers, the system should provide basic functionality or friendly unsupported notifications
