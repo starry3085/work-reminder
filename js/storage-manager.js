@@ -32,63 +32,22 @@ class StorageManager {
     }
 
     /**
-     * Save settings to storage
+     * Save data to storage (unified API)
      * @param {string} key - Storage key name
      * @param {any} data - Data to save
      * @returns {boolean} Whether save was successful
      */
     saveSettings(key, data) {
-        try {
-            const fullKey = this.storagePrefix + key;
-            const jsonData = JSON.stringify(data);
-            
-            if (this.isStorageAvailable) {
-                localStorage.setItem(fullKey, jsonData);
-            } else {
-                // Use memory storage as fallback
-                this.memoryStorage.set(fullKey, jsonData);
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('Failed to save settings:', error);
-            // Try using memory storage
-            try {
-                const fullKey = this.storagePrefix + key;
-                this.memoryStorage.set(fullKey, JSON.stringify(data));
-                return true;
-            } catch (memError) {
-                console.error('Memory storage also failed:', memError);
-                return false;
-            }
-        }
+        return this.setItem(key, data);
     }
 
     /**
-     * Load settings from storage
+     * Load data from storage (unified API)
      * @param {string} key - Storage key name
      * @returns {any|null} Loaded data, returns null on failure
      */
     loadSettings(key) {
-        try {
-            const fullKey = this.storagePrefix + key;
-            let jsonData = null;
-            
-            if (this.isStorageAvailable) {
-                jsonData = localStorage.getItem(fullKey);
-            } else {
-                jsonData = this.memoryStorage.get(fullKey);
-            }
-            
-            if (jsonData === null || jsonData === undefined) {
-                return null;
-            }
-            
-            return JSON.parse(jsonData);
-        } catch (error) {
-            console.error('Failed to load settings:', error);
-            return null;
-        }
+        return this.getItem(key);
     }
 
     /**
@@ -172,7 +131,65 @@ class StorageManager {
     }
 
     /**
-     * Save settings
+     * Set item to storage (基础API)
+     * @param {string} key - Storage key name (不包含前缀)
+     * @param {any} data - Data to save
+     * @returns {boolean} Whether save was successful
+     */
+    setItem(key, data) {
+        try {
+            const fullKey = this.storagePrefix + key;
+            const jsonData = JSON.stringify(data);
+            
+            if (this.isStorageAvailable) {
+                localStorage.setItem(fullKey, jsonData);
+            } else {
+                this.memoryStorage.set(fullKey, jsonData);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Failed to save to storage:', error);
+            try {
+                const fullKey = this.storagePrefix + key;
+                this.memoryStorage.set(fullKey, JSON.stringify(data));
+                return true;
+            } catch (memError) {
+                console.error('Memory storage also failed:', memError);
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Get item from storage (基础API)
+     * @param {string} key - Storage key name (不包含前缀)
+     * @returns {any|null} Loaded data, returns null on failure
+     */
+    getItem(key) {
+        try {
+            const fullKey = this.storagePrefix + key;
+            let jsonData = null;
+            
+            if (this.isStorageAvailable) {
+                jsonData = localStorage.getItem(fullKey);
+            } else {
+                jsonData = this.memoryStorage.get(fullKey);
+            }
+            
+            if (jsonData === null || jsonData === undefined) {
+                return null;
+            }
+            
+            return JSON.parse(jsonData);
+        } catch (error) {
+            console.error('Failed to load from storage:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Save settings (兼容旧API)
      * @param {Object} settings - 设置对象
      */
     saveSettings(settings) {
@@ -180,7 +197,7 @@ class StorageManager {
     }
 
     /**
-     * Load settings
+     * Load settings (兼容旧API)
      * @returns {Object|null} 设置对象
      */
     loadSettings() {
@@ -188,7 +205,7 @@ class StorageManager {
     }
 
     /**
-     * Save state
+     * Save state (兼容旧API)
      * @param {string} type - 提醒类型 ('water' | 'standup')
      * @param {Object} state - 状态对象
      */
@@ -198,7 +215,7 @@ class StorageManager {
     }
 
     /**
-     * Load state
+     * Load state (兼容旧API)
      * @param {string} type - 提醒类型 ('water' | 'standup')
      * @returns {Object|null} 状态对象
      */

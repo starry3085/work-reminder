@@ -22,10 +22,32 @@ class UIController {
      */
     initialize() {
         console.log('Initializing UI controller...');
+        this.cleanup();
         this.cacheElements();
         this.bindEvents();
         this.setupInitialState();
         return this;
+    }
+
+    /**
+     * Clean up event listeners to prevent memory leaks
+     */
+    cleanup() {
+        // Remove all custom event listeners
+        this.eventListeners = {};
+        
+        // Remove window resize listener if exists
+        if (this.resizeHandler) {
+            window.removeEventListener('resize', this.resizeHandler);
+            this.resizeHandler = null;
+        }
+        
+        // Remove theme change listener if exists
+        if (this.themeChangeHandler) {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            mediaQuery.removeEventListener('change', this.themeChangeHandler);
+            this.themeChangeHandler = null;
+        }
     }
 
     /**
@@ -312,14 +334,16 @@ class UIController {
             document.body.classList.remove('mobile-device');
         }
 
-        // Listen for window resize events
-        window.addEventListener('resize', () => {
+        // Store resize handler reference for cleanup
+        this.resizeHandler = () => {
             if (window.innerWidth < 768) {
                 document.body.classList.add('mobile-device');
             } else {
                 document.body.classList.remove('mobile-device');
             }
-        });
+        };
+        
+        window.addEventListener('resize', this.resizeHandler);
     }
 
     /**
@@ -327,17 +351,24 @@ class UIController {
      * @param {string} theme - Theme name ('light' | 'dark' | 'auto')
      */
     applyTheme(theme) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // Remove existing theme change listener
+        if (this.themeChangeHandler) {
+            mediaQuery.removeEventListener('change', this.themeChangeHandler);
+        }
+
         if (theme === 'auto') {
             // Automatically select theme based on system preference
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const prefersDark = mediaQuery.matches;
             if (prefersDark) {
                 document.body.classList.add('dark-theme');
             } else {
                 document.body.classList.remove('dark-theme');
             }
 
-            // Listen for system theme changes
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            // Store theme change handler reference
+            this.themeChangeHandler = (e) => {
                 if (this.getSettingsFromUI().appearance.theme === 'auto') {
                     if (e.matches) {
                         document.body.classList.add('dark-theme');
@@ -345,7 +376,9 @@ class UIController {
                         document.body.classList.remove('dark-theme');
                     }
                 }
-            });
+            };
+            
+            mediaQuery.addEventListener('change', this.themeChangeHandler);
         } else if (theme === 'dark') {
             document.body.classList.add('dark-theme');
         } else {
