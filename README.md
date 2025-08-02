@@ -23,7 +23,7 @@ A health reminder web application designed specifically for office workers to he
 ## Project Structure
 
 ```
-office-wellness-reminder/
+work-reminder/
 ├── index.html              # Main page
 ├── 404.html               # Error page
 ├── styles/
@@ -89,8 +89,8 @@ Visit the live demo: [Office Wellness Reminder](https://starry3085.github.io/wor
 
 1. **Clone and Setup**
    ```bash
-   git clone https://github.com/yourusername/office-wellness-reminder.git
-   cd office-wellness-reminder
+   git clone https://github.com/starry3085/work-reminder.git
+   cd work-reminder
    npm install
    ```
 
@@ -107,28 +107,27 @@ Visit the live demo: [Office Wellness Reminder](https://starry3085.github.io/wor
 
 ## Deployment
 
-### Automatic Deployment (Recommended)
+### Simple Deployment
 
 This project uses **GitHub Actions** for automatic deployment:
 
-1. **Push to Main Branch**
+1. **Deploy with npm script**
+   ```bash
+   npm run deploy
+   ```
+
+2. **Or manually push to main**
    ```bash
    git add .
    git commit -m "Your changes"
    git push origin main
    ```
 
-2. **Automatic Process**
+3. **Automatic Process**
    - GitHub Actions detects the push
    - Automatically deploys to `gh-pages` branch
    - GitHub Pages serves the updated site
    - Usually takes 1-2 minutes to go live
-
-3. **Setup GitHub Pages** (One-time setup)
-   - Go to repository Settings → Pages
-   - Source: Deploy from a branch
-   - Branch: `gh-pages` / `/ (root)`
-   - Save settings
 
 ### Verification After Deployment
 

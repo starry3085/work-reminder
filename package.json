@@ -1,16 +1,16 @@
 {
-  "name": "office-wellness-reminder",
+  "name": "work-reminder",
   "version": "1.0.0",
   "description": "Office Wellness Reminder - Helping office workers develop healthy work habits",
   "main": "index.html",
   "scripts": {
     "start": "npx http-server . -o",
-    "push-dual": "git push gitee main && git push github main && git push origin main",
+    "deploy": "git add . && git commit -m \"Deploy to GitHub Pages\" && git push origin main",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/office-wellness-reminder.git"
+    "url": "git+https://github.com/starry3085/work-reminder.git"
   },
   "keywords": [
     "health",
@@ -20,12 +20,12 @@
     "water",
     "standup"
   ],
-  "author": "Your Name",
+  "author": "Office Wellness Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yourusername/office-wellness-reminder/issues"
+    "url": "https://github.com/starry3085/work-reminder/issues"
   },
-  "homepage": "https://github.com/yourusername/office-wellness-reminder#readme",
+  "homepage": "https://starry3085.github.io/work-reminder/",
   "devDependencies": {
     "http-server": "^14.1.1"
   }
