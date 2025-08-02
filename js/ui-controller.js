@@ -55,6 +55,8 @@ class UIController {
      * @private
      */
     cacheElements() {
+        console.log('GitHub Pages Debug - Caching DOM elements');
+        
         // Main control elements
         this.elements = {
             // App container
@@ -98,13 +100,27 @@ class UIController {
 
         };
 
+        // Debug log for GitHub Pages troubleshooting
+        console.log('GitHub Pages Debug - standupToggle element:', this.elements.standupToggle);
+        console.log('GitHub Pages Debug - standupToggle exists:', !!this.elements.standupToggle);
+
         // Check if required elements exist
-        const requiredElements = ['waterCard', 'standupCard', 'settingsPanel'];
+        const requiredElements = ['waterCard', 'standupCard'];
         const missingElements = requiredElements.filter(id => !this.elements[id]);
 
         if (missingElements.length > 0) {
             console.error('UI initialization error: Missing required DOM elements', missingElements);
         }
+        
+        // Special check for critical buttons
+        const criticalButtons = ['waterToggle', 'standupToggle'];
+        criticalButtons.forEach(buttonId => {
+            if (!this.elements[buttonId]) {
+                console.error(`GitHub Pages Debug - Critical button missing: ${buttonId}`);
+            } else {
+                console.log(`GitHub Pages Debug - Critical button found: ${buttonId}`);
+            }
+        });
     }
 
     /**
@@ -112,7 +128,7 @@ class UIController {
      * @private
      */
     bindEvents() {
-
+        console.log('GitHub Pages Debug - Starting to bind events');
 
         // Notification popup events
         this.addEventHandler('notificationConfirm', 'click', () => {
@@ -162,6 +178,7 @@ class UIController {
         this.addEventHandler('standupToggle', 'click', () => {
             const currentState = this.uiState.standup;
             console.log('Standup toggle clicked, current state:', currentState);
+            console.log('GitHub Pages Debug - Button click detected');
             
             if (!currentState.isActive) {
                 // Currently stopped, start it
@@ -274,6 +291,9 @@ class UIController {
 
         this.eventListeners[elementId][eventType].push(handler);
         element.addEventListener(eventType, handler);
+        
+        // Debug log for GitHub Pages troubleshooting
+        console.log(`Event handler added: ${elementId} -> ${eventType}`);
     }
 
     /**
@@ -319,16 +339,19 @@ class UIController {
      */
     triggerEvent(eventName, data = null) {
         console.log(`Triggering event: ${eventName}`, data);
+        console.log(`GitHub Pages Debug - Event triggered: ${eventName}`);
         
         if (!this.eventListeners._custom || !this.eventListeners._custom[eventName]) {
             console.warn(`No listeners found for event: ${eventName}`);
+            console.warn(`GitHub Pages Debug - Available events:`, Object.keys(this.eventListeners._custom || {}));
             return;
         }
 
         console.log(`Found ${this.eventListeners._custom[eventName].length} listeners for event: ${eventName}`);
         
-        this.eventListeners._custom[eventName].forEach(callback => {
+        this.eventListeners._custom[eventName].forEach((callback, index) => {
             try {
+                console.log(`GitHub Pages Debug - Calling listener ${index} for ${eventName}`);
                 callback(data);
             } catch (error) {
                 console.error(`Event handling error (${eventName}):`, error);

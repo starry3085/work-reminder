@@ -6,6 +6,8 @@
   "scripts": {
     "start": "npx http-server . -o",
     "deploy": "gh-pages -d .",
+    "deploy-dual": "node -e \"require('child_process').exec(process.platform === 'win32' ? 'deploy-dual-repos.bat' : './deploy-dual-repos.sh')\"",
+    "quick-deploy": "node -e \"require('child_process').exec(process.platform === 'win32' ? 'quick-deploy.bat' : './quick-deploy.sh')\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

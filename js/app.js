@@ -610,18 +610,23 @@ class OfficeWellnessApp {
 
         // 久坐提醒控制事件
         this.uiController.on('standupToggle', (data) => {
+            console.log('GitHub Pages Debug - standupToggle event received in app.js:', data);
             switch (data.action) {
                 case 'start':
+                    console.log('GitHub Pages Debug - Starting standup reminder');
                     this.startReminder('standup');
                     break;
                 case 'pause':
+                    console.log('GitHub Pages Debug - Pausing standup reminder');
                     this.pauseReminder('standup');
                     break;
                 case 'resume':
+                    console.log('GitHub Pages Debug - Resuming standup reminder');
                     this.resumeReminder('standup');
                     break;
                 default:
                     // Fallback to old logic for compatibility
+                    console.log('GitHub Pages Debug - Using fallback logic');
                     if (data.isActive) {
                         this.startReminder('standup');
                     } else {
@@ -1547,6 +1552,7 @@ class OfficeWellnessApp {
      */
     pauseReminder(type) {
         try {
+            console.log(`GitHub Pages Debug - pauseReminder called for ${type}`);
             if (type === 'water' && this.waterReminder) {
                 console.log('Pausing water reminder...');
                 console.log('Water reminder status before pause:', this.waterReminder.getCurrentStatus());
@@ -1558,16 +1564,17 @@ class OfficeWellnessApp {
                 console.log('Water reminder paused successfully');
                 
             } else if (type === 'standup' && this.standupReminder) {
-                console.log('Pausing standup reminder...');
+                console.log('GitHub Pages Debug - Pausing standup reminder...');
                 console.log('Standup reminder status before pause:', this.standupReminder.getCurrentStatus());
                 this.standupReminder.pause();
                 console.log('Standup reminder status after pause:', this.standupReminder.getCurrentStatus());
                 
                 // 保存应用状态
                 this.saveAppState();
-                console.log('Standup reminder paused successfully');
+                console.log('GitHub Pages Debug - Standup reminder paused successfully');
             } else {
                 console.warn(`Cannot pause ${type} reminder: reminder not initialized`);
+                console.warn(`GitHub Pages Debug - Reminder availability: water=${!!this.waterReminder}, standup=${!!this.standupReminder}`);
             }
         } catch (error) {
             console.error(`Failed to pause ${type} reminder:`, error);
@@ -1580,6 +1587,7 @@ class OfficeWellnessApp {
      */
     resumeReminder(type) {
         try {
+            console.log(`GitHub Pages Debug - resumeReminder called for ${type}`);
             if (type === 'water' && this.waterReminder) {
                 console.log('Resuming water reminder...');
                 this.waterReminder.resume();
@@ -1589,14 +1597,15 @@ class OfficeWellnessApp {
                 console.log('Water reminder resumed successfully');
                 
             } else if (type === 'standup' && this.standupReminder) {
-                console.log('Resuming standup reminder...');
+                console.log('GitHub Pages Debug - Resuming standup reminder...');
                 this.standupReminder.resume();
                 
                 // 保存应用状态
                 this.saveAppState();
-                console.log('Standup reminder resumed successfully');
+                console.log('GitHub Pages Debug - Standup reminder resumed successfully');
             } else {
                 console.warn(`Cannot resume ${type} reminder: reminder not initialized`);
+                console.warn(`GitHub Pages Debug - Reminder availability: water=${!!this.waterReminder}, standup=${!!this.standupReminder}`);
             }
         } catch (error) {
             console.error(`Failed to resume ${type} reminder:`, error);
