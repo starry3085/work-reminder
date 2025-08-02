@@ -161,21 +161,18 @@ class ReminderManager {
     }
 
     /**
-     * Pause reminder
+     * Pause reminder - simplified
      * @param {boolean} isAuto - Whether it's auto-pause (triggered by activity detection)
      */
     pause(isAuto = false) {
         if (!this.isActive || this.isPaused) {
-            if (!isAuto) {
-                console.warn(`${this.type} reminder is not running or already paused`);
-            }
             return;
         }
         
         this.isPaused = true;
         this.pauseTime = Date.now();
         
-        // Calculate remaining time based on nextReminderTime
+        // Calculate remaining time
         this.timeRemaining = Math.max(0, this.nextReminderTime - this.pauseTime);
         
         // Clear timer
@@ -183,25 +180,21 @@ class ReminderManager {
         
         // Trigger status change callback
         this.triggerStatusChange({
-            status: 'paused',
+            status: isAuto ? 'auto-paused' : 'paused',
             isActive: true,
             isPaused: true,
-            timeRemaining: this.timeRemaining,
-            isAuto: isAuto
+            timeRemaining: this.timeRemaining
         });
         
         console.log(`${this.type} reminder ${isAuto ? 'auto' : 'manually'} paused`);
     }
 
     /**
-     * Resume reminder
+     * Resume reminder - simplified
      * @param {boolean} isAuto - Whether it's auto-resume (triggered by activity detection)
      */
     resume(isAuto = false) {
         if (!this.isActive || !this.isPaused) {
-            if (!isAuto) {
-                console.warn(`${this.type} reminder is not paused`);
-            }
             return;
         }
         
@@ -214,11 +207,10 @@ class ReminderManager {
         
         // Trigger status change callback
         this.triggerStatusChange({
-            status: 'resumed',
+            status: isAuto ? 'auto-resumed' : 'resumed',
             isActive: true,
             isPaused: false,
-            timeRemaining: this.timeRemaining,
-            isAuto: isAuto
+            timeRemaining: this.timeRemaining
         });
         
         console.log(`${this.type} reminder ${isAuto ? 'auto' : 'manually'} resumed`);
