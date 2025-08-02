@@ -113,6 +113,9 @@
 
     </div>
 
+    <!-- Version Control for Cache Busting -->
+    <script src="version.js"></script>
+    
     <!-- JavaScript Files -->
     <script src="js/debug-helper.js"></script>
     <script src="js/error-handler.js"></script>
@@ -126,6 +129,9 @@
     <script src="js/mobile-adapter.js"></script>
     <script src="js/ui-controller.js"></script>
     <script src="js/app.js"></script>
+    
+    <!-- GitHub Pages Compatibility Fix -->
+    <script src="js/github-pages-fix.js"></script>
 
     <!-- Application Initialization -->
     <script>
@@ -250,11 +256,59 @@
             }
         }
 
+        // GitHub Pages 兼容性修复 - 添加直接事件绑定作为备用
+        function setupFallbackEventHandlers() {
+            console.log('GitHub Pages Debug - Setting up fallback event handlers');
+            
+            // 直接绑定 standup toggle 按钮事件作为备用
+            const standupToggle = document.getElementById('standup-toggle');
+            if (standupToggle) {
+                console.log('GitHub Pages Debug - Found standup toggle button, adding fallback handler');
+                
+                // 移除可能存在的旧事件监听器
+                const newButton = standupToggle.cloneNode(true);
+                standupToggle.parentNode.replaceChild(newButton, standupToggle);
+                
+                // 添加新的事件监听器
+                newButton.addEventListener('click', function(e) {
+                    console.log('GitHub Pages Debug - Fallback standup toggle clicked');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // 尝试通过全局app对象调用
+                    if (window.app && window.app.standupReminder) {
+                        const reminder = window.app.standupReminder;
+                        if (!reminder.isActive) {
+                            console.log('GitHub Pages Debug - Fallback: Starting standup reminder');
+                            window.app.startReminder('standup');
+                        } else if (reminder.isPaused) {
+                            console.log('GitHub Pages Debug - Fallback: Resuming standup reminder');
+                            window.app.resumeReminder('standup');
+                        } else {
+                            console.log('GitHub Pages Debug - Fallback: Pausing standup reminder');
+                            window.app.pauseReminder('standup');
+                        }
+                    } else {
+                        console.error('GitHub Pages Debug - Fallback: App or standup reminder not available');
+                    }
+                });
+                
+                console.log('GitHub Pages Debug - Fallback handler added successfully');
+            } else {
+                console.error('GitHub Pages Debug - Standup toggle button not found for fallback');
+            }
+        }
+
         // 当DOM加载完成后初始化应用
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
+            document.addEventListener('DOMContentLoaded', () => {
+                initializeApp();
+                // 延迟设置备用事件处理器，确保主应用初始化完成
+                setTimeout(setupFallbackEventHandlers, 2000);
+            });
         } else {
             initializeApp();
+            setTimeout(setupFallbackEventHandlers, 2000);
         }
 
         // 添加全局错误处理

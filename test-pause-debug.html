@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAUSE Button Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .countdown {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .status.active { background: #28a745; color: white; }
+        .status.paused { background: #ffc107; color: #212529; }
+        .status.inactive { background: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <h1>PAUSE Button Debug Test</h1>
+    <p>这个页面用于测试PAUSE按钮在GitHub Pages上的行为问题</p>
+
+    <div class="test-section">
+        <h2>环境检测</h2>
+        <div id="environment-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>类加载检测</h2>
+        <div id="class-loading-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>简化版提醒器测试</h2>
+        <div>
+            <div class="status inactive" id="test-status">Inactive</div>
+            <div class="countdown" id="test-countdown">00:00</div>
+            <button class="btn-primary" id="test-toggle">Start</button>
+            <button class="btn-secondary" id="test-reset" style="display: none;">Reset</button>
+        </div>
+        <div id="test-debug-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>事件监听器测试</h2>
+        <div id="event-test-info"></div>
+        <button class="btn-success" id="event-test-btn">测试事件监听</button>
+    </div>
+
+    <div class="test-section">
+        <h2>实时调试日志</h2>
+        <div id="debug-log" style="height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border: 1px solid #ddd;"></div>
+        <button class="btn-danger" onclick="clearDebugLog()">清除日志</button>
+    </div>
+
+    <!-- 加载必要的JavaScript文件 -->
+    <script src="js/storage-manager.js"></script>
+    <script src="js/app-settings.js"></script>
+    <script src="js/notification-service.js"></script>
+    <script src="js/activity-detector.js"></script>
+    <script src="js/reminder-manager.js"></script>
+    <script src="js/standup-reminder.js"></script>
+    <script src="js/ui-controller.js"></script>
+
+    <script>
+        // 调试日志函数
+        function debugLog(message, type = 'info') {
+            const logDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `debug-info ${type}`;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[DEBUG] ${message}`);
+        }
+
+        function clearDebugLog() {
+            document.getElementById('debug-log').innerHTML = '';
+        }
+
+        // 环境检测
+        function checkEnvironment() {
+            const info = document.getElementById('environment-info');
+            const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+            const isGitHubPages = location.hostname.includes('github.io');
+            
+            info.innerHTML = `
+                <div class="debug-info ${isLocal ? 'success' : isGitHubPages ? 'warning' : 'error'}">
+                    环境: ${isLocal ? '本地开发' : isGitHubPages ? 'GitHub Pages' : '其他'}
+                </div>
+                <div class="debug-info">
+                    URL: ${location.href}
+                </div>
+                <div class="debug-info">
+                    User Agent: ${navigator.userAgent}
+                </div>
+            `;
+            
+            debugLog(`环境检测完成: ${isLocal ? '本地' : isGitHubPages ? 'GitHub Pages' : '其他'}`);
+        }
+
+        // 类加载检测
+        function checkClassLoading() {
+            const info = document.getElementById('class-loading-info');
+            const requiredClasses = [
+                'StorageManager', 'AppSettings', 'NotificationService', 
+                'ActivityDetector', 'ReminderManager', 'PostureReminder', 'UIController'
+            ];
+            
+            let html = '';
+            let allLoaded = true;
+            
+            requiredClasses.forEach(className => {
+                const exists = typeof window[className] !== 'undefined';
+                if (!exists) allLoaded = false;
+                html += `<div class="debug-info ${exists ? 'success' : 'error'}">
+                    ${className}: ${exists ? '✅ 已加载' : '❌ 未加载'}
+                </div>`;
+            });
+            
+            info.innerHTML = html;
+            debugLog(`类加载检测: ${allLoaded ? '全部成功' : '部分失败'}`);
+            return allLoaded;
+        }
+
+        // 简化版提醒器
+        class SimpleReminder {
+            constructor() {
+                this.isActive = false;
+                this.isPaused = false;
+                this.timeRemaining = 0;
+                this.timer = null;
+                this.updateTimer = null;
+                this.nextReminderTime = null;
+                
+                this.statusElement = document.getElementById('test-status');
+                this.countdownElement = document.getElementById('test-countdown');
+                this.toggleButton = document.getElementById('test-toggle');
+                this.resetButton = document.getElementById('test-reset');
+                
+                this.setupEventListeners();
+                debugLog('简化版提醒器初始化完成');
+            }
+            
+            setupEventListeners() {
+                this.toggleButton.addEventListener('click', () => {
+                    debugLog(`Toggle按钮点击 - 当前状态: active=${this.isActive}, paused=${this.isPaused}`);
+                    
+                    if (!this.isActive) {
+                        this.start();
+                    } else if (this.isPaused) {
+                        this.resume();
+                    } else {
+                        this.pause();
+                    }
+                });
+                
+                this.resetButton.addEventListener('click', () => {
+                    debugLog('Reset按钮点击');
+                    this.reset();
+                });
+                
+                debugLog('事件监听器设置完成');
+            }
+            
+            start() {
+                debugLog('开始提醒器');
+                this.isActive = true;
+                this.isPaused = false;
+                this.timeRemaining = 2 * 60 * 1000; // 2分钟测试
+                this.nextReminderTime = Date.now() + this.timeRemaining;
+                
+                this.startTimer();
+                this.updateUI();
+            }
+            
+            pause() {
+                debugLog('暂停提醒器');
+                if (!this.isActive || this.isPaused) {
+                    debugLog('警告: 尝试暂停非活动或已暂停的提醒器');
+                    return;
+                }
+                
+                this.isPaused = true;
+                const now = Date.now();
+                this.timeRemaining = Math.max(0, this.nextReminderTime - now);
+                
+                debugLog(`暂停时剩余时间: ${Math.round(this.timeRemaining / 1000)}秒`);
+                
+                this.clearTimer();
+                this.updateUI();
+            }
+            
+            resume() {
+                debugLog('恢复提醒器');
+                if (!this.isActive || !this.isPaused) {
+                    debugLog('警告: 尝试恢复非暂停状态的提醒器');
+                    return;
+                }
+                
+                this.isPaused = false;
+                this.nextReminderTime = Date.now() + this.timeRemaining;
+                
+                debugLog(`恢复时剩余时间: ${Math.round(this.timeRemaining / 1000)}秒`);
+                
+                this.startTimer();
+                this.updateUI();
+            }
+            
+            reset() {
+                debugLog('重置提醒器');
+                this.isActive = false;
+                this.isPaused = false;
+                this.timeRemaining = 0;
+                this.clearTimer();
+                this.updateUI();
+            }
+            
+            startTimer() {
+                this.clearTimer();
+                
+                // 主计时器
+                this.timer = setTimeout(() => {
+                    debugLog('提醒器触发!');
+                    this.reset();
+                }, this.timeRemaining);
+                
+                // 更新计时器
+                this.updateTimer = setInterval(() => {
+                    if (!this.isPaused) {
+                        this.timeRemaining = Math.max(0, this.nextReminderTime - Date.now());
+                        this.updateCountdown();
+                    }
+                }, 1000);
+                
+                debugLog(`计时器启动: ${Math.round(this.timeRemaining / 1000)}秒`);
+            }
+            
+            clearTimer() {
+                if (this.timer) {
+                    clearTimeout(this.timer);
+                    this.timer = null;
+                }
+                if (this.updateTimer) {
+                    clearInterval(this.updateTimer);
+                    this.updateTimer = null;
+                }
+            }
+            
+            updateUI() {
+                // 更新状态显示
+                if (this.isActive && !this.isPaused) {
+                    this.statusElement.textContent = 'Active';
+                    this.statusElement.className = 'status active';
+                    this.toggleButton.textContent = 'Pause';
+                    this.toggleButton.className = 'btn-secondary';
+                    this.resetButton.style.display = 'inline-block';
+                } else if (this.isActive && this.isPaused) {
+                    this.statusElement.textContent = 'Paused';
+                    this.statusElement.className = 'status paused';
+                    this.toggleButton.textContent = 'Resume';
+                    this.toggleButton.className = 'btn-primary';
+                    this.resetButton.style.display = 'inline-block';
+                } else {
+                    this.statusElement.textContent = 'Inactive';
+                    this.statusElement.className = 'status inactive';
+                    this.toggleButton.textContent = 'Start';
+                    this.toggleButton.className = 'btn-primary';
+                    this.resetButton.style.display = 'none';
+                }
+                
+                this.updateCountdown();
+                debugLog(`UI更新: ${this.statusElement.textContent}`);
+            }
+            
+            updateCountdown() {
+                const minutes = Math.floor(this.timeRemaining / 60000);
+                const seconds = Math.floor((this.timeRemaining % 60000) / 1000);
+                this.countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // 事件监听器测试
+        function testEventListeners() {
+            const info = document.getElementById('event-test-info');
+            const testBtn = document.getElementById('event-test-btn');
+            
+            let clickCount = 0;
+            
+            const handler = () => {
+                clickCount++;
+                info.innerHTML = `<div class="debug-info success">事件监听器工作正常! 点击次数: ${clickCount}</div>`;
+                debugLog(`事件测试按钮点击: ${clickCount}次`);
+            };
+            
+            testBtn.addEventListener('click', handler);
+            
+            // 测试是否能正确移除事件监听器
+            setTimeout(() => {
+                testBtn.removeEventListener('click', handler);
+                testBtn.addEventListener('click', () => {
+                    info.innerHTML = `<div class="debug-info warning">事件监听器已更换! 原点击次数: ${clickCount}</div>`;
+                    debugLog('事件监听器更换测试');
+                });
+            }, 10000);
+            
+            debugLog('事件监听器测试设置完成');
+        }
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', () => {
+            debugLog('页面DOM加载完成');
+            
+            checkEnvironment();
+            const classesLoaded = checkClassLoading();
+            
+            if (classesLoaded) {
+                debugLog('开始初始化简化版提醒器');
+                try {
+                    window.testReminder = new SimpleReminder();
+                    debugLog('简化版提醒器初始化成功');
+                } catch (error) {
+                    debugLog(`简化版提醒器初始化失败: ${error.message}`, 'error');
+                }
+            } else {
+                debugLog('类加载不完整，跳过提醒器初始化', 'warning');
+            }
+            
+            testEventListeners();
+        });
+
+        // 全局错误处理
+        window.addEventListener('error', (event) => {
+            debugLog(`全局错误: ${event.error?.message || event.message}`, 'error');
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            debugLog(`未处理的Promise拒绝: ${event.reason}`, 'error');
+        });
+    </script>
+</body>
+</html>
