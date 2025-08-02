@@ -155,13 +155,14 @@ class UIController {
     }
 
     /**
-     * Validate interval input
+     * Validate interval input（与后端验证保持一致）
      * @private
      */
     validateInterval(value) {
-        if (isNaN(value) || value < 1) return 1;
-        if (value > 60) return 60;
-        return value;
+        const validatedValue = Math.floor(value);
+        if (isNaN(validatedValue) || validatedValue < 1) return 1;
+        if (validatedValue > 60) return 60;
+        return validatedValue;
     }
 
     /**
