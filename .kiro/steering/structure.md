@@ -73,9 +73,10 @@ The application follows a modular class-based architecture with clear separation
 
 ### JavaScript
 - ES6+ features: classes, arrow functions, const/let
-- Comprehensive JSDoc comments for all public methods
+- Comprehensive JSDoc comments for all public methods (must be in English)
 - Error handling with try-catch blocks
 - Console logging for debugging (removed in production)
+- All variable and function names must be in English
 
 ### CSS
 - CSS custom properties for theming

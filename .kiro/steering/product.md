@@ -2,6 +2,11 @@
 
 ## Core Principles
 
+### Development Guidelines (CRITICAL)
+- **Best Practices**: All code must follow industry best practices and modern web standards
+- **MVP Principle**: Strictly adhere to Minimum Viable Product - build only essential features first
+- **English Documentation**: All comments, documentation, and naming must be in English
+
 ### Development Constraints (CRITICAL)
 - **Pure Frontend Only**: No backend server, no APIs, no databases
 - **GitHub Pages Compatible**: Static files only, no build process required
