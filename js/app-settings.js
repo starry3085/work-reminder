@@ -300,39 +300,37 @@ class AppSettings {
     /**
      * 验证设置是否有效
      * @param {Object} settings - 要验证的设置
-     * @returns {boolean} 设置是否有效
+     * @returns {Object} 验证结果 {isValid: boolean, errors: Array}
      */
     validateSettings(settings) {
-        try {
-            // 验证水提醒设置
-            if (settings.water) {
-                if (typeof settings.water.interval !== 'number' || 
-                    settings.water.interval < 1 || 
-                    settings.water.interval > 60) {
-                    console.warn('无效的水提醒间隔设置');
-                    return false;
-                }
-                
-                
-            }
-            
-            // 验证久坐提醒设置
-            if (settings.standup) {
-                if (typeof settings.standup.interval !== 'number' || 
-                    settings.standup.interval < 1 || 
-                    settings.standup.interval > 60) {
-                    console.warn('无效的久坐提醒间隔设置');
-                    return false;
-                }
-                
-                
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('设置验证失败:', error);
-            return false;
+        const errors = [];
+
+        if (!settings || typeof settings !== 'object') {
+            errors.push('Settings must be an object');
+            return { isValid: false, errors };
         }
+
+        // 验证提醒设置
+        ['water', 'standup'].forEach(type => {
+            const reminder = settings[type];
+            if (!reminder || typeof reminder !== 'object') {
+                errors.push(`${type}: settings must be an object`);
+                return;
+            }
+
+            if (!Number.isInteger(reminder.interval) || reminder.interval < 1 || reminder.interval > 120) {
+                errors.push(`${type}: interval must be between 1-120 minutes`);
+            }
+
+            if (typeof reminder.enabled !== 'boolean') {
+                errors.push(`${type}: enabled must be a boolean`);
+            }
+        });
+
+        return {
+            isValid: errors.length === 0,
+            errors
+        };
     }
 
     /**

@@ -26,12 +26,11 @@ class ReminderManager {
         // Callback functions
         this.statusChangeCallback = null;
         this.timeUpdateCallback = null;
+        this.settingsUpdateCallback = null;
         
         // Timer update interval (1 second)
         this.updateInterval = 1000;
         this.updateTimer = null;
-        
-        // Activity detection removed for MVP - using simpler time-based reminders
         
         console.log(`${this.type} reminder manager created`);
     }
@@ -50,7 +49,10 @@ class ReminderManager {
         this.isActive = true;
         this.isPaused = false;
         this.startTime = Date.now();
-        this.timeRemaining = this.settings.interval * 60 * 1000; // Convert to milliseconds
+        
+        // Use precise millisecond calculation
+        const intervalMs = Math.round(this.settings.interval * 60 * 1000);
+        this.timeRemaining = intervalMs;
         this.nextReminderTime = this.startTime + this.timeRemaining;
         
         // Start timer
@@ -58,8 +60,6 @@ class ReminderManager {
         
         // Start time update timer
         this.startUpdateTimer();
-        
-        // Activity detection removed for MVP - using simpler time-based reminders
         
         // Save state immediately
         this.saveState();
@@ -72,7 +72,7 @@ class ReminderManager {
             timeRemaining: this.timeRemaining
         });
         
-        console.log(`${this.type} reminder started, interval: ${this.settings.interval} minutes`);
+        console.log(`${this.type} reminder started, interval: ${this.settings.interval} minutes (${intervalMs}ms)`);
     }
 
     /**
@@ -221,18 +221,45 @@ class ReminderManager {
         // Save settings immediately
         this.saveState();
         
-        // Reset timer
-        this.reset();
+        // Reset and restart timer
+        this.resetAndRestart();
         
-        // Trigger status change callback
+        console.log(`${this.type} reminder acknowledged, timer restarted`);
+    }
+
+    /**
+     * Reset and restart timer with current settings
+     * @private
+     */
+    resetAndRestart() {
+        if (!this.isActive) return;
+        
+        // Clear current timers
+        this.clearTimer();
+        this.clearUpdateTimer();
+        
+        // Reset state and restart
+        this.startTime = Date.now();
+        const intervalMs = Math.round(this.settings.interval * 60 * 1000);
+        this.timeRemaining = intervalMs;
+        this.nextReminderTime = this.startTime + this.timeRemaining;
+        
+        // Restart timers
+        this.startTimer();
+        this.startUpdateTimer();
+        
+        // Save state
+        this.saveState();
+        
+        // Trigger status change
         this.triggerStatusChange({
-            status: 'acknowledged',
+            status: 'restarted',
             isActive: true,
             isPaused: false,
             timeRemaining: this.timeRemaining
         });
         
-        console.log(`${this.type} reminder acknowledged`);
+        console.log(`${this.type} reminder reset and restarted with ${this.settings.interval}min interval`);
     }
 
     /**
@@ -299,6 +326,34 @@ class ReminderManager {
      */
     setTimeUpdateCallback(callback) {
         this.timeUpdateCallback = callback;
+    }
+
+    /**
+     * Set settings update callback
+     * @param {Function} callback - Callback function
+     */
+    setSettingsUpdateCallback(callback) {
+        this.settingsUpdateCallback = callback;
+    }
+
+    /**
+     * Update settings dynamically
+     * @param {Object} newSettings - New settings object
+     */
+    updateSettings(newSettings) {
+        const wasActive = this.isActive;
+        const oldInterval = this.settings.interval;
+        
+        // Update settings
+        this.settings = { ...this.settings, ...newSettings };
+        
+        // If interval changed and reminder is active, restart with new interval
+        if (wasActive && oldInterval !== newSettings.interval) {
+            this.stop();
+            this.start();
+        }
+        
+        console.log(`${this.type} settings updated:`, this.settings);
     }
 
     /**
@@ -432,14 +487,14 @@ class ReminderManager {
             timeRemaining: 0
         });
         
-        // Auto-reset timer (if user doesn't manually confirm)
+        // Unified auto-reset mechanism - restart with original interval
         setTimeout(() => {
-            if (this.isActive && this.timeRemaining === 0) {
-                this.reset();
+            if (this.isActive) {
+                this.resetAndRestart();
             }
-        }, 5000); // Auto-reset after 5 seconds
+        }, 5000); // Auto-restart after 5 seconds
         
-        console.log(`${this.type} reminder triggered`);
+        console.log(`${this.type} reminder triggered - will auto-restart`);
     }
 
     /**
