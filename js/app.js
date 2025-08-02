@@ -411,8 +411,14 @@ class OfficeWellnessApp {
         // Set up simplified callbacks
         if (this.waterReminder) {
             this.waterReminder.setStatusChangeCallback((status) => {
-                if (this.uiController) {
-                    this.uiController.updateReminderStatus('water', status);
+                if (status.action === 'saveState') {
+                    // Handle state save request from reminder manager
+                    this.saveAppState();
+                } else {
+                    // Handle regular status updates
+                    if (this.uiController) {
+                        this.uiController.updateReminderStatus('water', status);
+                    }
                 }
             });
             
@@ -425,8 +431,14 @@ class OfficeWellnessApp {
         
         if (this.standupReminder) {
             this.standupReminder.setStatusChangeCallback((status) => {
-                if (this.uiController) {
-                    this.uiController.updateReminderStatus('standup', status);
+                if (status.action === 'saveState') {
+                    // Handle state save request from reminder manager
+                    this.saveAppState();
+                } else {
+                    // Handle regular status updates
+                    if (this.uiController) {
+                        this.uiController.updateReminderStatus('standup', status);
+                    }
                 }
             });
             
