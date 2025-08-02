@@ -61,6 +61,9 @@ class ReminderManager {
         
         // Activity detection removed for MVP - using simpler time-based reminders
         
+        // Save state immediately
+        this.saveState();
+        
         // Trigger status change callback
         this.triggerStatusChange({
             status: 'started',
@@ -93,6 +96,9 @@ class ReminderManager {
         // Reset state
         this.resetState();
         
+        // Save state immediately
+        this.saveState();
+        
         // Trigger status change callback
         this.triggerStatusChange({
             status: 'stopped',
@@ -122,6 +128,9 @@ class ReminderManager {
         // Clear timer
         this.clearTimer();
         
+        // Save state immediately
+        this.saveState();
+        
         // Trigger status change callback
         this.triggerStatusChange({
             status: isAuto ? 'auto-paused' : 'paused',
@@ -148,6 +157,9 @@ class ReminderManager {
         
         // Restart timer
         this.startTimer();
+        
+        // Save state immediately
+        this.saveState();
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -205,6 +217,9 @@ class ReminderManager {
         
         // Update last reminder time
         this.settings.lastReminder = Date.now();
+        
+        // Save settings immediately
+        this.saveState();
         
         // Reset timer
         this.reset();
@@ -284,6 +299,35 @@ class ReminderManager {
      */
     setTimeUpdateCallback(callback) {
         this.timeUpdateCallback = callback;
+    }
+
+    /**
+     * Get current reminder status for state persistence
+     * @returns {Object} Current status object
+     */
+    getCurrentStatus() {
+        return {
+            isActive: this.isActive,
+            isPaused: this.isPaused,
+            timeRemaining: this.timeRemaining,
+            nextReminderAt: this.nextReminderTime,
+            lastAcknowledged: this.settings.lastReminder,
+            interval: this.settings.interval,
+            enabled: this.settings.enabled !== false
+        };
+    }
+
+    /**
+     * Save current state to storage through callback
+     * @private
+     */
+    saveState() {
+        if (this.statusChangeCallback) {
+            const status = this.getCurrentStatus();
+            status.action = 'saveState';
+            status.type = this.type;
+            this.statusChangeCallback(status);
+        }
     }
 
     /**

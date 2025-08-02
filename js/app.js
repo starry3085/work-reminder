@@ -411,8 +411,14 @@ class OfficeWellnessApp {
         // Set up simplified callbacks
         if (this.waterReminder) {
             this.waterReminder.setStatusChangeCallback((status) => {
-                if (this.uiController) {
-                    this.uiController.updateReminderStatus('water', status);
+                if (status.action === 'saveState') {
+                    // Handle state save request from reminder manager
+                    this.saveAppState();
+                } else {
+                    // Handle regular status updates
+                    if (this.uiController) {
+                        this.uiController.updateReminderStatus('water', status);
+                    }
                 }
             });
             
@@ -425,8 +431,14 @@ class OfficeWellnessApp {
         
         if (this.standupReminder) {
             this.standupReminder.setStatusChangeCallback((status) => {
-                if (this.uiController) {
-                    this.uiController.updateReminderStatus('standup', status);
+                if (status.action === 'saveState') {
+                    // Handle state save request from reminder manager
+                    this.saveAppState();
+                } else {
+                    // Handle regular status updates
+                    if (this.uiController) {
+                        this.uiController.updateReminderStatus('standup', status);
+                    }
                 }
             });
             
@@ -483,11 +495,7 @@ class OfficeWellnessApp {
             this.resetReminder('water');
         });
 
-        this.uiController.on('waterDrink', () => {
-            if (this.waterReminder) {
-                this.waterReminder.acknowledge();
-            }
-        });
+
 
         this.uiController.on('standupToggle', () => {
             this.toggleReminder('standup');
@@ -497,11 +505,7 @@ class OfficeWellnessApp {
             this.resetReminder('standup');
         });
 
-        this.uiController.on('standupActivity', () => {
-            if (this.standupReminder) {
-                this.standupReminder.acknowledge();
-            }
-        });
+
 
 
 
@@ -707,53 +711,7 @@ class OfficeWellnessApp {
         }
     }
 
-    /**
-     * 更新每日统计
-     * @param {string} type - 'water' | 'standup'
-     * @private
-     */
-    updateDailyStats(type) {
-        try {
-            const today = new Date().toDateString();
-            const statsKey = `dailyStats_${today}`;
-            
-            // 从存储中获取今日统计
-            let dailyStats = this.storageManager.loadSettings(statsKey) || {
-                water: { completed: 0, target: 8 },
-                standup: { completed: 0, target: 8 }
-            };
-            
-            // 获取当前设置中的目标值
-            const currentSettings = this.appSettings.getSettings();
-            if (type === 'water' && currentSettings.water) {
-                dailyStats.water.target = currentSettings.water.target;
-            } else if (type === 'standup' && currentSettings.standup) {
-                dailyStats.standup.target = currentSettings.standup.target;
-            }
-            
-            // 更新统计
-            if (dailyStats[type]) {
-                dailyStats[type].completed += 1;
-            }
-            
-            // 保存统计
-            this.storageManager.saveSettings(statsKey, dailyStats);
-            
-            // 更新UI显示
-            if (this.uiController) {
-                this.uiController.updateDailyProgress(
-                    type, 
-                    dailyStats[type].completed, 
-                    dailyStats[type].target
-                );
-            }
-            
-            console.log(`${type}统计已更新:`, dailyStats[type]);
-            
-        } catch (error) {
-            console.error('更新每日统计失败:', error);
-        }
-    }
+
 
     /**
      * 恢复上次会话状态
@@ -839,272 +797,80 @@ class OfficeWellnessApp {
     }
     
     /**
-     * 显示首次使用引导
+     * 显示首次使用引导 - HACKATHON版本：简化或移除引导
      * @private
      */
     showFirstUseGuide() {
         try {
-            console.log('显示首次使用引导...');
+            console.log('HACKATHON模式：跳过首次使用引导');
             
-            // 创建引导弹窗
-            const guideOverlay = document.createElement('div');
-            guideOverlay.className = 'guide-overlay';
-            guideOverlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.6);
-                z-index: 2000;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            `;
+            // HACKATHON建议：直接标记为已使用，不显示引导
+            this.appSettings.markFirstUseComplete();
             
-            guideOverlay.innerHTML = `
-                <div class="guide-modal" style="
-                    background-color: white;
-                    border-radius: 12px;
-                    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-                    width: 90%;
-                    max-width: 500px;
-                    max-height: 90vh;
-                    overflow-y: auto;
-                    padding: 0;
-                ">
-                    <div class="guide-header" style="
-                        padding: 1rem 1.5rem;
-                        border-bottom: 1px solid #e0e0e0;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    ">
-                        <h2 style="margin: 0; color: #333;">Welcome to Office Wellness Reminder</h2>
-                        <button class="btn-close" id="guide-close" style="
-                            background: #dc3545;
-                            color: white;
-                            border: none;
-                            border-radius: 50%;
-                            width: 30px;
-                            height: 30px;
-                            cursor: pointer;
-                            font-size: 16px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        ">×</button>
-                    </div>
-                    <div class="guide-content" style="padding: 1.5rem;">
-                        <div class="guide-step" style="display: flex; margin-bottom: 1.5rem; align-items: flex-start;">
-                            <div class="guide-step-number" style="
-                                width: 32px;
-                                height: 32px;
-                                border-radius: 50%;
-                                background-color: #3498db;
-                                color: white;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                font-weight: bold;
-                                margin-right: 1rem;
-                                flex-shrink: 0;
-                            ">1</div>
-                            <div class="guide-step-content">
-                                <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: #333;">Set Reminder Intervals</h3>
-                                <p style="margin: 0; color: #666;">Set water and standup reminder intervals according to your needs</p>
-                            </div>
-                        </div>
-                        <div class="guide-step" style="display: flex; margin-bottom: 1.5rem; align-items: flex-start;">
-                            <div class="guide-step-number" style="
-                                width: 32px;
-                                height: 32px;
-                                border-radius: 50%;
-                                background-color: #3498db;
-                                color: white;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                font-weight: bold;
-                                margin-right: 1rem;
-                                flex-shrink: 0;
-                            ">2</div>
-                            <div class="guide-step-content">
-                                <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: #333;">Enable Reminders</h3>
-                                <p style="margin: 0; color: #666;">Click the "Start" button to activate reminders</p>
-                            </div>
-                        </div>
-                        <div class="guide-step" style="display: flex; margin-bottom: 0; align-items: flex-start;">
-                            <div class="guide-step-number" style="
-                                width: 32px;
-                                height: 32px;
-                                border-radius: 50%;
-                                background-color: #3498db;
-                                color: white;
-                                display: flex;
-                                justify-content: center;
-                                align-items: center;
-                                font-weight: bold;
-                                margin-right: 1rem;
-                                flex-shrink: 0;
-                            ">3</div>
-                            <div class="guide-step-content">
-                                <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: #333;">Confirm Completion</h3>
-                                <p style="margin: 0; color: #666;">After receiving a reminder, click the "Done" button to confirm and reset the timer</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="guide-footer" style="
-                        padding: 1rem 1.5rem;
-                        border-top: 1px solid #e0e0e0;
-                        display: flex;
-                        justify-content: flex-end;
-                        gap: 1rem;
-                    ">
-                        <button class="btn-primary" id="guide-settings" style="
-                            background: #3498db;
-                            color: white;
-                            border: none;
-                            padding: 0.75rem 1.5rem;
-                            border-radius: 5px;
-                            cursor: pointer;
-                            font-size: 14px;
-                        ">Configure Settings</button>
-                        <button class="btn-secondary" id="guide-start" style="
-                            background: #28a745;
-                            color: white;
-                            border: none;
-                            padding: 0.75rem 1.5rem;
-                            border-radius: 5px;
-                            cursor: pointer;
-                            font-size: 14px;
-                        ">Start Now</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(guideOverlay);
-            console.log('Guide overlay added to DOM');
-            
-            // 立即绑定事件，不使用setTimeout
-            const closeBtn = document.getElementById('guide-close');
-            const settingsBtn = document.getElementById('guide-settings');
-            const startBtn = document.getElementById('guide-start');
-            
-            console.log('Guide buttons found:', {
-                closeBtn: !!closeBtn,
-                settingsBtn: !!settingsBtn,
-                startBtn: !!startBtn
-            });
-            
-            // 绑定关闭按钮事件
-            if (closeBtn) {
-                closeBtn.onclick = (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Guide close button clicked');
-                    this.closeFirstUseGuide(guideOverlay);
-                    this.appSettings.markFirstUseComplete();
-                };
-                console.log('Close button event bound');
-            }
-            
-            // 绑定设置按钮事件
-            if (settingsBtn) {
-                settingsBtn.onclick = (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Guide settings button clicked');
-                    this.closeFirstUseGuide(guideOverlay);
-                    this.appSettings.markFirstUseComplete();
-                    // 打开设置面板
-                    if (this.uiController && typeof this.uiController.showSettings === 'function') {
-                        this.uiController.showSettings();
-                    }
-                };
-                console.log('Settings button event bound');
-            }
-            
-            // 绑定开始按钮事件
-            if (startBtn) {
-                startBtn.onclick = (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    console.log('Guide start button clicked');
-                    this.closeFirstUseGuide(guideOverlay);
-                    this.appSettings.markFirstUseComplete();
-                    // 直接开始提醒
-                    try {
-                        this.startReminder('water');
-                        this.startReminder('standup');
-                    } catch (startError) {
-                        console.warn('Failed to start reminders:', startError);
-                    }
-                };
-                console.log('Start button event bound');
-            }
-            
-            // 添加点击外部关闭功能
-            guideOverlay.onclick = (event) => {
-                if (event.target === guideOverlay) {
-                    console.log('Clicked outside guide modal');
-                    this.closeFirstUseGuide(guideOverlay);
-                    this.appSettings.markFirstUseComplete();
-                }
-            };
-            
-            // 添加ESC键关闭功能
-            const handleEscKey = (event) => {
-                if (event.key === 'Escape') {
-                    console.log('ESC key pressed, closing guide');
-                    this.closeFirstUseGuide(guideOverlay);
-                    this.appSettings.markFirstUseComplete();
-                    document.removeEventListener('keydown', handleEscKey);
-                }
-            };
-            document.addEventListener('keydown', handleEscKey);
+            // 可选：显示一个简洁的欢迎提示条，而不是弹窗
+            this.showWelcomeToast();
             
         } catch (error) {
             console.error('显示首次使用引导失败:', error);
         }
     }
-    
+
     /**
-     * 关闭首次使用引导
-     * @param {HTMLElement} guideOverlay - 引导弹窗元素
+     * 显示简洁欢迎提示条
      * @private
      */
-    closeFirstUseGuide(guideOverlay) {
-        console.log('Closing first use guide');
+    showWelcomeToast() {
         try {
-            if (guideOverlay && guideOverlay.parentNode) {
-                // 添加淡出动画
-                guideOverlay.style.opacity = '0';
-                guideOverlay.style.transition = 'opacity 0.3s ease';
-                
-                // 延迟移除元素
-                setTimeout(() => {
-                    if (guideOverlay.parentNode) {
-                        guideOverlay.parentNode.removeChild(guideOverlay);
-                        console.log('Guide overlay removed from DOM');
-                    }
-                }, 300);
-            } else {
-                console.warn('Guide overlay not found or already removed');
-                // 尝试查找并移除任何残留的guide-overlay
-                const existingOverlay = document.querySelector('.guide-overlay');
-                if (existingOverlay) {
-                    existingOverlay.remove();
-                    console.log('Removed existing guide overlay');
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #2c3e50;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-size: 14px;
+                max-width: 300px;
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: all 0.3s ease;
+            `;
+            
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>💡</span>
+                    <span>Set intervals and click Start to begin</span>
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">×</button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // 动画显示
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 100);
+            
+            // 5秒后自动消失
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-20px)';
+                    setTimeout(() => toast.remove(), 300);
                 }
-            }
+            }, 5000);
+            
         } catch (error) {
-            console.error('Error closing first use guide:', error);
-            // 强制移除所有guide-overlay元素
-            const overlays = document.querySelectorAll('.guide-overlay');
-            overlays.forEach(overlay => overlay.remove());
+            console.warn('显示欢迎提示失败:', error);
         }
     }
+    
+
 
     /**
      * 获取错误信息

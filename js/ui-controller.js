@@ -51,7 +51,6 @@ class UIController {
             waterIntervalDisplay: document.getElementById('water-interval-display'),
             waterToggle: document.getElementById('water-toggle'),
             waterReset: document.getElementById('water-reset'),
-            waterDrink: document.getElementById('waterDrink'),
             waterStats: document.getElementById('water-stats'),
             waterCountdown: document.getElementById('water-countdown'),
             // Standup reminder related
@@ -61,7 +60,6 @@ class UIController {
             standupIntervalDisplay: document.getElementById('standup-interval-display'),
             standupToggle: document.getElementById('standup-toggle'),
             standupReset: document.getElementById('standup-reset'),
-            standupActivity: document.getElementById('standupActivity'),
             standupStats: document.getElementById('standup-stats'),
             standupCountdown: document.getElementById('standup-countdown'),
 
@@ -130,9 +128,7 @@ class UIController {
             this.triggerEvent('waterReset');
         });
 
-        this.addEventHandler('waterDrink', 'click', () => {
-            this.triggerEvent('waterDrink');
-        });
+
 
         this.addEventHandler('standupToggle', 'click', () => {
             this.triggerEvent('standupToggle');
@@ -142,9 +138,7 @@ class UIController {
             this.triggerEvent('standupReset');
         });
 
-        this.addEventHandler('standupActivity', 'click', () => {
-            this.triggerEvent('standupActivity');
-        });
+
 
         // Interval input handlers
         this.addEventHandler('waterIntervalDisplay', 'change', (e) => {
@@ -824,17 +818,7 @@ class UIController {
         }
     }
 
-    /**
-     * Update daily progress display (kept for compatibility, but now updates countdown)
-     * @param {string} type - 'water' | 'standup'
-     * @param {number} current - Current completion count
-     * @param {number} target - Target count
-     */
-    updateDailyProgress(type, current, target) {
-        // This method is kept for compatibility but no longer updates progress bars
-        // The countdown display is updated through updateCountdown method
-        console.log(`Daily progress updated for ${type}: ${current}/${target}`);
-    }
+
 
     /**
      * Show in-page notification

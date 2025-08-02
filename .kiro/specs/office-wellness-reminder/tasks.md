@@ -54,14 +54,14 @@
 
 - [x] 5.2 Implement water reminder functionality
   - Create water reminder specific logic
-  - Implement "hydrated" confirmation functionality
+  - Implement automatic notification and timer reset (5-second auto-dismiss)
   - Add water reminder timer reset
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
 - [x] 5.3 Implement sedentary reminder functionality
   - Create sedentary reminder specific logic
-  - Implement "moved" confirmation functionality
-  - Integrate user activity detection intelligent functionality
+  - Implement automatic notification and timer reset (5-second auto-dismiss)
+  - Integrate basic time-based reminder functionality
   - _Requirements: 2.1, 2.2, 2.3, 2.5_
 
 - [x] 6. Develop user interface controller

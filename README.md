@@ -4,12 +4,12 @@ A health reminder web application designed specifically for office workers to he
 
 ## Features
 
-- 🥤 **Water Reminder** - Timed reminders to stay hydrated and maintain good health
-- 🪑 **Standup Reminder** - Smart activity detection to remind you to get up and move
-- 🔔 **Multiple Notification Types** - Support for browser notifications and in-page alerts
-- ⚙️ **Personalized Settings** - Customizable reminder intervals and notification preferences
-- 📱 **Responsive Design** - Perfect compatibility with desktop and mobile devices
-- 💾 **Local Storage** - Automatic settings save, no account registration required
+- 🥤 **Water Reminder** - Simple timed reminders to stay hydrated
+- 🪑 **Standup Reminder** - Timed reminders to get up and move regularly
+- 🔔 **Automatic Notifications** - In-page alerts that auto-dismiss after 5 seconds
+- ⚙️ **Simple Settings** - Basic reminder intervals customization
+- 📱 **Responsive Design** - Works on desktop and mobile devices
+- 💾 **Local Storage** - Settings saved automatically, no registration needed
 
 ## Tech Stack
 
@@ -73,7 +73,7 @@ The project uses Kiro AI Assistant for development assistance, including the fol
 - [x] Project foundation structure
 - [x] Storage management system
 - [x] Notification service
-- [x] User activity detection
+- [x] Simple time-based reminders (MVP focus)
 - [x] Reminder management core functionality
 - [x] UI interaction control
 - [x] Responsive design

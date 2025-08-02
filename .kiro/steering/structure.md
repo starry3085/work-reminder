@@ -24,9 +24,8 @@ The application follows a modular class-based architecture with clear separation
 #### Business Logic Layer
 - `ReminderManager` - Base class for reminder functionality
 - `WaterReminder` - Water reminder implementation
-- `StandupReminder` - Standup reminder with activity detection
+- `StandupReminder` - Standup reminder with time-based intervals
 - `NotificationService` - Handles browser and in-page notifications
-- `ActivityDetector` - User activity monitoring for smart pause/resume (removed for MVP)
 
 #### Utility Layer
 - `MobileAdapter` - Mobile device optimizations and compatibility checks
@@ -74,9 +73,10 @@ The application follows a modular class-based architecture with clear separation
 
 ### JavaScript
 - ES6+ features: classes, arrow functions, const/let
-- Comprehensive JSDoc comments for all public methods
+- Comprehensive JSDoc comments for all public methods (must be in English)
 - Error handling with try-catch blocks
 - Console logging for debugging (removed in production)
+- All variable and function names must be in English
 
 ### CSS
 - CSS custom properties for theming
