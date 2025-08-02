@@ -15,7 +15,7 @@ The Office Wellness Reminder System is a pure frontend web application designed 
 1. When the user first visits the application, the system should display water reminder setting options
 2. When the user sets water reminder interval time, the system should save this setting to local storage
 3. When the set reminder time is reached, the system should display a water reminder notification
-4. When the user clicks the "Hydrated" button, the system should reset the reminder timer
+4. When the reminder time is reached, the system should display a notification that automatically disappears after 5 seconds and then reset the timer
 5. When the user pauses the water reminder, the system should stop timing and save the state
 6. If the user closes the browser tab, the system should restore the reminder state when reopened
 
@@ -27,7 +27,7 @@ The Office Wellness Reminder System is a pure frontend web application designed 
 
 1. When the user sets sedentary reminder interval time, the system should save this setting to local storage
 2. When the set sedentary reminder time is reached, the system should display a stand-up activity reminder notification
-3. When the user clicks the "Moved" button, the system should reset the sedentary timer
+3. When the sedentary reminder time is reached, the system should display a notification that automatically disappears after 5 seconds and then reset the timer
 4. When the user pauses the sedentary reminder, the system should stop timing and save the state
 5. When the user has mouse or keyboard activity within the set time, the system should automatically extend the sedentary timing
 6. If the user leaves the computer for more than 5 minutes, the system should pause the sedentary timing

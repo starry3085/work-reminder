@@ -282,12 +282,7 @@ class AppSettings {
                     return false;
                 }
                 
-                if (typeof settings.water.target !== 'number' || 
-                    settings.water.target < 1 || 
-                    settings.water.target > 20) {
-                    console.warn('无效的水提醒目标设置');
-                    return false;
-                }
+                
             }
             
             // 验证久坐提醒设置
@@ -299,12 +294,7 @@ class AppSettings {
                     return false;
                 }
                 
-                if (typeof settings.standup.target !== 'number' || 
-                    settings.standup.target < 1 || 
-                    settings.standup.target > 20) {
-                    console.warn('无效的久坐提醒目标设置');
-                    return false;
-                }
+                
             }
             
             return true;

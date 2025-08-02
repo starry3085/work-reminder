@@ -69,19 +69,17 @@ class NotificationService {
     }
 
     /**
-     * Show notification - simplified approach
+     * Show notification - simplified for MVP
      * @param {string} type - 通知类型 ('water' | 'standup')
      * @param {string} title - 通知标题
      * @param {string} message - 通知内容
-     * @param {Function} onConfirm - 确认回调
-     * @param {Function} onSnooze - 稍后提醒回调
      * @returns {boolean} 是否成功显示
      */
-    showNotification(type, title, message, onConfirm, onSnooze) {
+    showNotification(type, title, message) {
         // Always show in-page notification for consistency
-        this.showInPageAlert(type, title, message, onConfirm, onSnooze);
+        this.showInPageAlert(type, title, message);
         
-        // Try browser notification as additional notification (no callbacks needed)
+        // Try browser notification as additional notification
         if (this.hasPermission) {
             this.showBrowserNotification(type, title, message);
         }
@@ -118,27 +116,23 @@ class NotificationService {
                 icon: this.getNotificationIcon(type),
                 badge: this.getNotificationIcon(type),
                 tag: `wellness-reminder-${type}`,
-                requireInteraction: true,
+                requireInteraction: false, // 不需要用户交互
                 silent: !this.soundEnabled,
                 vibrate: [200, 100, 200] // 振动模式（移动设备）
             };
 
             const notification = new Notification(title, options);
             
-            // 设置点击事件
+            // 设置点击事件 - 简单聚焦窗口
             notification.onclick = () => {
                 window.focus();
                 notification.close();
-                // 触发确认回调（如果有）
-                if (window.app && window.app[`${type}Reminder`]) {
-                    window.app[`${type}Reminder`].acknowledge();
-                }
             };
 
-            // 自动关闭通知（30秒后）
+            // 自动关闭通知（5秒后）
             setTimeout(() => {
                 notification.close();
-            }, 30000);
+            }, 5000);
 
             return true;
         } catch (error) {
@@ -148,14 +142,12 @@ class NotificationService {
     }
 
     /**
-     * Show in-page alert - simplified
+     * Show in-page alert - simplified for MVP
      * @param {string} type - 提醒类型 ('water' | 'standup')
      * @param {string} title - 提醒标题
      * @param {string} message - 提醒内容
-     * @param {Function} onConfirm - 确认回调
-     * @param {Function} onSnooze - 稍后提醒回调
      */
-    showInPageAlert(type, title, message, onConfirm, onSnooze) {
+    showInPageAlert(type, title, message) {
         // Remove existing notification
         this.hideInPageAlert();
 
@@ -164,7 +156,7 @@ class NotificationService {
         alertContainer.className = `notification-alert notification-${type}`;
         alertContainer.id = 'wellness-notification';
 
-        // Simplified layout for all devices
+        // Simplified layout without buttons
         alertContainer.innerHTML = `
             <div class="notification-content">
                 <div class="notification-icon">
@@ -176,62 +168,31 @@ class NotificationService {
                 </div>
                 <button class="btn btn-close" id="close-btn">×</button>
             </div>
-            <div class="notification-actions">
-                <button class="btn btn-primary" id="confirm-btn">
-                    ${type === 'water' ? 'Hydrated' : 'Moved'}
-                </button>
-                <button class="btn btn-secondary" id="snooze-btn">
-                    Remind Later
-                </button>
-            </div>
         `;
 
         // Add to page
         document.body.appendChild(alertContainer);
 
-        // Bind events - simplified
-        this.bindNotificationEvents(alertContainer, onConfirm, onSnooze);
-
-        // Show with animation
-        setTimeout(() => alertContainer.classList.add('show'), 100);
-
-        // Auto-hide after 45 seconds
-        setTimeout(() => {
-            if (document.getElementById('wellness-notification')) {
-                this.hideInPageAlert();
-            }
-        }, 45000);
-    }
-
-    /**
-     * Bind notification events
-     * @private
-     */
-    bindNotificationEvents(container, onConfirm, onSnooze) {
-        const confirmBtn = container.querySelector('#confirm-btn');
-        const snoozeBtn = container.querySelector('#snooze-btn');
-        const closeBtn = container.querySelector('#close-btn');
-
-        if (confirmBtn) {
-            confirmBtn.addEventListener('click', () => {
-                this.hideInPageAlert();
-                if (onConfirm) onConfirm();
-            });
-        }
-
-        if (snoozeBtn) {
-            snoozeBtn.addEventListener('click', () => {
-                this.hideInPageAlert();
-                if (onSnooze) onSnooze();
-            });
-        }
-
+        // Bind close event only
+        const closeBtn = alertContainer.querySelector('#close-btn');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 this.hideInPageAlert();
             });
         }
+
+        // Show with animation
+        setTimeout(() => alertContainer.classList.add('show'), 100);
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            if (document.getElementById('wellness-notification')) {
+                this.hideInPageAlert();
+            }
+        }, 5000);
     }
+
+
 
     /**
      * 播放提醒音效

@@ -483,11 +483,7 @@ class OfficeWellnessApp {
             this.resetReminder('water');
         });
 
-        this.uiController.on('waterDrink', () => {
-            if (this.waterReminder) {
-                this.waterReminder.acknowledge();
-            }
-        });
+
 
         this.uiController.on('standupToggle', () => {
             this.toggleReminder('standup');
@@ -497,11 +493,7 @@ class OfficeWellnessApp {
             this.resetReminder('standup');
         });
 
-        this.uiController.on('standupActivity', () => {
-            if (this.standupReminder) {
-                this.standupReminder.acknowledge();
-            }
-        });
+
 
 
 
@@ -707,53 +699,7 @@ class OfficeWellnessApp {
         }
     }
 
-    /**
-     * 更新每日统计
-     * @param {string} type - 'water' | 'standup'
-     * @private
-     */
-    updateDailyStats(type) {
-        try {
-            const today = new Date().toDateString();
-            const statsKey = `dailyStats_${today}`;
-            
-            // 从存储中获取今日统计
-            let dailyStats = this.storageManager.loadSettings(statsKey) || {
-                water: { completed: 0, target: 8 },
-                standup: { completed: 0, target: 8 }
-            };
-            
-            // 获取当前设置中的目标值
-            const currentSettings = this.appSettings.getSettings();
-            if (type === 'water' && currentSettings.water) {
-                dailyStats.water.target = currentSettings.water.target;
-            } else if (type === 'standup' && currentSettings.standup) {
-                dailyStats.standup.target = currentSettings.standup.target;
-            }
-            
-            // 更新统计
-            if (dailyStats[type]) {
-                dailyStats[type].completed += 1;
-            }
-            
-            // 保存统计
-            this.storageManager.saveSettings(statsKey, dailyStats);
-            
-            // 更新UI显示
-            if (this.uiController) {
-                this.uiController.updateDailyProgress(
-                    type, 
-                    dailyStats[type].completed, 
-                    dailyStats[type].target
-                );
-            }
-            
-            console.log(`${type}统计已更新:`, dailyStats[type]);
-            
-        } catch (error) {
-            console.error('更新每日统计失败:', error);
-        }
-    }
+
 
     /**
      * 恢复上次会话状态

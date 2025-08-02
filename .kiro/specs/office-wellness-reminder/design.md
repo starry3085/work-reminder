@@ -63,9 +63,9 @@ class ReminderManager {
 - Integrate with notification system
 
 #### 2. ActivityDetector (Removed for MVP)
-- **Status**: Removed for MVP - using simpler time-based reminders instead
+- **Status**: Removed for MVP - using simple time-based reminders instead
 - **Original Purpose**: Monitor user activity status to intelligently pause/resume reminders
-- **Rationale**: Simplified to focus on core functionality for MVP release
+- **Rationale**: Simplified to focus on core functionality for MVP release - using fixed interval reminders
 
 #### 3. NotificationService (Notification Service)
 ```javascript
