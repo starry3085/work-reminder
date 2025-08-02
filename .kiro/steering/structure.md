@@ -24,7 +24,7 @@ The application follows a modular class-based architecture with clear separation
 #### Business Logic Layer
 - `ReminderManager` - Base class for reminder functionality
 - `WaterReminder` - Water reminder implementation
-- `PostureReminder` (standup) - Standup reminder with activity detection
+- `StandupReminder` - Standup reminder with activity detection
 - `NotificationService` - Handles browser and in-page notifications
 - `ActivityDetector` - User activity monitoring for smart pause/resume
 

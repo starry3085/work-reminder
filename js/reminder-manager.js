@@ -1,14 +1,14 @@
 /**
- * Reminder Manager - Core class for managing water and posture reminders
+ * Reminder Manager - Core class for managing water and standup reminders
  * Responsible for timer management, status tracking, reminder triggering and persistent storage
  */
 class ReminderManager {
     /**
      * Create reminder manager instance
-     * @param {string} type - Reminder type ('water' | 'posture')
+     * @param {string} type - Reminder type ('water' | 'standup')
      * @param {Object} settings - Reminder settings
      * @param {NotificationService} notificationService - Notification service instance
-     * @param {ActivityDetector} activityDetector - Activity detector instance (only needed for posture reminders)
+     * @param {ActivityDetector} activityDetector - Activity detector instance (only needed for standup reminders)
      */
     constructor(type, settings, notificationService, activityDetector = null) {
         this.type = type;
@@ -33,8 +33,8 @@ class ReminderManager {
         this.updateInterval = 1000;
         this.updateTimer = null;
         
-        // If posture reminder, set up activity detector callback
-        if (this.type === 'posture' && this.activityDetector) {
+        // If standup reminder, set up activity detector callback
+        if (this.type === 'standup' && this.activityDetector) {
             this.setupActivityDetection();
         }
         
@@ -42,7 +42,7 @@ class ReminderManager {
     }
 
     /**
-     * Set up activity detection (posture reminders only)
+     * Set up activity detection (standup reminders only)
      * @private
      */
     setupActivityDetection() {
@@ -64,23 +64,23 @@ class ReminderManager {
     }
 
     /**
-     * Handle user activity events (posture reminders only)
+     * Handle user activity events (standup reminders only)
      * @param {Object} event - Activity event
      * @private
      */
     handleActivityEvent(event) {
-        if (this.type !== 'posture') return;
+        if (this.type !== 'standup') return;
         
         switch (event.type) {
             case 'user-away':
-                // User away, auto-pause posture reminder
+                // User away, auto-pause standup reminder
                 if (this.isActive && !this.isPaused) {
                     this.pause(true); // true means auto-pause
                 }
                 break;
                 
             case 'user-return':
-                // User returned, auto-resume posture reminder
+                // User returned, auto-resume standup reminder
                 if (this.isActive && this.isPaused) {
                     this.resume(true); // true means auto-resume
                 }
@@ -109,8 +109,8 @@ class ReminderManager {
         // Start time update timer
         this.startUpdateTimer();
         
-        // If posture reminder, start activity detection
-        if (this.type === 'posture' && this.activityDetector) {
+        // If standup reminder, start activity detection
+        if (this.type === 'standup' && this.activityDetector) {
             this.activityDetector.startMonitoring();
         }
         
@@ -141,8 +141,8 @@ class ReminderManager {
         this.clearTimer();
         this.clearUpdateTimer();
         
-        // If posture reminder, stop activity detection
-        if (this.type === 'posture' && this.activityDetector) {
+        // If standup reminder, stop activity detection
+        if (this.type === 'standup' && this.activityDetector) {
             this.activityDetector.stopMonitoring();
         }
         
@@ -543,8 +543,8 @@ class ReminderManager {
                 this.startTimer();
                 this.startUpdateTimer();
                 
-                // If posture reminder, start activity detection
-                if (this.type === 'posture' && this.activityDetector) {
+                // If standup reminder, start activity detection
+                if (this.type === 'standup' && this.activityDetector) {
                     this.activityDetector.startMonitoring();
                 }
                 
@@ -590,8 +590,8 @@ class ReminderManager {
         this.statusChangeCallback = null;
         this.timeUpdateCallback = null;
         
-        // If posture reminder, clean up activity detector
-        if (this.type === 'posture' && this.activityDetector) {
+        // If standup reminder, clean up activity detector
+        if (this.type === 'standup' && this.activityDetector) {
             this.activityDetector.stopMonitoring();
         }
         

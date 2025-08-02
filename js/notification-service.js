@@ -305,28 +305,28 @@ class NotificationService {
     
     /**
      * 获取通知图标URL
-     * @param {string} type - 通知类型 ('water' | 'posture')
+     * @param {string} type - 通知类型 ('water' | 'standup')
      * @returns {string} 图标URL
      */
     getNotificationIcon(type) {
         // 根据类型返回不同的图标URL
         if (type === 'water') {
             return 'assets/water-icon.png';
-        } else if (type === 'posture') {
-            return 'assets/posture-icon.png';
+        } else if (type === 'standup') {
+            return 'assets/standup-icon.png';
         }
         return 'assets/default-icon.png';
     }
     
     /**
      * 获取通知表情符号
-     * @param {string} type - 通知类型 ('water' | 'posture')
+     * @param {string} type - 通知类型 ('water' | 'standup')
      * @returns {string} 表情符号HTML
      */
     getNotificationEmoji(type) {
         if (type === 'water') {
             return '💧';
-        } else if (type === 'posture') {
+        } else if (type === 'standup') {
             return '🧘';
         }
         return '⏰';
@@ -386,7 +386,7 @@ class NotificationService {
                 setTimeout(() => {
                     oscillator.stop();
                 }, 300);
-            } else if (type === 'posture') {
+            } else if (type === 'standup') {
                 oscillator.type = 'triangle';
                 oscillator.frequency.value = 600; // 较低的音调
                 gainNode.gain.value = 0.1;
@@ -437,7 +437,7 @@ class NotificationService {
                 // 根据类型设置不同的音效
                 if (type === 'water') {
                     audio.src = 'assets/water-reminder.mp3';
-                } else if (type === 'posture') {
+                } else if (type === 'standup') {
                     audio.src = 'assets/standup-reminder.mp3';
                 } else {
                     audio.src = 'assets/notification.mp3';
@@ -462,7 +462,7 @@ class NotificationService {
                     
                     if (type === 'water') {
                         newAudio.src = 'assets/water-reminder.mp3';
-                    } else if (type === 'posture') {
+                    } else if (type === 'standup') {
                         newAudio.src = 'assets/standup-reminder.mp3';
                     } else {
                         newAudio.src = 'assets/notification.mp3';

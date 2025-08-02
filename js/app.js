@@ -248,15 +248,15 @@ class OfficeWellnessApp {
             }
             
             try {
-                if (typeof PostureReminder !== 'undefined') {
-                    this.standupReminder = new PostureReminder(
+                if (typeof StandupReminder !== 'undefined') {
+                    this.standupReminder = new StandupReminder(
                         currentSettings.standup, 
                         this.notificationService,
                         this.activityDetector // Pass activity detector to standup reminder
                     );
                     console.log('Standup reminder initialized');
                 } else {
-                    console.warn('PostureReminder class not found');
+                    console.warn('StandupReminder class not found');
                     this.standupReminder = null;
                 }
             } catch (error) {
