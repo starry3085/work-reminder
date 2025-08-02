@@ -19,7 +19,7 @@
 ### Browser APIs Used
 - localStorage API for settings persistence
 - Web Notifications API for browser notifications
-- Page Visibility API for activity detection
+- Page Visibility API for basic state management
 - Performance API for timing measurements
 - sessionStorage for temporary flags
 
@@ -38,7 +38,7 @@ office-wellness-reminder/
 │   ├── storage-manager.js # localStorage abstraction layer
 │   ├── app-settings.js    # Settings and state management
 │   ├── notification-service.js # Notification handling
-│   ├── activity-detector.js    # User activity detection (removed for MVP)
+
 │   ├── reminder-manager.js     # Base reminder functionality
 │   ├── water-reminder.js       # Water reminder implementation
 │   ├── standup-reminder.js     # Standup reminder implementation

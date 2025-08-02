@@ -13,7 +13,7 @@ class WaterReminder extends ReminderManager {
         
         // Water-specific state
         this.dailyWaterCount = 0;
-        this.dailyGoal = 8; // Daily water goal (glasses)
+
         this.lastDrinkTime = null;
         this.drinkHistory = []; // Today's water intake records
         
@@ -115,8 +115,7 @@ class WaterReminder extends ReminderManager {
             isActive: true,
             isPaused: false,
             timeRemaining: this.timeRemaining,
-            dailyCount: this.dailyWaterCount,
-            dailyGoal: this.dailyGoal,
+            dailyCount: this.dailyWaterCount
             lastDrinkTime: this.lastDrinkTime
         });
         
@@ -128,17 +127,7 @@ class WaterReminder extends ReminderManager {
      * @private
      */
     showDrinkConfirmation() {
-        const progress = Math.min(this.dailyWaterCount / this.dailyGoal, 1);
-        const progressPercent = Math.round(progress * 100);
-        
         let message = `Great! You've had ${this.dailyWaterCount} glasses today`;
-        
-        if (this.dailyWaterCount >= this.dailyGoal) {
-            message += `\n🎉 Congratulations! You've reached your daily water goal!`;
-        } else {
-            const remaining = this.dailyGoal - this.dailyWaterCount;
-            message += `\nNeed ${remaining} more glasses to reach today's goal (${progressPercent}%)`;
-        }
         
         // Show in-page notification
         this.notificationService.showInPageAlert(
@@ -147,16 +136,7 @@ class WaterReminder extends ReminderManager {
             message
         );
         
-        // If goal reached, show celebration notification
-        if (this.dailyWaterCount === this.dailyGoal) {
-            setTimeout(() => {
-                this.notificationService.showInPageAlert(
-                    'water',
-                    '🎉 Goal Reached!',
-                    'Congratulations on reaching your daily water goal! Keep up the good habits!'
-                );
-            }, 1000);
-        }
+
     }
 
     /**
@@ -169,14 +149,9 @@ class WaterReminder extends ReminderManager {
         const title = '💧 Time to Hydrate!';
         let message = 'Long work sessions can lead to dehydration, remember to drink water!';
         
-        // Adjust message based on today's progress
+        // Show today's water intake
         if (this.dailyWaterCount > 0) {
-            const remaining = Math.max(0, this.dailyGoal - this.dailyWaterCount);
-            if (remaining > 0) {
-                message += `\nToday: ${this.dailyWaterCount} glasses, need ${remaining} more to reach goal`;
-            } else {
-                message = 'Keep up the great hydration habits!';
-            }
+            message += `\nToday: ${this.dailyWaterCount} glasses so far`;
         }
         
         // Show notification with confirm and snooze options
@@ -209,7 +184,7 @@ class WaterReminder extends ReminderManager {
             isPaused: false,
             timeRemaining: 0,
             dailyCount: this.dailyWaterCount,
-            dailyGoal: this.dailyGoal
+
         });
         
         // Auto-reset timer (if user doesn't manually confirm)
@@ -228,34 +203,16 @@ class WaterReminder extends ReminderManager {
      */
     getDailyStats() {
         const totalAmount = this.drinkHistory.reduce((sum, record) => sum + record.amount, 0);
-        const progress = Math.min(this.dailyWaterCount / this.dailyGoal, 1);
         
         return {
             count: this.dailyWaterCount,
-            goal: this.dailyGoal,
-            progress: progress,
-            progressPercent: Math.round(progress * 100),
             totalAmount: totalAmount,
             lastDrinkTime: this.lastDrinkTime,
-            history: [...this.drinkHistory],
-            isGoalReached: this.dailyWaterCount >= this.dailyGoal
+            history: [...this.drinkHistory]
         };
     }
 
-    /**
-     * Set daily goal
-     * @param {number} goal - Daily water goal (glasses)
-     */
-    setDailyGoal(goal) {
-        if (goal > 0 && goal <= 20) { // Reasonable range
-            this.dailyGoal = goal;
-            this.saveDailyData();
-            
-            console.log(`Daily water goal set to ${goal} glasses`);
-        } else {
-            console.warn('Daily goal should be between 1-20 glasses');
-        }
-    }
+
 
     /**
      * Get drinking suggestion
@@ -264,31 +221,18 @@ class WaterReminder extends ReminderManager {
     getDrinkingSuggestion() {
         const now = new Date();
         const hour = now.getHours();
-        const progress = this.dailyWaterCount / this.dailyGoal;
         
-        // Give suggestions based on time and progress
+        // Give suggestions based on time
         if (hour < 9) {
             return 'Drink a glass of warm water after waking up to help activate your body functions';
         } else if (hour < 12) {
-            if (progress < 0.3) {
-                return 'During morning work hours, remember to drink more water to stay energized';
-            } else {
-                return 'Your morning water intake is good, keep it up!';
-            }
+            return 'During morning work hours, remember to drink water to stay energized';
         } else if (hour < 14) {
             return 'Lunchtime - moderate water intake helps with digestion';
         } else if (hour < 18) {
-            if (progress < 0.6) {
-                return 'Afternoons can be tiring, drinking more water helps maintain focus';
-            } else {
-                return 'Your afternoon hydration is timely!';
-            }
+            return 'Afternoons can be tiring, drinking water helps maintain focus';
         } else if (hour < 20) {
-            if (progress < 0.8) {
-                return 'Moderate water intake before dinner, but not too much to affect appetite';
-            } else {
-                return 'Today\'s water intake is great, moderate amounts in the evening are fine';
-            }
+            return 'Moderate water intake before dinner, but not too much to affect appetite';
         } else {
             return 'Reduce water intake 1-2 hours before bed to avoid affecting sleep quality';
         }

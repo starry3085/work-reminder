@@ -14,15 +14,13 @@ class AppSettings {
                 enabled: true,
                 interval: 30, // 分钟
                 sound: true,
-                lastReminder: null,
-                target: 8 // 每日目标杯数
+                lastReminder: null
             },
             standup: {
                 enabled: true,
                 interval: 30, // 分钟
                 sound: true,
-                lastReminder: null,
-                target: 8, // 每日目标次数
+                lastReminder: null
             },
             notifications: {
                 browserNotifications: true,

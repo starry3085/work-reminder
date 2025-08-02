@@ -10,7 +10,7 @@
 
 ### Feature Priorities
 1. **Water Reminder** - Primary feature, simple and reliable
-2. **Standup Reminder** - Secondary feature with smart activity detection
+2. **Standup Reminder** - Secondary feature with simple time-based reminders
 3. **Settings Persistence** - Essential for user experience
 4. **Responsive Design** - Must work on mobile and desktop
 

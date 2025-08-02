@@ -1,6 +1,6 @@
 /**
  * Standup Reminder Class - Handles standup reminder logic
- * Extends ReminderManager, adds standup-specific functionality and intelligent activity detection
+ * Extends ReminderManager, adds standup-specific functionality with time-based reminders
  */
 class StandupReminder extends ReminderManager {
     /**
@@ -13,7 +13,7 @@ class StandupReminder extends ReminderManager {
         
         // Standup-specific state
         this.dailyActivityCount = 0;
-        this.dailyGoal = 8; // Daily activity goal (times)
+
         // Activity tracking removed for MVP
         this.activityHistory = []; // Today's activity records
         this.totalSittingTime = 0; // Total sitting time today (milliseconds)
@@ -41,7 +41,7 @@ class StandupReminder extends ReminderManager {
                 if (data.date === today) {
                     this.dailyActivityCount = data.count || 0;
                     this.activityHistory = data.history || [];
-                    // Activity tracking removed for MVP
+        
                     this.totalSittingTime = data.totalSittingTime || 0;
                 } else {
                     // New day, reset data
@@ -116,8 +116,7 @@ class StandupReminder extends ReminderManager {
             isActive: true,
             isPaused: false,
             timeRemaining: this.timeRemaining,
-            dailyCount: this.dailyActivityCount,
-            dailyGoal: this.dailyGoal,
+            dailyCount: this.dailyActivityCount
             // Activity tracking removed for MVP
         });
         
@@ -155,17 +154,7 @@ class StandupReminder extends ReminderManager {
      * @private
      */
     showActivityConfirmation(duration, activityType) {
-        const progress = Math.min(this.dailyActivityCount / this.dailyGoal, 1);
-        const progressPercent = Math.round(progress * 100);
-        
         let message = `Great! You've been active ${this.dailyActivityCount} times today`;
-        
-        if (this.dailyActivityCount >= this.dailyGoal) {
-            message += `\n🎉 Congratulations! You've completed your daily activity goal!`;
-        } else {
-            const remaining = this.dailyGoal - this.dailyActivityCount;
-            message += `\n${remaining} more activities needed to complete today's goal (${progressPercent}%)`;
-        }
         
         // Add extra information based on activity type
         if (activityType === 'away-break') {
@@ -179,16 +168,7 @@ class StandupReminder extends ReminderManager {
             message
         );
         
-        // If goal completed, show celebration notification
-        if (this.dailyActivityCount === this.dailyGoal) {
-            setTimeout(() => {
-                this.notificationService.showInPageAlert(
-                    'standup',
-                    '🎉 Goal Reached!',
-                    'Congratulations! You\'ve completed your daily activity goal! Keep up the healthy work habits!'
-                );
-            }, 1000);
-        }
+
     }
 
     /**
@@ -205,12 +185,7 @@ class StandupReminder extends ReminderManager {
         const sittingHours = Math.round(this.totalSittingTime / (1000 * 60 * 60) * 10) / 10;
         
         if (this.dailyActivityCount > 0) {
-            const remaining = Math.max(0, this.dailyGoal - this.dailyActivityCount);
-            if (remaining > 0) {
-                message += `\nYou've been active ${this.dailyActivityCount} times today, ${remaining} more needed to reach your goal`;
-            } else {
-                message = 'Keep up the good activity habits!';
-            }
+            message += `\nYou've been active ${this.dailyActivityCount} times today`;
         }
         
         if (sittingHours > 0) {
@@ -247,7 +222,7 @@ class StandupReminder extends ReminderManager {
             isPaused: false,
             timeRemaining: 0,
             dailyCount: this.dailyActivityCount,
-            dailyGoal: this.dailyGoal
+
         });
         
         // Auto-reset timer (if user doesn't manually confirm)
@@ -266,40 +241,22 @@ class StandupReminder extends ReminderManager {
      */
     getDailyStats() {
         const totalActivityTime = this.activityHistory.reduce((sum, record) => sum + record.duration, 0);
-        const progress = Math.min(this.dailyActivityCount / this.dailyGoal, 1);
         const sittingHours = Math.round(this.totalSittingTime / (1000 * 60 * 60) * 10) / 10;
         
         return {
             count: this.dailyActivityCount,
-            goal: this.dailyGoal,
-            progress: progress,
-            progressPercent: Math.round(progress * 100),
             totalActivityTime: totalActivityTime,
             totalSittingTime: this.totalSittingTime,
             sittingHours: sittingHours,
             // Activity tracking removed for MVP
             history: [...this.activityHistory],
-            isGoalReached: this.dailyActivityCount >= this.dailyGoal,
             averageActivityDuration: this.activityHistory.length > 0 
                 ? Math.round(totalActivityTime / this.activityHistory.length / 60000) 
                 : 0
         };
     }
 
-    /**
-     * Set daily goal
-     * @param {number} goal - Daily activity goal (times)
-     */
-    setDailyGoal(goal) {
-        if (goal > 0 && goal <= 20) { // Reasonable range
-            this.dailyGoal = goal;
-            this.saveDailyData();
-            
-            console.log(`Daily activity goal set to ${goal} times`);
-        } else {
-            console.warn('Daily goal should be between 1-20 times');
-        }
-    }
+
 
     // Activity threshold setting removed for MVP - using simpler time-based reminders
 
@@ -312,13 +269,9 @@ class StandupReminder extends ReminderManager {
         const now = new Date();
         const hour = now.getHours();
         
-        // Give suggestions based on time, activity count and sitting time
+        // Give suggestions based on time and sitting time
         if (stats.sittingHours > 6) {
             return 'You\'ve been sitting for a long time today, suggest increasing activity frequency, stand up every 30 minutes';
-        } else if (stats.count < stats.goal * 0.5 && hour > 14) {
-            return 'It\'s afternoon and activity count is still low, remember to stand up and move around more';
-        } else if (stats.count >= stats.goal) {
-            return 'Daily activity goal achieved! Keep up the good habits';
         } else if (hour < 12) {
             return 'Morning work time, remember to stand up and move every hour';
         } else if (hour < 18) {
