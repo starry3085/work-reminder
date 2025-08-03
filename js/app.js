@@ -503,7 +503,7 @@ class OfficeWellnessApp {
 
     /**
      * Toggle reminder state - simplified logic
-     * @param {string} type - 提醒类型 ('water' | 'standup')
+     * @param {string} type - reminder type ('water' | 'standup')
      */
     toggleReminder(type) {
         const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
@@ -668,7 +668,7 @@ class OfficeWellnessApp {
                 message: 'All settings have been force reset to default values (30-minute intervals), all reminders stopped'
             });
             
-            // 关闭设置面板
+            // Close settings panel
             this.uiController.hideSettings();
             
         } catch (error) {
@@ -683,7 +683,7 @@ class OfficeWellnessApp {
 
 
     /**
-     * 恢复上次会话状态
+     * Restore previous session state
      * @private
      */
     async restorePreviousState() {
@@ -776,7 +776,7 @@ class OfficeWellnessApp {
             // HACKATHON suggestion: mark as used directly, no guide shown
             this.appSettings.markFirstUseComplete();
             
-            // 可选：显示一个简洁的欢迎提示条，而不是弹窗
+            // Optional: show a simple welcome banner instead of popup
             this.showWelcomeToast();
             
         } catch (error) {
@@ -819,13 +819,13 @@ class OfficeWellnessApp {
             
             document.body.appendChild(toast);
             
-            // 动画显示
+            // Animate display
             setTimeout(() => {
                 toast.style.opacity = '1';
                 toast.style.transform = 'translateY(0)';
             }, 100);
             
-            // 5秒后自动消失
+            // Auto-hide after 5 seconds
             setTimeout(() => {
                 if (toast.parentNode) {
                     toast.style.opacity = '0';
@@ -835,7 +835,7 @@ class OfficeWellnessApp {
             }, 5000);
             
         } catch (error) {
-            console.warn('显示欢迎提示失败:', error);
+            console.warn('Failed to display welcome banner:', error);
         }
     }
     
@@ -883,7 +883,7 @@ class OfficeWellnessApp {
         errorDiv.textContent = message;
         document.body.appendChild(errorDiv);
         
-        // 5秒后自动隐藏
+        // Auto-hide after 5 seconds
         setTimeout(() => {
             if (errorDiv.parentNode) {
                 errorDiv.parentNode.removeChild(errorDiv);
@@ -892,7 +892,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 请求通知权限
+     * Request notification permission
      * @private
      */
     async requestNotificationPermission() {
@@ -904,21 +904,21 @@ class OfficeWellnessApp {
         try {
             const hasPermission = await this.notificationService.requestPermission();
             if (!hasPermission) {
-                // 显示权限请求提示
+                // Show permission request prompt
                 if (this.uiController && typeof this.uiController.showPermissionPrompt === 'function') {
                     this.uiController.showPermissionPrompt(
                         async () => {
-                            // 用户点击允许
+                            // User clicked allow
                             const granted = await this.notificationService.requestPermission();
                             if (granted) {
-                                console.log('通知权限已获得');
+                                console.log('Notification permission granted');
                             } else {
-                                console.log('用户拒绝了通知权限');
+                                console.log('User denied notification permission');
                             }
                         },
                         () => {
-                            // 用户点击拒绝
-                            console.log('用户选择不开启通知权限');
+                            // User clicked deny
+                            console.log('User chose not to enable notifications');
                             const settings = this.appSettings.getSettings();
                             settings.notifications.browserNotifications = false;
                             this.appSettings.saveSettings(settings);
@@ -927,25 +927,25 @@ class OfficeWellnessApp {
                 }
             }
         } catch (error) {
-            console.warn('请求通知权限失败:', error);
+            console.warn('Failed to request notification permission:', error);
         }
     }
 
     /**
-     * 处理初始化错误
+     * Handle initialization errors
      * @param {Error} error
      * @private
      */
     handleInitializationError(error) {
         console.error('Application initialization error:', error);
         
-        // 显示用户友好的错误信息
+        // Display user-friendly error message
         const errorMessage = this.getErrorMessage(error);
         this.showFallbackError(errorMessage);
         
-        // 尝试基本功能恢复
+        // Attempt basic functionality recovery
         try {
-            // 至少确保UI可以显示
+            // Ensure UI can at least display
             if (!this.uiController && typeof UIController !== 'undefined') {
                 try {
                     this.uiController = new UIController();
@@ -956,7 +956,7 @@ class OfficeWellnessApp {
                 }
             }
             
-            // 显示错误状态
+            // Display error state
             if (this.uiController && typeof this.uiController.updateAppStatusSummary === 'function') {
                 this.uiController.updateAppStatusSummary(false);
             }
@@ -968,35 +968,35 @@ class OfficeWellnessApp {
     }
     
     /**
-     * 获取用户友好的错误信息
-     * @param {Error} error - 错误对象
-     * @returns {string} 用户友好的错误信息
+     * Get user-friendly error message
+     * @param {Error} error - error object
+     * @returns {string} user-friendly error message
      */
     getErrorMessage(error) {
         if (!error) return 'Unknown error occurred';
         
         const message = error.message || error.toString();
         
-        // 根据错误类型返回友好信息
+        // Return friendly message based on error type
         if (message.includes('Missing required classes')) {
-            return '应用组件加载失败，请刷新页面重试';
+            return 'Application component loading failed, please refresh the page to retry';
         } else if (message.includes('localStorage')) {
-            return '浏览器存储功能不可用，某些功能可能受限';
+            return 'Browser storage unavailable, some features may be limited';
         } else if (message.includes('Notification')) {
-            return '通知功能初始化失败，将使用页面内提醒';
+            return 'Notification initialization failed, will use in-page alerts';
         } else if (message.includes('UIController')) {
-            return '用户界面初始化失败，请刷新页面';
+            return 'User interface initialization failed, please refresh the page';
         } else {
-            return `应用启动时遇到问题: ${message}`;
+            return `Application startup encountered an issue: ${message}`;
         }
     }
     
     /**
-     * 显示回退错误信息
-     * @param {string} message - 错误信息
+     * Display fallback error message
+     * @param {string} message - error message
      */
     showFallbackError(message) {
-        // 尝试在页面上显示错误
+        // Attempt to display error on page
         try {
             const errorDiv = document.createElement('div');
             errorDiv.style.cssText = `
@@ -1016,7 +1016,7 @@ class OfficeWellnessApp {
             `;
             
             errorDiv.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 8px;">应用启动失败</div>
+                <div style="font-weight: bold; margin-bottom: 8px;">Application startup failed</div>
                 <div style="font-size: 14px; margin-bottom: 12px;">${message}</div>
                 <button onclick="location.reload()" style="
                     background: white;
@@ -1026,12 +1026,12 @@ class OfficeWellnessApp {
                     border-radius: 4px;
                     cursor: pointer;
                     font-weight: bold;
-                ">刷新页面</button>
+                ">Refresh page</button>
             `;
             
             document.body.appendChild(errorDiv);
             
-            // 10秒后自动隐藏
+            // Auto-hide after 10 seconds
             setTimeout(() => {
                 if (errorDiv.parentNode) {
                     errorDiv.remove();
@@ -1040,13 +1040,13 @@ class OfficeWellnessApp {
             
         } catch (displayError) {
             console.error('Failed to display error message:', displayError);
-            // 最后的回退方案
-            alert(message + '\n\n请刷新页面重试。');
+            // Final fallback solution
+            alert(message + '\n\nPlease refresh the page to retry.');
         }
     }
 
     /**
-     * 启动提醒
+     * Start reminder
      * @param {string} type - 'water' | 'standup'
      */
     startReminder(type) {
@@ -1064,11 +1064,11 @@ class OfficeWellnessApp {
                 currentSettings.water.enabled = true;
                 this.appSettings.updateSettings(currentSettings);
                 
-                // 保存应用状态
+                // Save application state
                 this.saveAppState();
                 console.log('Water reminder started successfully');
                 
-                // 手动触发状态更新以确保UI同步
+                // Manually trigger state update to ensure UI synchronization
                 if (this.uiController) {
                     const status = this.waterReminder.getCurrentStatus();
                     console.log('Manual status update for water:', status);
@@ -1080,11 +1080,11 @@ class OfficeWellnessApp {
                 currentSettings.standup.enabled = true;
                 this.appSettings.updateSettings(currentSettings);
                 
-                // 保存应用状态
+                // Save application state
                 this.saveAppState();
                 console.log('Standup reminder started successfully');
                 
-                // 手动触发状态更新以确保UI同步
+                // Manually trigger state update to ensure UI synchronization
                 if (this.uiController) {
                     const status = this.standupReminder.getCurrentStatus();
                     console.log('Manual status update for standup:', status);
@@ -1099,7 +1099,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 停止提醒
+     * Stop reminder
      * @param {string} type - 'water' | 'standup'
      */
     stopReminder(type) {
@@ -1117,11 +1117,11 @@ class OfficeWellnessApp {
                 currentSettings.water.enabled = false;
                 this.appSettings.updateSettings(currentSettings);
                 
-                // 保存应用状态
+                // Save application state
                 this.saveAppState();
                 console.log('Water reminder stopped successfully');
                 
-                // 手动触发状态更新以确保UI同步
+                // Manually trigger state update to ensure UI synchronization
                 if (this.uiController) {
                     const status = this.waterReminder.getCurrentStatus();
                     console.log('Manual status update for water:', status);
@@ -1133,11 +1133,11 @@ class OfficeWellnessApp {
                 currentSettings.standup.enabled = false;
                 this.appSettings.updateSettings(currentSettings);
                 
-                // 保存应用状态
+                // Save application state
                 this.saveAppState();
                 console.log('Standup reminder stopped successfully');
                 
-                // 手动触发状态更新以确保UI同步
+                // Manually trigger state update to ensure UI synchronization
                 if (this.uiController) {
                     const status = this.standupReminder.getCurrentStatus();
                     console.log('Manual status update for standup:', status);
@@ -1152,7 +1152,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 暂停提醒
+     * Pause reminder
      * @param {string} type - 'water' | 'standup'
      */
     pauseReminder(type) {
@@ -1164,7 +1164,7 @@ class OfficeWellnessApp {
                 this.waterReminder.pause();
                 console.log('Water reminder status after pause:', this.waterReminder.getCurrentStatus());
                 
-                // 保存应用状态
+                // Save application state
                 this.saveAppState();
                 console.log('Water reminder paused successfully');
                 
@@ -1174,7 +1174,7 @@ class OfficeWellnessApp {
                 this.standupReminder.pause();
                 console.log('Standup reminder status after pause:', this.standupReminder.getCurrentStatus());
                 
-                // 保存应用状态
+                // Save application state
                 this.saveAppState();
                 console.log('GitHub Pages Debug - Standup reminder paused successfully');
             } else {
@@ -1187,7 +1187,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 恢复提醒
+     * Resume reminder
      * @param {string} type - 'water' | 'standup'
      */
     resumeReminder(type) {
@@ -1197,7 +1197,7 @@ class OfficeWellnessApp {
                 console.log('Resuming water reminder...');
                 this.waterReminder.resume();
                 
-                // 保存应用状态
+                // Save application state
                 this.saveAppState();
                 console.log('Water reminder resumed successfully');
                 
@@ -1205,7 +1205,7 @@ class OfficeWellnessApp {
                 console.log('GitHub Pages Debug - Resuming standup reminder...');
                 this.standupReminder.resume();
                 
-                // 保存应用状态
+                // Save application state
                 this.saveAppState();
                 console.log('GitHub Pages Debug - Standup reminder resumed successfully');
             } else {
@@ -1218,7 +1218,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 重置提醒
+     * Reset reminder
      * @param {string} type - 'water' | 'standup'
      */
     resetReminder(type) {
@@ -1226,11 +1226,11 @@ class OfficeWellnessApp {
             console.log('Resetting water reminder...');
             this.waterReminder.reset();
             
-            // 保存应用状态
+            // Save application state
             this.saveAppState();
             console.log('Water reminder reset successfully');
             
-            // 手动触发状态更新以确保UI同步
+            // Manually trigger state update to ensure UI synchronization
             if (this.uiController) {
                 const status = this.waterReminder.getCurrentStatus();
                 console.log('Manual status update for water:', status);
@@ -1240,11 +1240,11 @@ class OfficeWellnessApp {
             console.log('Resetting standup reminder...');
             this.standupReminder.reset();
             
-            // 保存应用状态
+            // Save application state
             this.saveAppState();
             console.log('Standup reminder reset successfully');
             
-            // 手动触发状态更新以确保UI同步
+            // Manually trigger state update to ensure UI synchronization
             if (this.uiController) {
                 const status = this.standupReminder.getCurrentStatus();
                 console.log('Manual status update for standup:', status);
@@ -1254,15 +1254,15 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 更新设置
+     * Update settings
      * @param {Object} newSettings
      */
     updateSettings(newSettings) {
         try {
-            // 更新设置
+            // Update settings
             const updatedSettings = this.appSettings.updateSettings(newSettings);
             
-            // 更新提醒管理器设置
+            // Update reminder manager settings
             if (newSettings.water && this.waterReminder) {
                 this.waterReminder.updateSettings(newSettings.water);
             }
@@ -1271,24 +1271,24 @@ class OfficeWellnessApp {
                 this.standupReminder.updateSettings(newSettings.standup);
             }
             
-            // 更新UI
+            // Update UI
             if (this.uiController) {
                 this.uiController.updateSettings(updatedSettings);
             }
             
-            // 保存应用状态
+            // Save application state
             this.saveAppState();
             
-            console.log('设置已更新:', updatedSettings);
+            console.log('Settings updated:', updatedSettings);
             return updatedSettings;
         } catch (error) {
-            console.error('更新设置失败:', error);
+            console.error('Failed to update settings:', error);
             throw error;
         }
     }
 
     /**
-     * 获取当前应用状态
+     * Get current application state
      * @returns {Object}
      */
     getAppState() {
@@ -1302,22 +1302,22 @@ class OfficeWellnessApp {
     }
 }
 
-// 全局应用实例
+// Global application instance
 
 
-// DOM加载完成后初始化应用
+// Initialize application after DOM loaded
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         app = new OfficeWellnessApp();
-        window.app = app; // 确保全局可访问
+        window.app = app; // Ensure global accessibility
         await app.initialize();
     } catch (error) {
         console.error('Application startup failed:', error);
         
-        // 如果应用初始化失败，设置基本的按钮功能
+        // If app initialization fails, set up basic button functionality
         setupFallbackButtons();
         
-        // 显示错误信息给用户
+        // Display error message to user
         const errorDiv = document.createElement('div');
         errorDiv.style.cssText = `
             position: fixed;
@@ -1342,7 +1342,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
         document.body.appendChild(errorDiv);
         
-        // 5秒后自动隐藏错误信息
+        // Auto-hide error message after 5 seconds
         setTimeout(() => {
             if (errorDiv.parentNode) {
                 errorDiv.parentNode.removeChild(errorDiv);
@@ -1351,60 +1351,60 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// 监听强制刷新快捷键
+// Listen for force refresh shortcuts
 document.addEventListener('keydown', (event) => {
-    // 检测 Ctrl+F5 或 Ctrl+Shift+R (强制刷新)
+    // Detect Ctrl+F5 or Ctrl+Shift+R (force refresh)
     if ((event.ctrlKey && event.key === 'F5') || 
         (event.ctrlKey && event.shiftKey && event.key === 'R')) {
-        console.log('检测到强制刷新快捷键');
-        // 设置强制刷新标记
+        console.log('Detected force refresh shortcut');
+        // Set force refresh flag
         if (app && app.appSettings) {
             app.appSettings.setForceRefreshFlag();
         } else {
-            // 如果应用还未初始化，直接设置 sessionStorage
+            // If app not yet initialized, set sessionStorage directly
             try {
                 sessionStorage.setItem('forceRefreshFlag', 'true');
             } catch (error) {
-                console.warn('设置强制刷新标记失败:', error);
+                console.warn('Failed to set force refresh flag:', error);
             }
         }
     }
 });
 
-// 页面卸载前保存状态
+// Save state before page unload
 window.addEventListener('beforeunload', () => {
     if (app && app.isInitialized) {
-        // 保存设置和应用状态
+        // Save settings and application state
         app.saveSettings();
         app.saveAppState();
     }
 });
 
-// 页面可见性变化时保存状态
+// Save state on page visibility change
 document.addEventListener('visibilitychange', () => {
     if (app && app.isInitialized) {
         if (document.visibilityState === 'hidden') {
-            // 页面隐藏时保存状态
+            // Save state when page hidden
             app.saveAppState();
         } else if (document.visibilityState === 'visible') {
-            // 页面可见时检查状态
-            // 这里可以添加额外的恢复逻辑，如果需要的话
+            // Check state when page visible
+            // Additional recovery logic can be added here if needed
         }
     }
 });
 
-// 导出给其他脚本使用
+// Export for other scripts to use
 window.OfficeWellnessApp = OfficeWellnessApp;
 
-// 备用按钮功能 - 当主应用初始化失败时使用
+// Fallback button functionality - used when main app initialization fails
 function setupFallbackButtons() {
     console.log('Setting up fallback button handlers...');
     
-    // 状态跟踪
+    // State tracking
     let waterActive = false;
     let standupActive = false;
     
-    // 更新应用状态指示器的函数
+    // Function to update application status indicator
     function updateAppStatus() {
         const indicator = document.getElementById('app-status-indicator');
         const text = document.getElementById('app-status-text');
@@ -1432,7 +1432,7 @@ function setupFallbackButtons() {
         }
     }
     
-    // 水提醒按钮
+    // Water reminder button
     const waterToggle = document.getElementById('water-toggle');
     if (waterToggle) {
         waterToggle.addEventListener('click', () => {
@@ -1456,14 +1456,14 @@ function setupFallbackButtons() {
         console.log('Water toggle fallback handler added');
     }
     
-    // 姿势提醒按钮
+    // Posture reminder button
     const standupToggle = document.getElementById('standup-toggle');
     if (standupToggle) {
         standupToggle.addEventListener('click', () => {
             console.log('Standup toggle clicked (fallback)');
             const isStart = standupToggle.textContent.trim() === 'Start';
             
-            // 尝试调用主应用的方法
+            // Try to call main app methods
             if (window.app && window.app.startReminder && window.app.pauseReminder) {
                 if (isStart) {
                     window.app.startReminder('standup');
@@ -1471,12 +1471,12 @@ function setupFallbackButtons() {
                     window.app.pauseReminder('standup');
                 }
             } else {
-                // 备用逻辑：手动更新UI
+                // Fallback logic: manually update UI
                 if (isStart) {
                     standupToggle.textContent = 'Pause';
                     standupToggle.className = 'btn-secondary';
                     standupActive = true;
-                    // 更新状态标签
+                    // Update status label
                     const statusBadge = document.getElementById('standup-status-badge');
                     if (statusBadge) {
                         statusBadge.textContent = 'Active';
@@ -1488,7 +1488,7 @@ function setupFallbackButtons() {
                     standupToggle.textContent = 'Start';
                     standupToggle.className = 'btn-primary';
                     standupActive = false;
-                    // 更新状态标签
+                    // Update status label
                     const statusBadge = document.getElementById('standup-status-badge');
                     if (statusBadge) {
                         statusBadge.textContent = 'Inactive';
@@ -1507,15 +1507,15 @@ function setupFallbackButtons() {
 
 }
 
-// 应用初始化
+// Application initialization
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         console.log('Starting application initialization...');
         
-        // 创建应用实例
+        // Create app instance
         const app = new OfficeWellnessApp();
         
-        // 初始化应用
+        // Initialize application
         await app.initialize();
         
         console.log('Application initialized successfully');
@@ -1525,7 +1525,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// 导出类供其他模块使用
+// Export class for other modules to use
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = OfficeWellnessApp;
 }
