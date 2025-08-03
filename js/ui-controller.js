@@ -315,8 +315,7 @@ class UIController {
 
 
 
-        // Set theme
-        this.applyTheme('light');
+
 
         // Check for mobile device
         this.checkMobileDevice();
@@ -346,45 +345,7 @@ class UIController {
         window.addEventListener('resize', this.resizeHandler);
     }
 
-    /**
-     * Apply theme
-     * @param {string} theme - Theme name ('light' | 'dark' | 'auto')
-     */
-    applyTheme(theme) {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        
-        // Remove existing theme change listener
-        if (this.themeChangeHandler) {
-            mediaQuery.removeEventListener('change', this.themeChangeHandler);
-        }
 
-        if (theme === 'auto') {
-            // Automatically select theme based on system preference
-            const prefersDark = mediaQuery.matches;
-            if (prefersDark) {
-                document.body.classList.add('dark-theme');
-            } else {
-                document.body.classList.remove('dark-theme');
-            }
-
-            // Store theme change handler reference
-            this.themeChangeHandler = (e) => {
-                if (this.getSettingsFromUI().appearance.theme === 'auto') {
-                    if (e.matches) {
-                        document.body.classList.add('dark-theme');
-                    } else {
-                        document.body.classList.remove('dark-theme');
-                    }
-                }
-            };
-            
-            mediaQuery.addEventListener('change', this.themeChangeHandler);
-        } else if (theme === 'dark') {
-            document.body.classList.add('dark-theme');
-        } else {
-            document.body.classList.remove('dark-theme');
-        }
-    }
 
     /**
      * Update reminder time display
@@ -650,14 +611,7 @@ class UIController {
      * @returns {Object} Settings object
      */
     getSettingsFromUI() {
-        // Get currently selected theme
-        let selectedTheme = 'light';
-        if (this.elements.themeSelector) {
-            const activeTheme = this.elements.themeSelector.querySelector('.theme-option.active');
-            if (activeTheme) {
-                selectedTheme = activeTheme.getAttribute('data-theme');
-            }
-        }
+
 
         return {
             water: {
@@ -676,9 +630,7 @@ class UIController {
                 soundEnabled: this.elements.soundEnabled ? this.elements.soundEnabled.checked : true,
                 style: this.elements.notificationStyle ? this.elements.notificationStyle.value : 'standard'
             },
-            appearance: {
-                theme: selectedTheme
-            }
+
         };
     }
 
@@ -731,21 +683,7 @@ class UIController {
             }
         }
 
-        // Apply appearance settings
-        if (settings.appearance && settings.appearance.theme) {
-            this.applyTheme(settings.appearance.theme);
 
-            // Update theme selector UI
-            if (this.elements.themeSelector) {
-                const themeOptions = this.elements.themeSelector.querySelectorAll('.theme-option');
-                themeOptions.forEach(option => {
-                    option.classList.remove('active');
-                    if (option.getAttribute('data-theme') === settings.appearance.theme) {
-                        option.classList.add('active');
-                    }
-                });
-            }
-        }
     }
 
     /**
