@@ -4,15 +4,19 @@
  */
 class StorageManager {
     constructor() {
-        this.storagePrefix = 'wellness_reminder_';
+        this.STORAGE_PREFIX = 'wellness-reminder';
+        this.STORAGE_VERSION = '1.0.0';
         this.storageKeys = {
-            settings: 'settings',
-            state: 'state',
-            waterState: 'water_state',
-            standupState: 'standup_state'
+            waterSettings: 'water-reminder-settings',
+            standupSettings: 'standup-reminder-settings',
+            appSettings: 'app-settings',
+            appState: 'app-state',
+            waterState: 'water-reminder-state',
+            standupState: 'standup-reminder-state'
         };
         this.isStorageAvailable = this.checkStorageAvailability();
         this.memoryStorage = new Map(); // Backup memory storage
+        this.pendingSaves = new Map(); // Debounce pending saves
     }
 
     /**
@@ -131,44 +135,72 @@ class StorageManager {
     }
 
     /**
-     * Set item to storage (basic API)
+     * Generate storage key with unified naming convention
+     * @private
+     */
+    generateStorageKey(key) {
+        const normalizedKey = this.storageKeys[key] || key.replace(/_/g, '-');
+        return `${this.STORAGE_PREFIX}.${normalizedKey}`;
+    }
+
+    /**
+     * Set item to storage with debounced batching
      * @param {string} key - Storage key name (without prefix)
      * @param {any} data - Data to save
+     * @param {Object} options - Save options
      * @returns {boolean} Whether save was successful
      */
-    setItem(key, data) {
+    setItem(key, data, options = {}) {
         try {
-            const fullKey = this.storagePrefix + key;
-            const jsonData = JSON.stringify(data);
+            const fullKey = this.generateStorageKey(key);
+            const storageData = {
+                data,
+                timestamp: Date.now(),
+                version: this.STORAGE_VERSION
+            };
+            const jsonData = JSON.stringify(storageData);
             
-            if (this.isStorageAvailable) {
-                localStorage.setItem(fullKey, jsonData);
+            // Clear existing pending save
+            if (this.pendingSaves.has(fullKey)) {
+                clearTimeout(this.pendingSaves.get(fullKey));
+            }
+            
+            const saveOperation = () => {
+                try {
+                    if (this.isStorageAvailable) {
+                        localStorage.setItem(fullKey, jsonData);
+                    } else {
+                        this.memoryStorage.set(fullKey, jsonData);
+                    }
+                } catch (error) {
+                    console.error('Failed to save to storage:', error);
+                    this.memoryStorage.set(fullKey, jsonData);
+                }
+            };
+            
+            if (options.immediate) {
+                saveOperation();
             } else {
-                this.memoryStorage.set(fullKey, jsonData);
+                const timer = setTimeout(saveOperation, 100);
+                this.pendingSaves.set(fullKey, timer);
             }
             
             return true;
         } catch (error) {
-            console.error('Failed to save to storage:', error);
-            try {
-                const fullKey = this.storagePrefix + key;
-                this.memoryStorage.set(fullKey, JSON.stringify(data));
-                return true;
-            } catch (memError) {
-                console.error('Memory storage also failed:', memError);
-                return false;
-            }
+            console.error('Failed to prepare save:', error);
+            return false;
         }
     }
 
     /**
-     * Get item from storage (basic API)
+     * Get item from storage with version checking
      * @param {string} key - Storage key name (without prefix)
-     * @returns {any|null} Loaded data, returns null on failure
+     * @param {any} defaultValue - Default value if key doesn't exist
+     * @returns {any} Loaded data or default value
      */
-    getItem(key) {
+    getItem(key, defaultValue = null) {
         try {
-            const fullKey = this.storagePrefix + key;
+            const fullKey = this.generateStorageKey(key);
             let jsonData = null;
             
             if (this.isStorageAvailable) {
@@ -178,36 +210,60 @@ class StorageManager {
             }
             
             if (jsonData === null || jsonData === undefined) {
-                return null;
+                return defaultValue;
             }
             
-            return JSON.parse(jsonData);
+            const parsed = JSON.parse(jsonData);
+            
+            // Version compatibility check
+            if (parsed.version !== this.STORAGE_VERSION) {
+                console.warn(`Storage version mismatch for key: ${key}`);
+                return this.migrateStorageData(key, parsed, defaultValue);
+            }
+            
+            return parsed.data;
         } catch (error) {
             console.error('Failed to load from storage:', error);
-            return null;
+            return defaultValue;
         }
     }
 
 
 
     /**
-     * Save state (legacy API compatibility)
+     * Migrate storage data when version mismatch occurs
+     * @private
+     */
+    migrateStorageData(key, oldData, defaultValue) {
+        try {
+            // Simple migration: just return data if structure is compatible
+            if (oldData && typeof oldData.data === 'object') {
+                return oldData.data;
+            }
+        } catch (error) {
+            console.error('Migration failed:', error);
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Save state with unified key mapping
      * @param {string} type - Reminder type ('water' | 'standup')
      * @param {Object} state - State object
      */
     saveState(type, state) {
-        const key = type === 'water' ? this.storageKeys.waterState : this.storageKeys.standupState;
-        this.setItem(key, state);
+        const key = type === 'water' ? 'waterState' : 'standupState';
+        this.setItem(key, state, { immediate: false });
     }
 
     /**
-     * Load state (legacy API compatibility)
+     * Load state with unified key mapping
      * @param {string} type - Reminder type ('water' | 'standup')
      * @returns {Object|null} State object
      */
     loadState(type) {
-        const key = type === 'water' ? this.storageKeys.waterState : this.storageKeys.standupState;
-        return this.getItem(key);
+        const key = type === 'water' ? 'waterState' : 'standupState';
+        return this.getItem(key, {});
     }
 
     /**

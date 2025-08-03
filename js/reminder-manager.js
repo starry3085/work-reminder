@@ -61,8 +61,14 @@ class ReminderManager {
         // Start time update timer
         this.startUpdateTimer();
         
-        // Notify state change
-        this.notifyStateChange();
+        // 通过StateManager统一更新状态
+        const updates = {
+            isActive: true,
+            isPaused: false,
+            timeRemaining: this.timeRemaining,
+            nextReminderAt: this.nextReminderTime
+        };
+        this.updateState(updates);
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -94,11 +100,14 @@ class ReminderManager {
         // Reset state
         this.resetState();
         
-        // Save state immediately
-        this.saveState();
-        
-        // Notify state change
-        this.notifyStateChange();
+        // 通过StateManager统一更新状态
+        const updates = {
+            isActive: false,
+            isPaused: false,
+            timeRemaining: 0,
+            nextReminderAt: 0
+        };
+        this.updateState(updates);
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -129,11 +138,14 @@ class ReminderManager {
         // Clear timer
         this.clearTimer();
         
-        // Save state immediately
-        this.saveState();
-        
-        // Notify state change
-        this.notifyStateChange();
+        // 通过StateManager统一更新状态
+        const updates = {
+            isActive: true,
+            isPaused: true,
+            timeRemaining: this.timeRemaining,
+            nextReminderAt: this.nextReminderTime
+        };
+        this.updateState(updates);
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -162,8 +174,14 @@ class ReminderManager {
         // Restart timer
         this.startTimer();
         
-        // Save state immediately
-        this.saveState();
+        // 通过StateManager统一更新状态
+        const updates = {
+            isActive: true,
+            isPaused: false,
+            timeRemaining: this.timeRemaining,
+            nextReminderAt: this.nextReminderTime
+        };
+        this.updateState(updates);
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -191,11 +209,20 @@ class ReminderManager {
         this.clearUpdateTimer();
         this.resetState();
         
+        // 通过StateManager统一更新状态
+        const updates = {
+            isActive: false,
+            isPaused: false,
+            timeRemaining: 0,
+            nextReminderAt: 0
+        };
+        this.updateState(updates);
+        
         if (wasActive) {
             // Restart with fresh interval
             this.start();
         } else {
-            // Update UI if not restarting
+            // Update UI via state change
             this.triggerStatusChange({
                 status: 'reset',
                 isActive: false,
@@ -219,8 +246,8 @@ class ReminderManager {
         // Update last reminder time
         this.settings.lastReminder = Date.now();
         
-        // Notify state change
-        this.notifyStateChange();
+        // 通过StateManager更新设置
+        this.updateState({ settings: this.settings });
         
         // Reset and restart timer
         this.resetAndRestart();
@@ -249,8 +276,14 @@ class ReminderManager {
         this.startTimer();
         this.startUpdateTimer();
         
-        // Notify state change
-        this.notifyStateChange();
+        // 通过StateManager统一更新状态
+        const updates = {
+            isActive: true,
+            isPaused: false,
+            timeRemaining: this.timeRemaining,
+            nextReminderAt: this.nextReminderTime
+        };
+        this.updateState(updates);
         
         // Trigger status change
         this.triggerStatusChange({
@@ -466,6 +499,15 @@ class ReminderManager {
         this.clearTimer();
         this.startTimer();
         
+        // 通过StateManager统一更新状态
+        const updates = {
+            isActive: true,
+            isPaused: false,
+            timeRemaining: this.timeRemaining,
+            nextReminderAt: this.nextReminderTime
+        };
+        this.updateState(updates);
+        
         // Trigger status change callback
         this.triggerStatusChange({
             status: 'snoozed',
@@ -504,56 +546,125 @@ class ReminderManager {
     }
 
     /**
-     * Restore saved state
-     * @param {Object} state - State to restore
+     * 设置状态管理器
+     */
+    setStateManager(stateManager) {
+        this.stateManager = stateManager;
+        
+        // 订阅状态变化
+        this.unsubscribe = stateManager.subscribe(this.type, (state) => {
+            this.syncWithState(state);
+        });
+        
+        console.log(`${this.type} reminder connected to StateManager`);
+    }
+
+    /**
+     * 同步状态 - 从StateManager同步状态
+     * @private
+     */
+    syncWithState(state) {
+        if (!state) return;
+        
+        try {
+            // 更新内部状态
+            this.isActive = state.isActive || false;
+            this.isPaused = state.isPaused || false;
+            this.timeRemaining = state.timeRemaining || 0;
+            this.nextReminderTime = state.nextReminderAt || 0;
+            
+            // 更新设置
+            this.settings = { ...this.settings, ...state.settings };
+            
+            // 同步定时器
+            this.syncTimers();
+            
+            console.log(`${this.type} reminder synced with state:`, {
+                isActive: this.isActive,
+                isPaused: this.isPaused,
+                timeRemaining: this.timeRemaining
+            });
+        } catch (error) {
+            console.error(`Failed to sync ${this.type} reminder state:`, error);
+        }
+    }
+
+    /**
+     * 同步定时器状态
+     * @private
+     */
+    syncTimers() {
+        this.clearTimer();
+        this.clearUpdateTimer();
+        
+        if (this.isActive && !this.isPaused) {
+            this.startTime = Date.now();
+            this.startTimer();
+            this.startUpdateTimer();
+            
+            this.triggerStatusChange({
+                status: 'synced',
+                isActive: true,
+                isPaused: false,
+                timeRemaining: this.timeRemaining
+            });
+        } else if (this.isActive && this.isPaused) {
+            this.pauseTime = Date.now();
+            
+            this.triggerStatusChange({
+                status: 'synced',
+                isActive: true,
+                isPaused: true,
+                timeRemaining: this.timeRemaining
+            });
+        }
+    }
+
+    /**
+     * 更新状态 - 统一状态更新入口
+     * @private
+     */
+    updateState(updates) {
+        if (this.stateManager) {
+            this.stateManager.updateState(this.type, updates);
+        } else {
+            // 兼容旧模式
+            this.handleLegacyStateUpdate(updates);
+        }
+    }
+
+    /**
+     * 处理旧模式状态更新（兼容）
+     * @private
+     */
+    handleLegacyStateUpdate(updates) {
+        // 仅在无StateManager时执行
+        console.warn('Using legacy state update for', this.type);
+    }
+
+    /**
+     * 恢复状态（兼容旧接口）
+     * @param {Object} state - 要恢复的状态
      */
     restoreState(state) {
         if (!state) return;
         
+        // 如果已连接StateManager，通过StateManager恢复
+        if (this.stateManager) {
+            this.stateManager.updateState(this.type, state);
+            return true;
+        }
+        
+        // 旧模式兼容
         try {
-            // Restore activity status
             this.isActive = state.isActive || false;
             this.isPaused = state.isPaused || false;
+            this.timeRemaining = state.timeRemaining || 0;
+            this.nextReminderTime = state.nextReminderAt || 0;
             
-            // Restore time information
-            if (state.timeRemaining) {
-                this.timeRemaining = state.timeRemaining;
-            }
+            this.syncTimers();
             
-            if (state.nextReminderAt) {
-                this.nextReminderTime = state.nextReminderAt;
-            } else if (this.timeRemaining > 0) {
-                this.nextReminderTime = Date.now() + this.timeRemaining;
-            }
-            
-            // If active, start timers
-            if (this.isActive && !this.isPaused) {
-                this.startTime = Date.now();
-                this.startTimer();
-                this.startUpdateTimer();
-                
-                // Activity detection removed for MVP - using simpler time-based reminders
-                
-                // Trigger status change callback
-                this.triggerStatusChange({
-                    status: 'restored',
-                    isActive: true,
-                    isPaused: false,
-                    timeRemaining: this.timeRemaining
-                });
-            } else if (this.isActive && this.isPaused) {
-                // If paused, only trigger status change callback
-                this.pauseTime = Date.now();
-                
-                this.triggerStatusChange({
-                    status: 'restored',
-                    isActive: true,
-                    isPaused: true,
-                    timeRemaining: this.timeRemaining
-                });
-            }
-            
-            console.log(`${this.type} reminder state restored:`, {
+            console.log(`${this.type} reminder state restored (legacy):`, {
                 isActive: this.isActive,
                 isPaused: this.isPaused,
                 timeRemaining: this.timeRemaining

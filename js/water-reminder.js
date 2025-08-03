@@ -7,9 +7,10 @@ class WaterReminder extends ReminderManager {
      * Create water reminder instance
      * @param {Object} settings - Water reminder settings
      * @param {NotificationService} notificationService - Notification service instance
+     * @param {StateManager} stateManager - State manager instance (optional)
      */
-    constructor(settings, notificationService) {
-        super('water', settings, notificationService);
+    constructor(settings, notificationService, stateManager = null) {
+        super('water', settings, notificationService, stateManager);
         
         console.log('Water reminder created');
     }

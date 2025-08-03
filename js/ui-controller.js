@@ -408,9 +408,31 @@ class UIController {
     }
 
     /**
-     * Update reminder status display - simplified
+     * 设置状态管理器
+     */
+    setStateManager(stateManager) {
+        this.stateManager = stateManager;
+        
+        // 订阅状态变化
+        this.unsubscribeWater = stateManager.subscribe('water', (state) => {
+            this.updateCard('water', state);
+            this.updateButtons('water', state);
+            this.updateCountdown('water', state.timeRemaining || 0);
+        });
+        
+        this.unsubscribeStandup = stateManager.subscribe('standup', (state) => {
+            this.updateCard('standup', state);
+            this.updateButtons('standup', state);
+            this.updateCountdown('standup', state.timeRemaining || 0);
+        });
+        
+        console.log('UIController connected to StateManager');
+    }
+
+    /**
+     * Update reminder status display - pure UI update
      * @param {string} type - 'water' | 'standup'
-     * @param {Object} status - Status object
+     * @param {Object} status - Status object from StateManager
      */
     updateReminderStatus(type, status) {
         // Update UI elements only - state management handled elsewhere

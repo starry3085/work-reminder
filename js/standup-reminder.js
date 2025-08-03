@@ -7,9 +7,10 @@ class StandupReminder extends ReminderManager {
      * Create standup reminder instance
      * @param {Object} settings - Standup reminder settings
      * @param {NotificationService} notificationService - Notification service instance
+     * @param {StateManager} stateManager - State manager instance (optional)
      */
-    constructor(settings, notificationService) {
-        super('standup', settings, notificationService);
+    constructor(settings, notificationService, stateManager = null) {
+        super('standup', settings, notificationService, stateManager);
         
         console.log('Standup reminder created');
     }
