@@ -7,25 +7,20 @@ class UIController {
         this.currentNotification = null;
         this.eventListeners = {};
         
-        // Simplified state - only track what UI needs to know
-        this.reminderStates = {
-            water: { isActive: false, isPaused: false, timeRemaining: 0 },
-            standup: { isActive: false, isPaused: false, timeRemaining: 0 }
-        };
+
 
         // Bind methods
         this.handleNotificationKeydown = this.handleNotificationKeydown.bind(this);
     }
 
     /**
-     * Initialize UI controller
+     * Initialize UI controller with StateManager integration
      */
     initialize() {
         console.log('Initializing UI controller...');
         this.cleanup();
         this.cacheElements();
         this.bindEvents();
-        this.setupInitialState();
         return this;
     }
 
@@ -351,13 +346,6 @@ class UIController {
         // Update countdown display with current time remaining
         if (timeInfo && typeof timeInfo.timeRemaining !== 'undefined') {
             this.updateCountdown(type, timeInfo.timeRemaining);
-            
-            // Update UI state
-            if (type === 'water') {
-                this.uiState.water.timeRemaining = timeInfo.timeRemaining;
-            } else if (type === 'standup') {
-                this.uiState.standup.timeRemaining = timeInfo.timeRemaining;
-            }
         }
         
         console.log(`${type} reminder time updated:`, timeInfo);
