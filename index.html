@@ -166,7 +166,7 @@
                 showAppStatus('error', 'Application failed to start: ' + error.message);
                 showStartupError(error);
 
-                // 如果有调试助手，显示详细诊断
+                // If debug helper is available, show detailed diagnostics
                 if (typeof runDiagnostics === 'function') {
                     console.log('Running detailed diagnostics...');
                     runDiagnostics();
@@ -185,13 +185,13 @@
         }
 
         function showStartupError(error) {
-            // 移除已存在的错误通知
+            // Remove existing error notification
             const existingError = document.getElementById('startup-error');
             if (existingError) {
                 existingError.remove();
             }
 
-            // 创建错误通知
+            // Create error notification
             const notification = document.createElement('div');
             notification.id = 'startup-error';
             notification.style.cssText = `
@@ -211,7 +211,7 @@
             `;
 
             notification.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 8px;">应用启动失败</div>
+                <div style="font-weight: bold; margin-bottom: 8px;">Application Startup Failed</div>
                 <div style="font-size: 14px; margin-bottom: 12px;">${error.message}</div>
                 <button onclick="location.reload()" style="
                     background: white;
@@ -221,12 +221,12 @@
                     border-radius: 4px;
                     cursor: pointer;
                     font-weight: bold;
-                ">刷新页面</button>
+                ">Refresh Page</button>
             `;
 
             document.body.appendChild(notification);
 
-            // 10秒后自动隐藏
+            // Auto-hide after 10 seconds
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.remove();
@@ -262,7 +262,7 @@
             });
         }
 
-        // 添加全局错误处理
+        // Add global error handling
         window.addEventListener('error', function (event) {
             console.error('Global error:', event.error);
             showAppStatus('error', 'Runtime error occurred');

@@ -295,7 +295,7 @@ class OfficeWellnessApp {
                         if (this.uiController && this.uiController.isInitialized) {
                             this.mobileAdapter.showCompatibilityNotice(document.body);
                         }
-                    }, 1000); // 延迟1秒显示，确保UI已初始化
+                    }, 1000); // Delay 1 second to ensure UI is initialized
                 });
             }
             
@@ -314,21 +314,21 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 加载用户设置和应用状态
+     * Load user settings and application state
      * @private
      */
     async loadSettingsAndState() {
         try {
-            // 检查是否为强制刷新
+            // Check if force refresh
             const isForceRefresh = this.appSettings.detectForceRefresh();
             
-            // 加载设置（如果是强制刷新，则使用默认设置）
+            // Load settings (use default settings if force refresh)
             const settings = this.appSettings.loadSettings(isForceRefresh);
             console.log('User settings loaded:', settings);
             
             if (isForceRefresh) {
-                console.log('检测到强制刷新，已恢复默认设置');
-                // 清除应用状态
+                console.log('Force refresh detected, default settings restored');
+                // Clear application state
                 this.appSettings.resetState();
             }
             
@@ -336,7 +336,7 @@ class OfficeWellnessApp {
             const state = this.appSettings.loadState();
             console.log('Application state loaded:', state);
             
-            // 检查是否首次使用
+            // Check if first time use
             this.appState.isFirstUse = this.appSettings.isFirstUse();
             
             return { settings, state };
@@ -347,7 +347,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 保存用户设置
+     * Save user settings
      * @private
      */
     saveSettings() {
@@ -357,20 +357,20 @@ class OfficeWellnessApp {
             console.log('Settings saved');
             return true;
         } catch (error) {
-            console.error('保存设置失败:', error);
+            console.error('Failed to save settings:', error);
             return false;
         }
     }
     
     /**
-     * 保存应用状态 - 统一状态管理
+     * Save application state - unified state management
      * @private
      */
     saveAppState() {
         try {
-            // 直接由appSettings管理状态，避免重复保存
+            // State managed directly by appSettings to avoid duplicate saves
             this.appSettings.saveState();
-            console.log('应用状态已保存');
+            console.log('Application state saved');
             return true;
         } catch (error) {
             console.error('保存应用状态失败:', error);

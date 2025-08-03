@@ -32,7 +32,7 @@ class MobileAdapter {
 
     /**
      * Detect if current device is mobile
-     * @returns {boolean} 是否为移动设备
+     * @returns {boolean} Whether is mobile device
      */
     isMobileDevice() {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
@@ -40,7 +40,7 @@ class MobileAdapter {
     }
 
     /**
-     * 应用移动端适配
+     * Apply mobile device adaptation
      */
     applyMobileAdaptation() {
         if (this.isMobileDevice()) {
@@ -50,13 +50,13 @@ class MobileAdapter {
     }
 
     /**
-     * 检查功能支持
-     * @returns {Object} 功能支持状态
+     * Check feature support
+     * @returns {Object} Feature support status
      */
     checkFeatures() {
         return { ...this.features };
     }
 }
 
-// 导出给其他脚本使用
+// Export for use by other scripts
 window.MobileAdapter = MobileAdapter;

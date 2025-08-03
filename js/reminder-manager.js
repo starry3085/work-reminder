@@ -327,7 +327,7 @@ class ReminderManager {
     }
 
     /**
-     * 通知状态变化 - 不再直接保存状态，由应用统一处理
+     * Notify status change - no longer save state directly, handled uniformly by application
      * @private
      */
     notifyStateChange() {

@@ -39,7 +39,7 @@ class StandupReminder extends ReminderManager {
             timeRemaining: 0
         });
         
-        // 使用父类的统一自动重置机制（5秒）
+        // Use parent class unified auto-reset mechanism (5 seconds)
         console.log('Standup reminder triggered, using unified auto-reset mechanism');
         
         console.log('Standup reminder triggered');

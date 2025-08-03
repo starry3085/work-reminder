@@ -155,7 +155,7 @@ body {
     font-weight: 500;
 }
 
-/* 主控制面板 */
+/* Main control panel */
 .main-panel {
     flex: 1;
     background: var(--background-primary);
@@ -167,7 +167,7 @@ body {
     gap: 2rem;
 }
 
-/* 状态显示区域 */
+/* Status display area */
 .status-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -405,7 +405,7 @@ body {
     margin-top: 0.5rem;
 }
 
-/* 按钮样式 */
+/* Button styles */
 .btn-primary, .btn-secondary, .btn-action, .btn-warning, .btn-close {
     padding: 0.5rem 1rem;
     border: none;
@@ -470,7 +470,7 @@ body {
     padding: 0;
 }
 
-/* 快速操作区域 */
+/* Quick actions area */
 .quick-actions {
     display: flex;
     justify-content: center;
@@ -485,7 +485,7 @@ body {
     gap: 0.75rem;
 }
 
-/* 状态摘要区域 */
+/* Status summary area */
 .status-summary {
     margin-top: 1rem;
 }
@@ -529,7 +529,7 @@ body {
     color: var(--text-primary);
 }
 
-/* 设置面板 */
+/* Settings panel */
 .settings-panel {
     position: fixed;
     top: 0;
@@ -626,7 +626,7 @@ body {
     text-align: center;
 }
 
-/* 隐藏时间输入框的上下箭头 */
+/* Hide up/down arrows for time input boxes */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none !important;
@@ -637,7 +637,7 @@ input[type="number"] {
     -moz-appearance: textfield !important;
 }
 
-/* 针对特定ID的输入框 */
+/* Input boxes for specific IDs */
 #water-interval::-webkit-outer-spin-button,
 #water-interval::-webkit-inner-spin-button,
 #water-target::-webkit-outer-spin-button,
@@ -657,7 +657,7 @@ input[type="number"] {
     -moz-appearance: textfield !important;
 }
 
-/* 针对时间显示中的输入框 */
+/* Input boxes in time display */
 .time-hour::-webkit-outer-spin-button,
 .time-hour::-webkit-inner-spin-button,
 .time-minute::-webkit-outer-spin-button,
@@ -671,7 +671,7 @@ input[type="number"] {
     -moz-appearance: textfield !important;
 }
 
-/* 更广泛的选择器，针对所有可能的时间输入框 */
+/* Broader selector for all possible time input boxes */
 .editable-time input[type="number"]::-webkit-outer-spin-button,
 .editable-time input[type="number"]::-webkit-inner-spin-button,
 .time-remaining input[type="number"]::-webkit-outer-spin-button,
@@ -717,7 +717,7 @@ input[type="number"] {
     gap: 1rem;
 }
 
-/* 主题选择器 */
+/* Theme selector */
 .theme-selector {
     display: flex;
     gap: 0.5rem;
@@ -764,7 +764,7 @@ input[type="number"] {
     color: var(--text-secondary);
 }
 
-/* 通知弹窗 */
+/* Notification popup */
 .notification-overlay, .help-overlay {
     position: fixed;
     top: 0;
@@ -851,7 +851,7 @@ input[type="number"] {
     justify-content: center;
 }
 
-/* 页面内通知弹窗 */
+/* In-page notification popup */
 .notification-alert {
     position: fixed;
     top: 20px;
@@ -943,7 +943,7 @@ input[type="number"] {
     padding: 0;
 }
 
-/* 水和久坐提醒的不同样式 */
+/* Different styles for water and standup reminders */
 .notification-water {
     border-top: 3px solid #2196F3;
 }
@@ -960,7 +960,7 @@ input[type="number"] {
     color: #FF9800;
 }
 
-/* 权限请求提示 */
+/* Permission request prompt */
 .permission-prompt {
     position: fixed;
     bottom: 20px;
@@ -1015,7 +1015,7 @@ input[type="number"] {
     gap: 1rem;
 }
 
-/* 帮助面板 */
+/* Help panel */
 .help-header {
     display: flex;
     justify-content: space-between;
@@ -1040,7 +1040,7 @@ input[type="number"] {
     color: var(--text-secondary);
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 768px) {
     #app {
         padding: 10px;
@@ -1288,8 +1288,9 @@ input[type="number"] {
     .status-summary {
         margin-top: 0.5rem;
     }
-}/* 开
-关样式 */
+}
+
+/* Switch styles */
 .switch {
     position: relative;
     display: inline-block;
@@ -1496,8 +1497,7 @@ ile-specific enhancements */
         padding: 0.6rem;
     }
 }
-/* 首
-次使用引导样式 */
+/* First-time use guide styles */
 .guide-overlay {
     position: fixed;
     top: 0;
@@ -1610,7 +1610,7 @@ ile-specific enhancements */
     }
 }
 
-/* 移动端适配 */
+/* Mobile adaptation */
 @media (max-width: 480px) {
     .guide-modal {
         width: 95%;
@@ -1640,8 +1640,9 @@ ile-specific enhancements */
         height: 28px;
         font-size: 0.9rem;
     }
-}/
-* 错误处理和兼容性提示样式 */
+}
+
+/* Error handling and compatibility notice styles */
 .compatibility-notice {
     background-color: var(--background-primary);
     border-radius: 12px;
@@ -1688,7 +1689,7 @@ ile-specific enhancements */
     gap: 1rem;
 }
 
-/* 错误提示样式 */
+/* Error message styles */
 .error-message {
     position: fixed;
     top: 20px;
@@ -1717,7 +1718,7 @@ ile-specific enhancements */
     }
 }
 
-/* 错误类型样式 */
+/* Error type styles */
 .error-message.warning {
     background: #FF9800;
 }
@@ -1730,7 +1731,7 @@ ile-specific enhancements */
     background: var(--primary-color);
 }
 
-/* 移动端适配 */
+/* Mobile adaptation */
 @media (max-width: 480px) {
     .compatibility-notice {
         width: 95%;

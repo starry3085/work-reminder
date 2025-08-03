@@ -29,17 +29,16 @@ work-reminder/
 ├── styles/
 │   └── main.css           # Main stylesheet
 ├── js/
-│   ├── app.js             # Main application file
-│   ├── storage-manager.js # Storage manager
-│   ├── app-settings.js    # Application settings
-│   ├── notification-service.js # Notification service
-│   ├── activity-detector.js    # Activity detector (removed for MVP)
-│   ├── reminder-manager.js     # Reminder manager
-│   ├── water-reminder.js       # Water reminder
-│   ├── standup-reminder.js     # Standup reminder
-│   ├── ui-controller.js        # UI controller
-│   ├── error-handler.js        # Error handler
-│   └── mobile-adapter.js       # Mobile adapter
+│   ├── app.js             # Main application orchestrator
+│   ├── storage-manager.js # localStorage abstraction layer
+│   ├── app-settings.js    # Settings and state management
+│   ├── notification-service.js # Notification handling
+│   ├── reminder-manager.js     # Base reminder functionality
+│   ├── water-reminder.js       # Water reminder implementation
+│   ├── standup-reminder.js     # Standup reminder implementation
+│   ├── ui-controller.js        # UI event handling and updates
+│   ├── error-handler.js        # Error handling and logging
+│   └── mobile-adapter.js       # Mobile device adaptations
 ├── assets/                # Static resources (icons, audio)
 ├── manifest.json          # PWA configuration
 ├── package.json           # Project configuration
@@ -77,6 +76,8 @@ The project uses Kiro AI Assistant for development assistance, including the fol
 - [x] Reminder management core functionality
 - [x] UI interaction control
 - [x] Responsive design
+- [x] Code internationalization (all English)
+- [x] Architecture optimization
 - [x] Testing and optimization
 - [x] GitHub Pages deployment
 
