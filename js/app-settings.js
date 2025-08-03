@@ -7,11 +7,7 @@ class AppSettings {
         this.storageManager = storageManager;
         this.stateManager = null; // Initialize state manager reference
         
-        // Use storage manager's prefix mechanism for consistency
-        this.settingsKey = 'settings_v1';
-        this.stateKey = 'state_v1';
-        
-        // Default settings
+        // Default settings - only settings, no state
         this.defaultSettings = {
             water: {
                 enabled: true,
@@ -36,28 +32,7 @@ class AppSettings {
             firstUse: true // whether first time use
         };
         
-        // Default application state
-        this.defaultState = {
-            waterReminder: {
-                isActive: false,
-                timeRemaining: 0,
-                nextReminderAt: null,
-                lastAcknowledged: null
-            },
-            standupReminder: {
-                isActive: false,
-                timeRemaining: 0,
-                nextReminderAt: null,
-                lastAcknowledged: null
-            },
-            userActivity: {
-                isActive: true
-            },
-            lastSaved: Date.now()
-        };
-        
         this.currentSettings = { ...this.defaultSettings };
-        this.currentState = { ...this.defaultState };
     }
 
     /**
@@ -102,7 +77,7 @@ class AppSettings {
     }
 
     /**
-     * Load application settings and state via StateManager
+     * Load application settings via StateManager
      * @param {boolean} forceDefault - Whether to force use default settings (on force refresh)
      * @returns {Object} Loaded settings
      */
@@ -112,24 +87,20 @@ class AppSettings {
             const isForceRefresh = this.detectForceRefresh();
             
             if (forceDefault || isForceRefresh) {
-                console.log('Force refresh detected or forced default settings, restoring default settings and state');
+                console.log('Force refresh detected or forced default settings, restoring default settings');
                 this.currentSettings = { ...this.defaultSettings };
-                this.currentState = { ...this.defaultState };
                 // Clear force refresh flag
                 this.clearForceRefreshFlag();
                 this.saveSettings();
-                this.saveState();
                 return this.currentSettings;
             }
             
             // Get settings from StateManager
             return this.getSettings();
         } catch (error) {
-            console.warn('Failed to load settings, using default settings and state:', error);
+            console.warn('Failed to load settings, using default settings:', error);
             this.currentSettings = { ...this.defaultSettings };
-            this.currentState = { ...this.defaultState };
             this.saveSettings();
-            this.saveState();
             return this.currentSettings;
         }
     }
@@ -173,69 +144,54 @@ class AppSettings {
         }
     }
 
+
+
     /**
-     * Load application state via StateManager
-     * @returns {Object} Loaded state
+     * Deep merge settings or state objects
+     * @param {Object} target - Target object
+     * @param {Object} source - Source object to merge
+     * @returns {Object} Merged object
+     * @private
      */
-    loadState() {
-        try {
-            const appState = this.stateManager.getState('app');
-            return appState || { ...this.defaultState };
-        } catch (error) {
-            console.warn('Failed to load state, using default state:', error);
-            this.currentState = { ...this.defaultState };
-            return this.currentState;
+    mergeSettings(target, source) {
+        if (!source || typeof source !== 'object') {
+            return target;
         }
+        
+        const result = { ...target };
+        
+        for (const key in source) {
+            if (source.hasOwnProperty(key)) {
+                if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                    result[key] = this.mergeSettings(result[key] || {}, source[key]);
+                } else {
+                    result[key] = source[key];
+                }
+            }
+        }
+        
+        return result;
     }
 
     /**
-     * Save application state via StateManager
-     * @param {Object} state - State to save
-     * @returns {boolean} Whether save was successful
-     */
-    saveState(state = null) {
-        try {
-            const stateToSave = state || this.currentState;
-            
-            // Update app state
-            this.stateManager.updateState('app', stateToSave);
-            console.log('State saved via StateManager');
-            return true;
-        } catch (error) {
-            console.error('Failed to save application state:', error);
-            return false;
-        }
-    }
-
-    /**
-     * Update settings
+     * Update settings - delegates to StateManager for state-related settings
      * @param {Object} newSettings - New settings
      * @returns {Object} Updated settings
      */
     updateSettings(newSettings) {
+        // For MVP, focus on settings only, let StateManager handle state
         this.currentSettings = this.mergeSettings(this.currentSettings, newSettings);
         this.saveSettings();
+        
+        // Notify StateManager of settings change
+        if (this.stateManager) {
+            this.stateManager.updateState('settings', this.currentSettings);
+        }
+        
         return this.currentSettings;
     }
 
-    /**
-     * Update application state - now delegates to StateManager if available
-     * @param {Object} newState - New state
-     * @returns {Object} Updated state
-     */
-    updateState(newState) {
-        // If we have StateManager, it handles state updates automatically
-        if (this.stateManager) {
-            // For app-specific state updates
-            this.stateManager.updateState('app', newState);
-            return this.stateManager.getState('app');
-        }
-        
-        // Legacy approach
-        this.currentState = this.mergeSettings(this.currentState, newState);
-        this.saveState();
-        return this.currentState;
-    }
+
 
     /**
      * Reset settings to defaults
@@ -247,57 +203,9 @@ class AppSettings {
         return this.currentSettings;
     }
 
-    /**
-     * Reset application state to defaults - now delegates to StateManager if available
-     * @returns {Object} Reset state
-     */
-    resetState() {
-        if (this.stateManager) {
-            this.stateManager.resetToDefaults();
-            return this.stateManager.getState('app');
-        }
-        
-        this.currentState = { ...this.defaultState };
-        this.saveState();
-        return this.currentState;
-    }
 
-    /**
-     * Check if state is valid
-     * @param {Object} state - State to check
-     * @returns {boolean} Whether state is valid
-     * @private
-     */
-    isStateValid(state) {
-        // Check if state is expired (over 24 hours)
-        if (!state.lastSaved) return false;
-        
-        const now = Date.now();
-        const lastSaved = state.lastSaved;
-        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-        
-        if (now - lastSaved > maxAge) {
-            console.warn('Application state expired');
-            return false;
-        }
-        
-        // Check if reminder times are valid
-        if (state.waterReminder && state.waterReminder.nextReminderAt) {
-            if (now - state.waterReminder.nextReminderAt > maxAge) {
-                console.warn('Water reminder time expired');
-                return false;
-            }
-        }
-        
-        if (state.standupReminder && state.standupReminder.nextReminderAt) {
-            if (now - state.standupReminder.nextReminderAt > maxAge) {
-                console.warn('Standup reminder time expired');
-                return false;
-            }
-        }
-        
-        return true;
-    }
+
+
 
     /**
      * Validate if settings are valid

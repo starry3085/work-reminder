@@ -91,14 +91,14 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Initialize all components
+     * Initialize all components in proper dependency order
      * @private
      */
     async initializeComponents() {
         try {
             console.log('Starting component initialization...');
             
-            // Initialize error handler first
+            // Step 1: Initialize error handler first (critical for error handling)
             try {
                 if (typeof ErrorHandler !== 'undefined') {
                     this.errorHandler = new ErrorHandler();
@@ -112,7 +112,7 @@ class OfficeWellnessApp {
                 this.errorHandler = null;
             }
             
-            // Initialize storage manager
+            // Step 2: Initialize storage manager (required by StateManager)
             try {
                 if (typeof StorageManager !== 'undefined') {
                     this.storageManager = new StorageManager();
@@ -125,10 +125,11 @@ class OfficeWellnessApp {
                 throw error;
             }
             
-            // Initialize state manager
+            // Step 3: Initialize state manager (core dependency)
             try {
                 if (typeof StateManager !== 'undefined') {
                     this.stateManager = new StateManager(this.storageManager);
+                    await this.stateManager.initialize(); // Ensure state is loaded
                     console.log('State manager initialized');
                 } else {
                     throw new Error('StateManager class not found');
@@ -138,7 +139,7 @@ class OfficeWellnessApp {
                 throw error;
             }
             
-            // Initialize app settings manager with state manager
+            // Step 4: Initialize app settings with state manager
             try {
                 if (typeof AppSettings !== 'undefined') {
                     this.appSettings = new AppSettings(this.stateManager);
@@ -151,24 +152,7 @@ class OfficeWellnessApp {
                 throw error;
             }
             
-            // Initialize mobile adapter
-            try {
-                if (typeof MobileAdapter !== 'undefined') {
-                    this.mobileAdapter = new MobileAdapter(this.errorHandler);
-                    console.log('Mobile adapter initialized');
-                } else {
-                    console.warn('MobileAdapter class not found');
-                    this.mobileAdapter = null;
-                }
-            } catch (error) {
-                console.warn('Failed to initialize mobile adapter:', error);
-                this.mobileAdapter = null;
-            }
-            
-            // Check browser compatibility
-            this.checkBrowserCompatibility();
-            
-            // Initialize notification service
+            // Step 5: Initialize notification service
             try {
                 if (typeof NotificationService !== 'undefined') {
                     this.notificationService = new NotificationService();
@@ -193,21 +177,31 @@ class OfficeWellnessApp {
                 };
             }
             
-            // Activity detector removed for MVP - using simpler time-based reminders
+            // Step 6: Initialize mobile adapter
+            try {
+                if (typeof MobileAdapter !== 'undefined') {
+                    this.mobileAdapter = new MobileAdapter(this.errorHandler);
+                    console.log('Mobile adapter initialized');
+                } else {
+                    console.warn('MobileAdapter class not found');
+                    this.mobileAdapter = null;
+                }
+            } catch (error) {
+                console.warn('Failed to initialize mobile adapter:', error);
+                this.mobileAdapter = null;
+            }
             
-            // Get current settings
-            const currentSettings = this.appSettings.getSettings();
-            console.log('Current settings loaded:', currentSettings);
+            // Step 7: Check browser compatibility after core services are ready
+            this.checkBrowserCompatibility();
             
-            // Initialize reminder managers
+            // Step 8: Initialize reminder managers after state manager is ready
             try {
                 if (typeof WaterReminder !== 'undefined') {
                     this.waterReminder = new WaterReminder(
-                        currentSettings.water, 
+                        this.appSettings.getSettings().water, 
                         this.notificationService,
                         this.stateManager
                     );
-                    this.waterReminder.setStateManager(this.stateManager);
                     console.log('Water reminder initialized');
                 } else {
                     console.warn('WaterReminder class not found');
@@ -221,11 +215,10 @@ class OfficeWellnessApp {
             try {
                 if (typeof StandupReminder !== 'undefined') {
                     this.standupReminder = new StandupReminder(
-                        currentSettings.standup, 
+                        this.appSettings.getSettings().standup, 
                         this.notificationService,
                         this.stateManager
                     );
-                    this.standupReminder.setStateManager(this.stateManager);
                     console.log('Standup reminder initialized');
                 } else {
                     console.warn('StandupReminder class not found');
@@ -236,7 +229,7 @@ class OfficeWellnessApp {
                 this.standupReminder = null;
             }
             
-            // Initialize UI controller
+            // Step 9: Initialize UI controller last (depends on all other components)
             try {
                 if (typeof UIController !== 'undefined') {
                     this.uiController = new UIController();
@@ -250,7 +243,7 @@ class OfficeWellnessApp {
                 throw error;
             }
             
-            // Apply mobile adaptation
+            // Step 10: Apply mobile adaptation
             if (this.mobileAdapter) {
                 try {
                     this.mobileAdapter.applyMobileAdaptation();
@@ -418,6 +411,9 @@ class OfficeWellnessApp {
         // Set up event handlers
         this.setupUIEventHandlers();
         
+        // Set up reminder callbacks to update UI
+        this.setupReminderCallbacks();
+        
         console.log('UI initialization complete');
     }
 
@@ -443,8 +439,6 @@ class OfficeWellnessApp {
             this.resetReminder('water');
         });
 
-
-
         this.uiController.on('standupToggle', () => {
             this.toggleReminder('standup');
         });
@@ -452,10 +446,6 @@ class OfficeWellnessApp {
         this.uiController.on('standupReset', () => {
             this.resetReminder('standup');
         });
-
-
-
-
 
         // Interval change event
         this.uiController.on('waterIntervalChanged', (data) => {
@@ -478,6 +468,43 @@ class OfficeWellnessApp {
         this.uiController.on('forceResetSettings', () => {
             this.handleForceResetSettings();
         });
+    }
+
+    /**
+     * Set up reminder callbacks for UI updates
+     * @private
+     */
+    setupReminderCallbacks() {
+        if (!this.uiController) {
+            console.error('UI controller not available for reminder callbacks');
+            return;
+        }
+
+        // Set up water reminder callbacks
+        if (this.waterReminder) {
+            this.waterReminder.setTimeUpdateCallback((data) => {
+                this.uiController.updateCountdown('water', data.timeRemaining);
+            });
+            
+            this.waterReminder.setStatusChangeCallback((status) => {
+                this.uiController.updateReminderStatus('water', status);
+            });
+            
+            console.log('Water reminder callbacks set up');
+        }
+
+        // Set up standup reminder callbacks
+        if (this.standupReminder) {
+            this.standupReminder.setTimeUpdateCallback((data) => {
+                this.uiController.updateCountdown('standup', data.timeRemaining);
+            });
+            
+            this.standupReminder.setStatusChangeCallback((status) => {
+                this.uiController.updateReminderStatus('standup', status);
+            });
+            
+            console.log('Standup reminder callbacks set up');
+        }
     }
 
     /**
