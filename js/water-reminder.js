@@ -7,9 +7,10 @@ class WaterReminder extends ReminderManager {
      * Create water reminder instance
      * @param {Object} settings - Water reminder settings
      * @param {NotificationService} notificationService - Notification service instance
+     * @param {StateManager} stateManager - State manager instance (optional)
      */
-    constructor(settings, notificationService) {
-        super('water', settings, notificationService);
+    constructor(settings, notificationService, stateManager = null) {
+        super('water', settings, notificationService, stateManager);
         
         console.log('Water reminder created');
     }
@@ -41,8 +42,8 @@ class WaterReminder extends ReminderManager {
             timeRemaining: 0
         });
         
-        // Use parent auto-reset mechanism (1 minute)
-        console.log('Water reminder triggered, using unified auto-reset mechanism');
+        // Use parent auto-reset mechanism
+        console.log('Water reminder triggered');
     }
 
     /**
@@ -54,11 +55,6 @@ class WaterReminder extends ReminderManager {
         
         console.log('Water reminder destroyed');
     }
-}
-
-// Export class for use by other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = WaterReminder;
 }
 
 // Export for browser use

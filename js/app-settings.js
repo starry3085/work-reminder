@@ -277,26 +277,129 @@ class AppSettings {
     }
 
     /**
-     * Deep merge settings objects
-     * @param {Object} target - Target object
-     * @param {Object} source - Source object
-     * @returns {Object} Merged object
-     * @private
+     * 统一设置管理 - 通过StateManager管理
      */
-    mergeSettings(target, source) {
-        const result = { ...target };
+    getSettings() {
+        // 从StateManager获取当前设置
+        const waterState = this.stateManager ? this.stateManager.getState('water') : null;
+        const standupState = this.stateManager ? this.stateManager.getState('standup') : null;
         
-        for (const key in source) {
-            if (source.hasOwnProperty(key)) {
-                if (source[key] instanceof Object && !Array.isArray(source[key]) && key in result) {
-                    result[key] = this.mergeSettings(result[key], source[key]);
-                } else {
-                    result[key] = source[key];
-                }
-            }
+        return {
+            water: waterState ? waterState.settings : this.defaultSettings.water,
+            standup: standupState ? standupState.settings : this.defaultSettings.standup,
+            notifications: this.defaultSettings.notifications,
+            appearance: this.defaultSettings.appearance,
+            firstUse: this.defaultSettings.firstUse
+        };
+    }
+
+    /**
+     * 更新设置 - 通过StateManager统一更新
+     */
+    updateSettings(type, settings) {
+        if (this.stateManager) {
+            this.stateManager.updateState(type, { settings });
+        }
+    }
+
+    /**
+     * 初始化状态管理器
+     */
+    async initialize(stateManager) {
+        this.stateManager = stateManager;
+        
+        // 从StateManager加载状态
+        const appState = this.stateManager.getState('app');
+        this.currentState = { ...this.currentState, ...appState };
+        
+        console.log('AppSettings initialized with StateManager');
+    }
+
+    /**
+     * 兼容旧接口 - 设置状态管理器
+     */
+    setStateManager(stateManager) {
+        this.stateManager = stateManager;
+    }
+
+    /**
+     * 检查是否首次使用
+     */
+    isFirstUse() {
+        const appState = this.stateManager ? this.stateManager.getState('app') : this.currentState;
+        return appState ? appState.isFirstUse : true;
+    }
+
+    /**
+     * 标记为已使用
+     */
+    markAsUsed() {
+        if (this.stateManager) {
+            this.stateManager.updateState('app', { isFirstUse: false });
+        }
+    }
+
+    /**
+     * 检测强制刷新
+     */
+    detectForceRefresh() {
+        return false; // MVP版本不实现版本检测
+    }
+
+    /**
+     * 保存设置（兼容旧接口）
+     */
+    saveSettings(settings) {
+        // 通过StateManager更新设置
+        if (settings.water && this.stateManager) {
+            this.stateManager.updateState('water', { settings: settings.water });
+        }
+        if (settings.standup && this.stateManager) {
+            this.stateManager.updateState('standup', { settings: settings.standup });
+        }
+        if (settings.notifications && this.stateManager) {
+            this.stateManager.updateState('app', { notifications: settings.notifications });
+        }
+    }
+
+    /**
+     * 加载设置（兼容旧接口）
+     */
+    loadSettings(useDefaults = false) {
+        if (useDefaults || !this.stateManager) {
+            return {
+                water: { ...this.defaultSettings.water },
+                standup: { ...this.defaultSettings.standup },
+                notifications: { ...this.defaultSettings.notifications },
+                appearance: { ...this.defaultSettings.appearance },
+                firstUse: this.defaultSettings.firstUse
+            };
         }
         
-        return result;
+        return this.getSettings();
+    }
+
+    /**
+     * 加载状态（兼容旧接口）
+     */
+    loadState() {
+        return this.stateManager ? this.stateManager.getState('app') : this.currentState;
+    }
+
+    /**
+     * 保存状态（兼容旧接口）
+     */
+    saveState() {
+        // 状态保存由StateManager统一处理，无需额外操作
+    }
+
+    /**
+     * 重置状态（兼容旧接口）
+     */
+    resetState() {
+        if (this.stateManager) {
+            this.stateManager.resetToDefaults();
+        }
     }
 
     /**

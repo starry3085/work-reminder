@@ -11,13 +11,14 @@ class OfficeWellnessApp {
         this.errorHandler = null;
         this.mobileAdapter = null;
         this.storageManager = null;
+        this.stateManager = null;
         this.appSettings = null;
         this.notificationService = null;
         this.waterReminder = null;
         this.standupReminder = null;
         this.uiController = null;
         
-        // Application state
+        // Application state (now managed by StateManager)
         this.appState = {
             isInitializing: false,
             isFirstUse: false,
@@ -34,53 +35,39 @@ class OfficeWellnessApp {
             console.log('Initializing Office Wellness Reminder application...');
             this.appState.isInitializing = true;
             
-            // Step 1: Initialize components
-            console.log('Step 1: Initializing components...');
+            // Initialize components
             await this.initializeComponents();
-            console.log('✅ Components initialized successfully');
             
-            // Step 2: Load user settings and state
-            console.log('Step 2: Loading settings and state...');
+            // Load user settings and state
             await this.loadSettingsAndState();
-            console.log('✅ Settings and state loaded successfully');
             
-            // Step 3: Initialize UI
-            console.log('Step 3: Initializing UI...');
+            // Initialize UI
             this.initializeUI();
-            console.log('✅ UI initialized successfully');
             
-            // Step 4: Set up event listeners
-            console.log('Step 4: Setting up event listeners...');
+            // Set up event listeners
             this.setupEventListeners();
-            console.log('✅ Event listeners set up successfully');
             
-            // Step 5: Request notification permission (non-blocking)
-            console.log('Step 5: Requesting notification permission...');
+            // Request notification permission (non-blocking)
             try {
                 await this.requestNotificationPermission();
-                console.log('✅ Notification permission handled');
             } catch (permissionError) {
-                console.warn('⚠️ Notification permission failed, continuing:', permissionError);
+                console.warn('Notification permission failed, continuing:', permissionError);
             }
             
-            // Step 6: Restore previous session state (non-blocking)
-            console.log('Step 6: Restoring previous state...');
+            // Restore previous session state (non-blocking)
             try {
                 await this.restorePreviousState();
-                console.log('✅ Previous state restored');
             } catch (stateError) {
-                console.warn('⚠️ State restoration failed, continuing:', stateError);
+                console.warn('State restoration failed, continuing:', stateError);
             }
             
-            // Step 7: Check if first use (non-blocking)
-            console.log('Step 7: Checking first use...');
+            // Check if first use (non-blocking)
             try {
                 if (this.appSettings && this.appSettings.isFirstUse()) {
                     this.showFirstUseGuide();
                 }
-                console.log('✅ First use check completed');
             } catch (firstUseError) {
-                console.warn('⚠️ First use check failed, continuing:', firstUseError);
+                console.warn('First use check failed, continuing:', firstUseError);
             }
             
             this.isInitialized = true;
@@ -138,10 +125,23 @@ class OfficeWellnessApp {
                 throw error;
             }
             
-            // Initialize app settings manager
+            // Initialize state manager
+            try {
+                if (typeof StateManager !== 'undefined') {
+                    this.stateManager = new StateManager(this.storageManager);
+                    console.log('State manager initialized');
+                } else {
+                    throw new Error('StateManager class not found');
+                }
+            } catch (error) {
+                console.error('Failed to initialize state manager:', error);
+                throw error;
+            }
+            
+            // Initialize app settings manager with state manager
             try {
                 if (typeof AppSettings !== 'undefined') {
-                    this.appSettings = new AppSettings(this.storageManager);
+                    this.appSettings = new AppSettings(this.stateManager);
                     console.log('App settings initialized');
                 } else {
                     throw new Error('AppSettings class not found');
@@ -204,8 +204,10 @@ class OfficeWellnessApp {
                 if (typeof WaterReminder !== 'undefined') {
                     this.waterReminder = new WaterReminder(
                         currentSettings.water, 
-                        this.notificationService
+                        this.notificationService,
+                        this.stateManager
                     );
+                    this.waterReminder.setStateManager(this.stateManager);
                     console.log('Water reminder initialized');
                 } else {
                     console.warn('WaterReminder class not found');
@@ -220,8 +222,10 @@ class OfficeWellnessApp {
                 if (typeof StandupReminder !== 'undefined') {
                     this.standupReminder = new StandupReminder(
                         currentSettings.standup, 
-                        this.notificationService
+                        this.notificationService,
+                        this.stateManager
                     );
+                    this.standupReminder.setStateManager(this.stateManager);
                     console.log('Standup reminder initialized');
                 } else {
                     console.warn('StandupReminder class not found');
@@ -236,6 +240,7 @@ class OfficeWellnessApp {
             try {
                 if (typeof UIController !== 'undefined') {
                     this.uiController = new UIController();
+                    this.uiController.setStateManager(this.stateManager);
                     console.log('UI controller initialized');
                 } else {
                     throw new Error('UIController class not found');
@@ -319,6 +324,9 @@ class OfficeWellnessApp {
      */
     async loadSettingsAndState() {
         try {
+            // Initialize state manager
+            await this.stateManager.initialize();
+            
             // Check if force refresh
             const isForceRefresh = this.appSettings.detectForceRefresh();
             
@@ -328,12 +336,12 @@ class OfficeWellnessApp {
             
             if (isForceRefresh) {
                 console.log('Force refresh detected, default settings restored');
-                // Clear application state
-                this.appSettings.resetState();
+                // Clear application state via state manager
+                this.stateManager.resetState();
             }
             
             // Load application state
-            const state = this.appSettings.loadState();
+            const state = this.stateManager.getState();
             console.log('Application state loaded:', state);
             
             // Check if first time use
@@ -347,14 +355,14 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Save user settings
+     * Save user settings - unified through StateManager
      * @private
      */
     saveSettings() {
         try {
             const currentSettings = this.appSettings.getSettings();
-            this.appSettings.saveSettings(currentSettings);
-            console.log('Settings saved');
+            this.stateManager.updateState({ settings: currentSettings });
+            console.log('Settings saved via state manager');
             return true;
         } catch (error) {
             console.error('Failed to save settings:', error);
@@ -363,14 +371,14 @@ class OfficeWellnessApp {
     }
     
     /**
-     * Save application state - unified state management
+     * Save application state - unified through StateManager
      * @private
      */
     saveAppState() {
         try {
-            // State managed directly by appSettings to avoid duplicate saves
-            this.appSettings.saveState();
-            console.log('Application state saved');
+            // State managed by StateManager - no duplicate saves
+            this.stateManager.saveState();
+            console.log('Application state saved via state manager');
             return true;
         } catch (error) {
             console.error('Failed to save application state:', error);
@@ -379,44 +387,15 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Set up event listeners
+     * Set up event listeners - StateManager handles state synchronization
      * @private
      */
     setupEventListeners() {
-        // Unified status update callback to avoid duplicate saves
-        if (this.waterReminder) {
-            this.waterReminder.setStatusChangeCallback((status) => {
-                // Unified UI status update
-                if (this.uiController) {
-                    this.uiController.updateReminderStatus('water', status);
-                }
-                // Unified state saving handled by application layer
-                this.saveAppState();
-            });
-            
-            this.waterReminder.setTimeUpdateCallback((timeInfo) => {
-                if (this.uiController) {
-                    this.uiController.updateReminderTime('water', timeInfo);
-                }
-            });
-        }
+        // StateManager now handles state synchronization and saves automatically
+        // No need for manual callbacks that trigger duplicate saves
         
-        if (this.standupReminder) {
-            this.standupReminder.setStatusChangeCallback((status) => {
-                // Unified UI status update
-                if (this.uiController) {
-                    this.uiController.updateReminderStatus('standup', status);
-                }
-                // Unified state saving handled by application layer
-                this.saveAppState();
-            });
-            
-            this.standupReminder.setTimeUpdateCallback((timeInfo) => {
-                if (this.uiController) {
-                    this.uiController.updateReminderTime('standup', timeInfo);
-                }
-            });
-        }
+        // UI updates are handled by StateManager subscriptions
+        console.log('Event listeners set up - StateManager handles state synchronization');
     }
 
     /**
