@@ -12,7 +12,15 @@ class StateManager {
         this.stateSchema = {
             app: {
                 isFirstUse: true,
-                compatibilityChecked: false
+                compatibilityChecked: false,
+                notifications: {
+                    browserNotifications: true,
+                    soundEnabled: true,
+                    style: 'standard'
+                },
+                appearance: {
+                    language: 'en-US'
+                }
             },
             water: {
                 isActive: false,
@@ -21,7 +29,9 @@ class StateManager {
                 nextReminderAt: 0,
                 settings: {
                     interval: 30,
-                    enabled: true
+                    enabled: true,
+                    sound: true,
+                    lastReminder: null
                 }
             },
             standup: {
@@ -30,8 +40,10 @@ class StateManager {
                 timeRemaining: 0,
                 nextReminderAt: 0,
                 settings: {
-                    interval: 45,
-                    enabled: true
+                    interval: 30,
+                    enabled: true,
+                    sound: true,
+                    lastReminder: null
                 }
             }
         };
@@ -181,6 +193,7 @@ class StateManager {
      * Reset to default state
      */
     resetToDefaults() {
+        // Reset to schema defaults
         this.stateCache.set('app', { ...this.stateSchema.app });
         this.stateCache.set('water', { ...this.stateSchema.water });
         this.stateCache.set('standup', { ...this.stateSchema.standup });
@@ -188,19 +201,17 @@ class StateManager {
         // Save all states immediately
         this.stateCache.forEach((state, type) => {
             this.storage.setItem(type, state, { immediate: true });
+            // Notify subscribers of reset
+            this.notifySubscribers(type, state);
         });
         
-        console.log('All states reset to defaults');
+        console.log('All states reset to defaults via StateManager');
     }
 
     /**
      * Clean up resources
      */
     destroy() {
-        // Clear all pending save queues
-        this.saveQueue.forEach(timer => clearTimeout(timer));
-        this.saveQueue.clear();
-        
         // Clear cache
         this.stateCache.clear();
         this.subscribers.clear();
