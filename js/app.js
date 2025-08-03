@@ -139,11 +139,12 @@ class OfficeWellnessApp {
                 throw error;
             }
             
-            // Step 4: Initialize app settings with state manager
+            // Step 4: Initialize app settings (validation and defaults only)
             try {
                 if (typeof AppSettings !== 'undefined') {
-                    this.appSettings = new AppSettings(this.stateManager);
-                    console.log('App settings initialized');
+                    this.appSettings = new AppSettings();
+                    this.appSettings.setStateManager(this.stateManager);
+                    console.log('App settings initialized (validation only)');
                 } else {
                     throw new Error('AppSettings class not found');
                 }
@@ -312,56 +313,42 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Load user settings and application state
+     * Load user settings and application state via StateManager only
      * @private
      */
     async loadSettingsAndState() {
         try {
-            // Initialize state manager
+            // Initialize state manager (single source of truth)
             await this.stateManager.initialize();
             
             // Check if force refresh
             const isForceRefresh = this.appSettings.detectForceRefresh();
             
-            // Load settings (use default settings if force refresh)
-            const settings = this.appSettings.loadSettings(isForceRefresh);
-            console.log('User settings loaded:', settings);
-            
             if (isForceRefresh) {
-                console.log('Force refresh detected, default settings restored');
-                // Clear application state via state manager
-                this.stateManager.resetState();
+                console.log('Force refresh detected, resetting to defaults');
+                this.stateManager.resetToDefaults();
+                this.appSettings.clearForceRefreshFlag();
             }
             
-            // Load application state
-            const state = this.stateManager.getState();
-            console.log('Application state loaded:', state);
+            // Get current state from StateManager
+            const waterState = this.stateManager.getState('water');
+            const standupState = this.stateManager.getState('standup');
+            const appState = this.stateManager.getState('app');
+            
+            console.log('State loaded from StateManager:', { waterState, standupState, appState });
             
             // Check if first time use
             this.appState.isFirstUse = this.appSettings.isFirstUse();
             
-            return { settings, state };
+            return { waterState, standupState, appState };
         } catch (error) {
             console.warn('Failed to load settings and state:', error);
             throw error;
         }
     }
 
-    /**
-     * Save user settings - unified through StateManager
-     * @private
-     */
-    saveSettings() {
-        try {
-            const currentSettings = this.appSettings.getSettings();
-            this.stateManager.updateState({ settings: currentSettings });
-            console.log('Settings saved via state manager');
-            return true;
-        } catch (error) {
-            console.error('Failed to save settings:', error);
-            return false;
-        }
-    }
+    // REMOVED: All settings saving now goes through StateManager directly
+    // No intermediate saving methods needed
     
     /**
      * Save application state - unified through StateManager
@@ -527,31 +514,19 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Handle interval change
+     * Handle interval change - update through StateManager only
      * @param {string} type - reminder type ('water' | 'standup')
      * @param {number} interval - new interval (minutes)
      * @private
      */
     handleIntervalChange(type, interval) {
         try {
-            // Update settings
-            const currentSettings = this.appSettings.getSettings();
-            if (type === 'water') {
-                currentSettings.water.interval = interval;
-                if (this.waterReminder) {
-                    this.waterReminder.updateSettings(currentSettings.water);
-                }
-            } else if (type === 'standup') {
-                currentSettings.standup.interval = interval;
-                if (this.standupReminder) {
-                    this.standupReminder.updateSettings(currentSettings.standup);
-                }
-            }
+            // Update settings through StateManager only
+            this.stateManager.updateState(type, {
+                settings: { interval: interval }
+            });
             
-            // Save settings
-            this.appSettings.saveSettings(currentSettings);
-            
-            console.log(`${type} reminder interval updated to ${interval} minutes`);
+            console.log(`${type} reminder interval updated to ${interval} minutes via StateManager`);
             
         } catch (error) {
             console.error(`Failed to update ${type} interval:`, error);
@@ -559,7 +534,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Handle save settings
+     * Handle save settings - update through StateManager only
      * @private
      */
     handleSaveSettings() {
@@ -567,19 +542,23 @@ class OfficeWellnessApp {
             const newSettings = this.uiController.getSettingsFromUI();
             
             // Validate settings
-            if (!this.appSettings.validateSettings(newSettings)) {
-                throw new Error('Settings validation failed');
+            const validation = this.appSettings.validateSettings(newSettings);
+            if (!validation.isValid) {
+                throw new Error('Settings validation failed: ' + validation.errors.join(', '));
             }
             
-            // Update settings
-            this.appSettings.updateSettings(newSettings);
-            
-            // Update reminder manager
-            if (this.waterReminder && newSettings.water) {
-                this.waterReminder.updateSettings(newSettings.water);
+            // Update settings through StateManager only
+            if (newSettings.water) {
+                this.stateManager.updateState('water', { settings: newSettings.water });
             }
-            if (this.standupReminder && newSettings.standup) {
-                this.standupReminder.updateSettings(newSettings.standup);
+            if (newSettings.standup) {
+                this.stateManager.updateState('standup', { settings: newSettings.standup });
+            }
+            if (newSettings.notifications || newSettings.appearance) {
+                this.stateManager.updateState('app', {
+                    notifications: newSettings.notifications,
+                    appearance: newSettings.appearance
+                });
             }
             
             // Show save success notification
@@ -601,24 +580,19 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Handle reset settings
+     * Handle reset settings - reset through StateManager only
      * @private
      */
     handleResetSettings() {
         try {
-            // Reset to default settings
-            const defaultSettings = this.appSettings.resetSettings();
+            // Reset to default settings through StateManager
+            this.stateManager.resetToDefaults();
+            
+            // Get default settings for UI update
+            const defaultSettings = this.appSettings.getDefaultSettings();
             
             // Apply to UI
             this.uiController.applySettingsToUI(defaultSettings);
-            
-            // Update reminder manager
-            if (this.waterReminder) {
-                this.waterReminder.updateSettings(defaultSettings.water);
-            }
-            if (this.standupReminder) {
-                this.standupReminder.updateSettings(defaultSettings.standup);
-            }
             
             // Show reset success notification
             this.notificationService.showInPageAlert('success', {
@@ -636,20 +610,14 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Handle force reset settings (force restore to defaults)
+     * Handle force reset settings - force reset through StateManager only
      * @private
      */
     handleForceResetSettings() {
         try {
-            console.log('Executing force reset settings');
+            console.log('Executing force reset settings via StateManager');
             
-            // Force reset to default settings
-            const defaultSettings = this.appSettings.forceResetToDefaults();
-            
-            // Apply to UI
-            this.uiController.applySettingsToUI(defaultSettings);
-            
-            // Stop all reminders
+            // Stop all reminders first
             if (this.waterReminder && this.waterReminder.isActive) {
                 this.waterReminder.stop();
             }
@@ -657,16 +625,14 @@ class OfficeWellnessApp {
                 this.standupReminder.stop();
             }
             
-            // Update reminder manager settings
-            if (this.waterReminder) {
-                this.waterReminder.updateSettings(defaultSettings.water);
-            }
-            if (this.standupReminder) {
-                this.standupReminder.updateSettings(defaultSettings.standup);
-            }
+            // Force reset to defaults through StateManager
+            this.stateManager.resetToDefaults();
             
-            // Clear all state
-            this.appSettings.resetState();
+            // Get default settings for UI update
+            const defaultSettings = this.appSettings.getDefaultSettings();
+            
+            // Apply to UI
+            this.uiController.applySettingsToUI(defaultSettings);
             
             // Show force reset success notification
             this.notificationService.showInPageAlert('success', {
@@ -725,15 +691,15 @@ class OfficeWellnessApp {
     }
     
     /**
-     * Show first use guide - HACKATHON version: simplified or removed guide
+     * Show first use guide - mark complete through StateManager only
      * @private
      */
     showFirstUseGuide() {
         try {
             console.log('HACKATHON mode: skipping first use guide');
             
-            // HACKATHON suggestion: mark as used directly, no guide shown
-            this.appSettings.markFirstUseComplete();
+            // Mark as used through StateManager only
+            this.stateManager.updateState('app', { isFirstUse: false });
             
             // Optional: show a simple welcome banner instead of popup
             this.showWelcomeToast();

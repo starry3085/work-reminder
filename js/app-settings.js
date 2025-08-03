@@ -1,13 +1,10 @@
 /**
- * Application Settings Manager - Manages application settings and state
- * Includes loading, saving, validation and state recovery functionality
+ * Application Settings Manager - Provides validation and default values only
+ * StateManager is the single source of truth for all state management
  */
 class AppSettings {
-    constructor(storageManager) {
-        this.storageManager = storageManager;
-        this.stateManager = null; // Initialize state manager reference
-        
-        // Default settings - only settings, no state
+    constructor() {
+        // Default settings structure - read-only reference
         this.defaultSettings = {
             water: {
                 enabled: true,
@@ -32,117 +29,52 @@ class AppSettings {
             firstUse: true // whether first time use
         };
         
-        this.currentSettings = { ...this.defaultSettings };
+        // StateManager reference for read-only access
+        this.stateManager = null;
     }
 
     /**
-     * Initialize with StateManager
-     * @param {StateManager} stateManager - State manager instance
-     */
-    async initialize(stateManager) {
-        this.stateManager = stateManager;
-        console.log('AppSettings initialized with StateManager');
-    }
-
-    /**
-     * Set StateManager reference (backward compatibility)
+     * Set StateManager reference for read-only access
      * @param {StateManager} stateManager - State manager instance
      */
     setStateManager(stateManager) {
         this.stateManager = stateManager;
+        console.log('AppSettings connected to StateManager (read-only)');
     }
 
     /**
-     * Get current settings from StateManager if available, otherwise use internal state
+     * Get current settings from StateManager (read-only)
      * @returns {Object} Current settings
      */
     getSettings() {
-        // If StateManager is available, get settings from there
-        if (this.stateManager) {
-            const waterState = this.stateManager.getState('water');
-            const standupState = this.stateManager.getState('standup');
-            const appState = this.stateManager.getState('app');
-            
-            return {
-                water: waterState && waterState.settings ? waterState.settings : this.defaultSettings.water,
-                standup: standupState && standupState.settings ? standupState.settings : this.defaultSettings.standup,
-                notifications: this.defaultSettings.notifications,
-    
-                firstUse: appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.firstUse
-            };
+        if (!this.stateManager) {
+            console.warn('StateManager not available, returning default settings');
+            return { ...this.defaultSettings };
         }
+
+        const waterState = this.stateManager.getState('water');
+        const standupState = this.stateManager.getState('standup');
+        const appState = this.stateManager.getState('app');
         
-        // Otherwise, return internal settings
-        return this.currentSettings;
+        return {
+            water: waterState && waterState.settings ? waterState.settings : this.defaultSettings.water,
+            standup: standupState && standupState.settings ? standupState.settings : this.defaultSettings.standup,
+            notifications: this.defaultSettings.notifications,
+            appearance: this.defaultSettings.appearance,
+            firstUse: appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.firstUse
+        };
     }
 
     /**
-     * Load application settings via StateManager
-     * @param {boolean} forceDefault - Whether to force use default settings (on force refresh)
-     * @returns {Object} Loaded settings
+     * Get default settings structure
+     * @returns {Object} Default settings
      */
-    loadSettings(forceDefault = false) {
-        try {
-            // Check if force refresh
-            const isForceRefresh = this.detectForceRefresh();
-            
-            if (forceDefault || isForceRefresh) {
-                console.log('Force refresh detected or forced default settings, restoring default settings');
-                this.currentSettings = { ...this.defaultSettings };
-                // Clear force refresh flag
-                this.clearForceRefreshFlag();
-                this.saveSettings();
-                return this.currentSettings;
-            }
-            
-            // Get settings from StateManager
-            return this.getSettings();
-        } catch (error) {
-            console.warn('Failed to load settings, using default settings:', error);
-            this.currentSettings = { ...this.defaultSettings };
-            this.saveSettings();
-            return this.currentSettings;
-        }
+    getDefaultSettings() {
+        return { ...this.defaultSettings };
     }
 
-    /**
-     * Save application settings via StateManager
-     * @param {Object} settings - Settings to save
-     * @returns {boolean} Whether save was successful
-     */
-    saveSettings(settings = null) {
-        try {
-            const settingsToSave = settings || this.currentSettings;
-            
-            // Update water settings if provided
-            if (settingsToSave.water) {
-                this.stateManager.updateState('water', { settings: settingsToSave.water });
-            }
-            
-            // Update standup settings if provided
-            if (settingsToSave.standup) {
-                this.stateManager.updateState('standup', { settings: settingsToSave.standup });
-            }
-            
-            // Update app settings if provided
-            const appSettings = {};
-            if (settingsToSave.notifications) {
-                appSettings.notifications = settingsToSave.notifications;
-            }
-            if (settingsToSave.appearance) {
-                appSettings.appearance = settingsToSave.appearance;
-            }
-            if (Object.keys(appSettings).length > 0) {
-                this.stateManager.updateState('app', appSettings);
-            }
-            
-            console.log('Settings saved via StateManager');
-            return true;
-        } catch (error) {
-            console.error('Failed to save settings:', error);
-            return false;
-        }
-    }
+    // REMOVED: AppSettings no longer saves settings directly
+    // All state changes must go through StateManager only
 
 
 
@@ -173,35 +105,13 @@ class AppSettings {
         return result;
     }
 
-    /**
-     * Update settings - delegates to StateManager for state-related settings
-     * @param {Object} newSettings - New settings
-     * @returns {Object} Updated settings
-     */
-    updateSettings(newSettings) {
-        // For MVP, focus on settings only, let StateManager handle state
-        this.currentSettings = this.mergeSettings(this.currentSettings, newSettings);
-        this.saveSettings();
-        
-        // Notify StateManager of settings change
-        if (this.stateManager) {
-            this.stateManager.updateState('settings', this.currentSettings);
-        }
-        
-        return this.currentSettings;
-    }
+    // REMOVED: AppSettings no longer updates settings directly
+    // All settings updates must go through StateManager only
 
 
 
-    /**
-     * Reset settings to defaults
-     * @returns {Object} Reset settings
-     */
-    resetSettings() {
-        this.currentSettings = { ...this.defaultSettings };
-        this.saveSettings();
-        return this.currentSettings;
-    }
+    // REMOVED: AppSettings no longer resets settings directly
+    // All settings resets must go through StateManager only
 
 
 
@@ -243,31 +153,20 @@ class AppSettings {
         };
     }
 
-    /**
-     * Get current state
-     * @returns {Object} Current state
-     */
-    getState() {
-        if (this.stateManager) {
-            return this.stateManager.getState('app');
-        }
-        return this.currentState;
-    }
+    // REMOVED: AppSettings no longer manages state directly
+    // All state access must go through StateManager only
 
     /**
-     * Mark application first use as complete
-     */
-    markFirstUseComplete() {
-        this.currentSettings.firstUse = false;
-        this.saveSettings();
-    }
-
-    /**
-     * Check if first time using application
+     * Check if first time using application (read-only from StateManager)
      * @returns {boolean} Whether first time use
      */
     isFirstUse() {
-        return this.currentSettings.firstUse === true;
+        if (!this.stateManager) {
+            return this.defaultSettings.firstUse;
+        }
+        
+        const appState = this.stateManager.getState('app');
+        return appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.firstUse;
     }
 
     /**
@@ -330,16 +229,8 @@ class AppSettings {
         }
     }
 
-    /**
-     * Force reset to default settings (for force refresh)
-     * @returns {Object} Reset settings
-     */
-    forceResetToDefaults() {
-        console.log('Force reset to default settings');
-        this.currentSettings = { ...this.defaultSettings };
-        this.saveSettings();
-        return this.currentSettings;
-    }
+    // REMOVED: AppSettings no longer resets settings directly
+    // All settings resets must go through StateManager only
 }
 
 // Export class for use by other modules

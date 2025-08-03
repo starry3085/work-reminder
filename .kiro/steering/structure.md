@@ -34,7 +34,7 @@ The application follows a modular class-based architecture with clear separation
 ## File Naming Conventions
 
 ### JavaScript Files
-- Use kebab-case: `water-reminder.js`, `activity-detector.js`
+- Use kebab-case: `water-reminder.js`
 - Class names use PascalCase: `WaterReminder`
 - One class per file, matching the filename
 
@@ -109,10 +109,6 @@ The application follows a modular class-based architecture with clear separation
 - Fallback mechanisms for storage and notifications
 
 ## Testing Strategy
-
-### Manual Testing
-- Use `test-simple.html` for basic functionality
-- Use `check-settings.html` for settings validation
 - Browser developer tools for debugging
 
 ### Debugging Tools
