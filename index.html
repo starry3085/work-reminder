@@ -112,21 +112,34 @@
     </div>
 
     <!-- Version Control for Cache Busting -->
-    <script src="version.js"></script>
+    <script src="version.js" onerror="console.error('Failed to load version.js')"></script>
     
     <!-- JavaScript Files -->
-    <script src="js/error-handler.js"></script>
-    <script src="js/storage-manager.js"></script>
-    <script src="js/app-settings.js"></script>
-    <script src="js/notification-service.js"></script>
-    <script src="js/reminder-manager.js"></script>
-    <script src="js/water-reminder.js"></script>
-    <script src="js/standup-reminder.js"></script>
-    <script src="js/mobile-adapter.js"></script>
-    <script src="js/ui-controller.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/error-handler.js" onerror="console.error('Failed to load error-handler.js')"></script>
+    <script src="js/storage-manager.js" onerror="console.error('Failed to load storage-manager.js')"></script>
+    <script src="js/app-settings.js" onerror="console.error('Failed to load app-settings.js')"></script>
+    <script src="js/notification-service-new.js" onerror="console.error('Failed to load notification-service-new.js')"></script>
+    <script src="js/reminder-manager.js" onerror="console.error('Failed to load reminder-manager.js')"></script>
+    <script src="js/water-reminder.js" onerror="console.error('Failed to load water-reminder.js')"></script>
+    <script src="js/standup-reminder.js" onerror="console.error('Failed to load standup-reminder.js')"></script>
+    <script src="js/mobile-adapter.js" onerror="console.error('Failed to load mobile-adapter.js')"></script>
+    <script src="js/ui-controller.js" onerror="console.error('Failed to load ui-controller.js')"></script>
+    <script src="js/app.js" onerror="console.error('Failed to load app.js')"></script>
     
-
+    <!-- Script Loading Verification -->
+    <script>
+        console.log('All scripts loaded, checking class availability...');
+        const expectedClasses = [
+            'ErrorHandler', 'StorageManager', 'AppSettings',
+            'NotificationService', 'ReminderManager',
+            'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'OfficeWellnessApp'
+        ];
+        
+        expectedClasses.forEach(className => {
+            const exists = window[className] !== undefined;
+            console.log(`${exists ? '✅' : '❌'} ${className}: ${exists ? 'Available' : 'Missing'}`);
+        });
+    </script>
 
     <!-- Application Initialization -->
     <script>
@@ -143,11 +156,19 @@
                 const requiredClasses = [
                     'ErrorHandler', 'StorageManager', 'AppSettings',
                     'NotificationService', 'ReminderManager',
-                    'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter'
+                    'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'OfficeWellnessApp'
                 ];
+
+                // Debug: Log all class availability
+                console.log('Checking class availability:');
+                requiredClasses.forEach(className => {
+                    const exists = window[className] !== undefined;
+                    console.log(`${exists ? '✅' : '❌'} ${className}: ${exists ? 'Available' : 'Missing'}`);
+                });
 
                 const missingClasses = requiredClasses.filter(className => !window[className]);
                 if (missingClasses.length > 0) {
+                    console.error('Missing classes:', missingClasses);
                     throw new Error(`Missing required classes: ${missingClasses.join(', ')}`);
                 }
 
@@ -265,7 +286,13 @@
         // Add global error handling
         window.addEventListener('error', function (event) {
             console.error('Global error:', event.error);
-            showAppStatus('error', 'Runtime error occurred');
+            console.error('Error details:', {
+                message: event.message,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno
+            });
+            showAppStatus('error', 'Runtime error occurred: ' + event.message);
         });
 
         window.addEventListener('unhandledrejection', function (event) {
