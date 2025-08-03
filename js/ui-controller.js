@@ -42,12 +42,7 @@ class UIController {
             this.resizeHandler = null;
         }
         
-        // Remove theme change listener if exists
-        if (this.themeChangeHandler) {
-            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            mediaQuery.removeEventListener('change', this.themeChangeHandler);
-            this.themeChangeHandler = null;
-        }
+
     }
 
     /**

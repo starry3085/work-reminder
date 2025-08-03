@@ -138,7 +138,6 @@ const AppSettings = {
     soundEnabled: true
   },
   ui: {
-    theme: 'light',      // 'light' | 'dark'
     language: 'en-US'    // 'zh-CN' | 'en-US'
   }
 }

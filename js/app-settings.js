@@ -31,7 +31,6 @@ class AppSettings {
                 style: 'standard' // notification style: standard, minimal, detailed
             },
             appearance: {
-    
                 language: 'en-US'
             },
             firstUse: true // whether first time use
@@ -201,7 +200,7 @@ class AppSettings {
                     appSettings.notifications = settingsToSave.notifications;
                 }
                 if (settingsToSave.appearance) {
-        
+                    appSettings.appearance = settingsToSave.appearance;
                 }
                 if (Object.keys(appSettings).length > 0) {
                     this.stateManager.updateState('app', appSettings);
