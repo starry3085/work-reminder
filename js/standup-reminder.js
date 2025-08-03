@@ -39,9 +39,7 @@ class StandupReminder extends ReminderManager {
             timeRemaining: 0
         });
         
-        // Use parent class unified auto-reset mechanism (5 seconds)
-        console.log('Standup reminder triggered, using unified auto-reset mechanism');
-        
+        // Use parent auto-reset mechanism
         console.log('Standup reminder triggered');
     }
 
@@ -54,11 +52,6 @@ class StandupReminder extends ReminderManager {
         
         console.log('Standup reminder destroyed');
     }
-}
-
-// Export class for use by other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = StandupReminder;
 }
 
 // Export for browser use

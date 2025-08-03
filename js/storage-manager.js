@@ -188,13 +188,7 @@ class StorageManager {
         }
     }
 
-    /**
-     * Load settings (legacy API compatibility)
-     * @returns {Object|null} Settings object
-     */
-    loadSettings() {
-        return this.getItem(this.storageKeys.settings);
-    }
+
 
     /**
      * Save state (legacy API compatibility)
@@ -270,11 +264,6 @@ class StorageManager {
             return false;
         }
     }
-}
-
-// Export class for use by other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = StorageManager;
 }
 
 // Export for browser use

@@ -34,53 +34,39 @@ class OfficeWellnessApp {
             console.log('Initializing Office Wellness Reminder application...');
             this.appState.isInitializing = true;
             
-            // Step 1: Initialize components
-            console.log('Step 1: Initializing components...');
+            // Initialize components
             await this.initializeComponents();
-            console.log('✅ Components initialized successfully');
             
-            // Step 2: Load user settings and state
-            console.log('Step 2: Loading settings and state...');
+            // Load user settings and state
             await this.loadSettingsAndState();
-            console.log('✅ Settings and state loaded successfully');
             
-            // Step 3: Initialize UI
-            console.log('Step 3: Initializing UI...');
+            // Initialize UI
             this.initializeUI();
-            console.log('✅ UI initialized successfully');
             
-            // Step 4: Set up event listeners
-            console.log('Step 4: Setting up event listeners...');
+            // Set up event listeners
             this.setupEventListeners();
-            console.log('✅ Event listeners set up successfully');
             
-            // Step 5: Request notification permission (non-blocking)
-            console.log('Step 5: Requesting notification permission...');
+            // Request notification permission (non-blocking)
             try {
                 await this.requestNotificationPermission();
-                console.log('✅ Notification permission handled');
             } catch (permissionError) {
-                console.warn('⚠️ Notification permission failed, continuing:', permissionError);
+                console.warn('Notification permission failed, continuing:', permissionError);
             }
             
-            // Step 6: Restore previous session state (non-blocking)
-            console.log('Step 6: Restoring previous state...');
+            // Restore previous session state (non-blocking)
             try {
                 await this.restorePreviousState();
-                console.log('✅ Previous state restored');
             } catch (stateError) {
-                console.warn('⚠️ State restoration failed, continuing:', stateError);
+                console.warn('State restoration failed, continuing:', stateError);
             }
             
-            // Step 7: Check if first use (non-blocking)
-            console.log('Step 7: Checking first use...');
+            // Check if first use (non-blocking)
             try {
                 if (this.appSettings && this.appSettings.isFirstUse()) {
                     this.showFirstUseGuide();
                 }
-                console.log('✅ First use check completed');
             } catch (firstUseError) {
-                console.warn('⚠️ First use check failed, continuing:', firstUseError);
+                console.warn('First use check failed, continuing:', firstUseError);
             }
             
             this.isInitialized = true;
