@@ -91,10 +91,11 @@ class ReminderManager {
         this.clearTimer();
         this.clearUpdateTimer();
         
-        // Activity detection removed for MVP - using simpler time-based reminders
-        
         // Reset state
         this.resetState();
+        
+        // Save state immediately
+        this.saveState();
         
         // Notify state change
         this.notifyStateChange();
@@ -127,6 +128,9 @@ class ReminderManager {
         
         // Clear timer
         this.clearTimer();
+        
+        // Save state immediately
+        this.saveState();
         
         // Notify state change
         this.notifyStateChange();

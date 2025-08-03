@@ -189,14 +189,6 @@ class StorageManager {
     }
 
     /**
-     * Save settings (legacy API compatibility)
-     * @param {Object} settings - Settings object
-     */
-    saveSettings(settings) {
-        this.setItem(this.storageKeys.settings, settings);
-    }
-
-    /**
      * Load settings (legacy API compatibility)
      * @returns {Object|null} Settings object
      */
