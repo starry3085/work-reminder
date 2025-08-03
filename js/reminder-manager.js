@@ -61,8 +61,8 @@ class ReminderManager {
         // Start time update timer
         this.startUpdateTimer();
         
-        // Save state immediately
-        this.saveState();
+        // Notify state change
+        this.notifyStateChange();
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -96,8 +96,8 @@ class ReminderManager {
         // Reset state
         this.resetState();
         
-        // Save state immediately
-        this.saveState();
+        // Notify state change
+        this.notifyStateChange();
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -128,8 +128,8 @@ class ReminderManager {
         // Clear timer
         this.clearTimer();
         
-        // Save state immediately
-        this.saveState();
+        // Notify state change
+        this.notifyStateChange();
         
         // Trigger status change callback
         this.triggerStatusChange({
@@ -218,8 +218,8 @@ class ReminderManager {
         // Update last reminder time
         this.settings.lastReminder = Date.now();
         
-        // Save settings immediately
-        this.saveState();
+        // Notify state change
+        this.notifyStateChange();
         
         // Reset and restart timer
         this.resetAndRestart();
@@ -248,8 +248,8 @@ class ReminderManager {
         this.startTimer();
         this.startUpdateTimer();
         
-        // Save state
-        this.saveState();
+        // Notify state change
+        this.notifyStateChange();
         
         // Trigger status change
         this.triggerStatusChange({
@@ -327,13 +327,12 @@ class ReminderManager {
     }
 
     /**
-     * Save current state to storage through centralized state manager
+     * 通知状态变化 - 不再直接保存状态，由应用统一处理
      * @private
      */
-    saveState() {
+    notifyStateChange() {
         if (this.statusChangeCallback) {
             const status = this.getCurrentStatus();
-            status.action = 'saveState';
             status.type = this.type;
             this.statusChangeCallback(status);
         }

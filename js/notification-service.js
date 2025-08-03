@@ -42,13 +42,61 @@ class NotificationService {
     }
 
     /**
-     * 请求通知权限（已委托给 app.js）
+     * 请求通知权限 - 统一权限管理
      * @returns {Promise<boolean>} 是否获得权限
-     * @deprecated 请使用应用层权限管理
      */
     async requestPermission() {
-        console.warn('NotificationService.requestPermission 已废弃。请使用应用层权限管理。');
-        return this.hasPermission || false;
+        if (!this.isSupported) {
+            console.warn('浏览器不支持通知');
+            return false;
+        }
+
+        try {
+            let permission = Notification.permission;
+            
+            if (permission === 'default') {
+                permission = await Notification.requestPermission();
+            }
+            
+            const granted = permission === 'granted';
+            this.hasPermission = granted;
+            
+            // 统一更新权限状态
+            this.updatePermissionStatus(granted);
+            
+            if (granted) {
+                console.log('通知权限已授予');
+            } else {
+                console.log('通知权限被拒绝');
+            }
+            
+            return granted;
+        } catch (error) {
+            console.error('请求通知权限失败:', error);
+            return false;
+        }
+    }
+
+    /**
+     * 更新权限状态
+     * @private
+     * @param {boolean} granted - 权限是否被授予
+     */
+    updatePermissionStatus(granted) {
+        this.hasPermission = granted;
+        
+        // 通知应用权限状态变化
+        if (this.permissionChangeCallback) {
+            this.permissionChangeCallback(granted);
+        }
+    }
+
+    /**
+     * 设置权限变更回调
+     * @param {Function} callback - 权限变更回调函数
+     */
+    setPermissionChangeCallback(callback) {
+        this.permissionChangeCallback = callback;
     }
 
     /**
