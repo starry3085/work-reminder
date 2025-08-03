@@ -195,7 +195,7 @@ class ErrorHandler {
      * @returns {Object} User-friendly error information
      */
     getUserFriendlyError(error) {
-        // 根据错误类型返回友好信息
+        // Return friendly information based on error type
         if (error.message && typeof error.message === 'string') {
             if (error.message.includes('localStorage') || error.message.includes('storage')) {
                 return this.handleStorageError({ type: 'storage', error });

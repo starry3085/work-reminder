@@ -131,8 +131,8 @@ class StorageManager {
     }
 
     /**
-     * Set item to storage (基础API)
-     * @param {string} key - Storage key name (不包含前缀)
+     * Set item to storage (basic API)
+     * @param {string} key - Storage key name (without prefix)
      * @param {any} data - Data to save
      * @returns {boolean} Whether save was successful
      */
@@ -162,8 +162,8 @@ class StorageManager {
     }
 
     /**
-     * Get item from storage (基础API)
-     * @param {string} key - Storage key name (不包含前缀)
+     * Get item from storage (basic API)
+     * @param {string} key - Storage key name (without prefix)
      * @returns {any|null} Loaded data, returns null on failure
      */
     getItem(key) {
@@ -189,25 +189,25 @@ class StorageManager {
     }
 
     /**
-     * Save settings (兼容旧API)
-     * @param {Object} settings - 设置对象
+     * Save settings (legacy API compatibility)
+     * @param {Object} settings - Settings object
      */
     saveSettings(settings) {
         this.setItem(this.storageKeys.settings, settings);
     }
 
     /**
-     * Load settings (兼容旧API)
-     * @returns {Object|null} 设置对象
+     * Load settings (legacy API compatibility)
+     * @returns {Object|null} Settings object
      */
     loadSettings() {
         return this.getItem(this.storageKeys.settings);
     }
 
     /**
-     * Save state (兼容旧API)
-     * @param {string} type - 提醒类型 ('water' | 'standup')
-     * @param {Object} state - 状态对象
+     * Save state (legacy API compatibility)
+     * @param {string} type - Reminder type ('water' | 'standup')
+     * @param {Object} state - State object
      */
     saveState(type, state) {
         const key = type === 'water' ? this.storageKeys.waterState : this.storageKeys.standupState;
@@ -215,9 +215,9 @@ class StorageManager {
     }
 
     /**
-     * Load state (兼容旧API)
-     * @param {string} type - 提醒类型 ('water' | 'standup')
-     * @returns {Object|null} 状态对象
+     * Load state (legacy API compatibility)
+     * @param {string} type - Reminder type ('water' | 'standup')
+     * @returns {Object|null} State object
      */
     loadState(type) {
         const key = type === 'water' ? this.storageKeys.waterState : this.storageKeys.standupState;

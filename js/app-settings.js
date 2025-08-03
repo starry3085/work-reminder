@@ -1,42 +1,42 @@
 /**
- * 应用设置管理类 - 负责应用设置和状态的管理
- * 包括设置的加载、保存、验证和状态恢复功能
+ * Application Settings Manager - Manages application settings and state
+ * Includes loading, saving, validation and state recovery functionality
  */
 class AppSettings {
     constructor(storageManager) {
         this.storageManager = storageManager;
         
-        // 统一存储键名规范
+        // Unified storage key naming convention
         this.settingsKey = 'work_reminder_settings_v1';
         this.stateKey = 'work_reminder_state_v1';
         
-        // 默认设置
+        // Default settings
         this.defaultSettings = {
             water: {
                 enabled: true,
-                interval: 30, // 分钟
+                interval: 30, // minutes
                 sound: true,
                 lastReminder: null
             },
             standup: {
                 enabled: true,
-                interval: 30, // 分钟
+                interval: 30, // minutes
                 sound: true,
                 lastReminder: null
             },
             notifications: {
                 browserNotifications: true,
                 soundEnabled: true,
-                style: 'standard' // 通知样式: standard, minimal, detailed
+                style: 'standard' // notification style: standard, minimal, detailed
             },
             appearance: {
-                theme: 'light', // 主题: light, dark, auto
-                language: 'zh-CN'
+                theme: 'light', // theme: light, dark, auto
+                language: 'en-US'
             },
-            firstUse: true // 是否首次使用
+            firstUse: true // whether first time use
         };
         
-        // 默认应用状态
+        // Default application state
         this.defaultState = {
             waterReminder: {
                 isActive: false,
@@ -61,20 +61,20 @@ class AppSettings {
     }
 
     /**
-     * 加载应用设置和状态（原子操作，确保一致性）
-     * @param {boolean} forceDefault - 是否强制使用默认设置（强制刷新时）
-     * @returns {Object} 加载的设置
+     * Load application settings and state (atomic operation to ensure consistency)
+     * @param {boolean} forceDefault - Whether to force use default settings (on force refresh)
+     * @returns {Object} Loaded settings
      */
     loadSettings(forceDefault = false) {
         try {
-            // 检查是否为强制刷新
+            // Check if force refresh
             const isForceRefresh = this.detectForceRefresh();
             
             if (forceDefault || isForceRefresh) {
-                console.log('检测到强制刷新或强制使用默认设置，恢复默认设置和状态');
+                console.log('Force refresh detected or forced default settings, restoring default settings and state');
                 this.currentSettings = { ...this.defaultSettings };
                 this.currentState = { ...this.defaultState };
-                // 清除强制刷新标记
+                // Clear force refresh flag
                 this.clearForceRefreshFlag();
                 this.saveSettings();
                 this.saveState();
@@ -84,31 +84,31 @@ class AppSettings {
             const savedSettings = this.storageManager.loadSettings(this.settingsKey);
             const savedState = this.storageManager.loadSettings(this.stateKey);
             
-            // 确保设置和状态的一致性
+            // Ensure consistency between settings and state
             let settingsValid = false;
             let stateValid = false;
             
             if (savedSettings && this.validateSettings(savedSettings)) {
                 this.currentSettings = this.mergeSettings(this.defaultSettings, savedSettings);
                 settingsValid = true;
-                console.log('已加载用户设置:', this.currentSettings);
+                console.log('User settings loaded:', this.currentSettings);
             } else {
-                console.log('使用默认设置');
+                console.log('Using default settings');
                 this.currentSettings = { ...this.defaultSettings };
             }
             
             if (savedState && this.isStateValid(savedState)) {
                 this.currentState = this.mergeSettings(this.defaultState, savedState);
                 stateValid = true;
-                console.log('已加载应用状态:', this.currentState);
+                console.log('Application state loaded:', this.currentState);
             } else {
-                console.log('使用默认状态');
+                console.log('Using default state');
                 this.currentState = { ...this.defaultState };
             }
             
-            // 如果设置或状态无效，确保两者都重置为默认值
+            // If settings or state invalid, ensure both are reset to defaults
             if (!settingsValid || !stateValid) {
-                console.log('设置或状态无效，重置为默认值');
+                console.log('Settings or state invalid, resetting to defaults');
                 this.currentSettings = { ...this.defaultSettings };
                 this.currentState = { ...this.defaultState };
                 this.saveSettings();
@@ -117,7 +117,7 @@ class AppSettings {
             
             return this.currentSettings;
         } catch (error) {
-            console.warn('加载设置失败，使用默认设置和状态:', error);
+            console.warn('Failed to load settings, using default settings and state:', error);
             this.currentSettings = { ...this.defaultSettings };
             this.currentState = { ...this.defaultState };
             this.saveSettings();
@@ -127,9 +127,9 @@ class AppSettings {
     }
 
     /**
-     * 保存应用设置
-     * @param {Object} settings - 要保存的设置
-     * @returns {boolean} 保存是否成功
+     * Save application settings
+     * @param {Object} settings - Settings to save
+     * @returns {boolean} Whether save was successful
      */
     saveSettings(settings = null) {
         try {
@@ -137,70 +137,70 @@ class AppSettings {
             const result = this.storageManager.saveSettings(this.settingsKey, settingsToSave);
             if (result) {
                 this.currentSettings = settingsToSave;
-                console.log('设置已保存');
+                console.log('Settings saved');
             }
             return result;
         } catch (error) {
-            console.error('保存设置失败:', error);
+            console.error('Failed to save settings:', error);
             return false;
         }
     }
 
     /**
-     * 加载应用状态
-     * @returns {Object} 加载的状态
+     * Load application state
+     * @returns {Object} Loaded state
      */
     loadState() {
         try {
             const savedState = this.storageManager.loadSettings(this.stateKey);
             if (savedState) {
-                // 验证状态的有效性
+                // Validate state validity
                 if (this.isStateValid(savedState)) {
                     this.currentState = this.mergeSettings(this.defaultState, savedState);
-                    console.log('已加载应用状态:', this.currentState);
+                    console.log('Application state loaded:', this.currentState);
                 } else {
-                    console.warn('保存的状态已过期或无效，使用默认状态');
+                    console.warn('Saved state expired or invalid, using default state');
                     this.currentState = { ...this.defaultState };
                 }
             } else {
-                console.log('没有找到保存的状态，使用默认状态');
+                console.log('No saved state found, using default state');
                 this.currentState = { ...this.defaultState };
             }
             return this.currentState;
         } catch (error) {
-            console.warn('加载状态失败，使用默认状态:', error);
+            console.warn('Failed to load state, using default state:', error);
             this.currentState = { ...this.defaultState };
             return this.currentState;
         }
     }
 
     /**
-     * 保存应用状态
-     * @param {Object} state - 要保存的状态
-     * @returns {boolean} 保存是否成功
+     * Save application state
+     * @param {Object} state - State to save
+     * @returns {boolean} Whether save was successful
      */
     saveState(state = null) {
         try {
             const stateToSave = state || this.currentState;
-            // 更新最后保存时间
+            // Update last saved time
             stateToSave.lastSaved = Date.now();
             
             const result = this.storageManager.saveSettings(this.stateKey, stateToSave);
             if (result) {
                 this.currentState = stateToSave;
-                console.log('应用状态已保存');
+                console.log('Application state saved');
             }
             return result;
         } catch (error) {
-            console.error('保存应用状态失败:', error);
+            console.error('Failed to save application state:', error);
             return false;
         }
     }
 
     /**
-     * 更新设置
-     * @param {Object} newSettings - 新设置
-     * @returns {Object} 更新后的设置
+     * Update settings
+     * @param {Object} newSettings - New settings
+     * @returns {Object} Updated settings
      */
     updateSettings(newSettings) {
         this.currentSettings = this.mergeSettings(this.currentSettings, newSettings);
@@ -209,9 +209,9 @@ class AppSettings {
     }
 
     /**
-     * 更新应用状态
-     * @param {Object} newState - 新状态
-     * @returns {Object} 更新后的状态
+     * Update application state
+     * @param {Object} newState - New state
+     * @returns {Object} Updated state
      */
     updateState(newState) {
         this.currentState = this.mergeSettings(this.currentState, newState);
@@ -220,8 +220,8 @@ class AppSettings {
     }
 
     /**
-     * 重置设置为默认值
-     * @returns {Object} 重置后的设置
+     * Reset settings to defaults
+     * @returns {Object} Reset settings
      */
     resetSettings() {
         this.currentSettings = { ...this.defaultSettings };
@@ -230,8 +230,8 @@ class AppSettings {
     }
 
     /**
-     * 重置应用状态为默认值
-     * @returns {Object} 重置后的状态
+     * Reset application state to defaults
+     * @returns {Object} Reset state
      */
     resetState() {
         this.currentState = { ...this.defaultState };
@@ -240,35 +240,35 @@ class AppSettings {
     }
 
     /**
-     * 检查状态是否有效
-     * @param {Object} state - 要检查的状态
-     * @returns {boolean} 状态是否有效
+     * Check if state is valid
+     * @param {Object} state - State to check
+     * @returns {boolean} Whether state is valid
      * @private
      */
     isStateValid(state) {
-        // 检查状态是否过期（超过24小时）
+        // Check if state is expired (over 24 hours)
         if (!state.lastSaved) return false;
         
         const now = Date.now();
         const lastSaved = state.lastSaved;
-        const maxAge = 24 * 60 * 60 * 1000; // 24小时
+        const maxAge = 24 * 60 * 60 * 1000; // 24 hours
         
         if (now - lastSaved > maxAge) {
-            console.warn('应用状态已过期');
+            console.warn('Application state expired');
             return false;
         }
         
-        // 检查提醒时间是否有效
+        // Check if reminder times are valid
         if (state.waterReminder && state.waterReminder.nextReminderAt) {
             if (now - state.waterReminder.nextReminderAt > maxAge) {
-                console.warn('水提醒时间已过期');
+                console.warn('Water reminder time expired');
                 return false;
             }
         }
         
         if (state.standupReminder && state.standupReminder.nextReminderAt) {
             if (now - state.standupReminder.nextReminderAt > maxAge) {
-                console.warn('久坐提醒时间已过期');
+                console.warn('Standup reminder time expired');
                 return false;
             }
         }
@@ -277,10 +277,10 @@ class AppSettings {
     }
 
     /**
-     * 深度合并设置对象
-     * @param {Object} target - 目标对象
-     * @param {Object} source - 源对象
-     * @returns {Object} 合并后的对象
+     * Deep merge settings objects
+     * @param {Object} target - Target object
+     * @param {Object} source - Source object
+     * @returns {Object} Merged object
      * @private
      */
     mergeSettings(target, source) {
@@ -300,9 +300,9 @@ class AppSettings {
     }
 
     /**
-     * 验证设置是否有效
-     * @param {Object} settings - 要验证的设置
-     * @returns {Object} 验证结果 {isValid: boolean, errors: Array}
+     * Validate if settings are valid
+     * @param {Object} settings - Settings to validate
+     * @returns {Object} Validation result {isValid: boolean, errors: Array}
      */
     validateSettings(settings) {
         const errors = [];
@@ -312,7 +312,7 @@ class AppSettings {
             return { isValid: false, errors };
         }
 
-        // 验证提醒设置
+        // Validate reminder settings
         ['water', 'standup'].forEach(type => {
             const reminder = settings[type];
             if (!reminder || typeof reminder !== 'object') {
@@ -336,23 +336,23 @@ class AppSettings {
     }
 
     /**
-     * 获取当前设置
-     * @returns {Object} 当前设置
+     * Get current settings
+     * @returns {Object} Current settings
      */
     getSettings() {
         return this.currentSettings;
     }
 
     /**
-     * 获取当前状态
-     * @returns {Object} 当前状态
+     * Get current state
+     * @returns {Object} Current state
      */
     getState() {
         return this.currentState;
     }
 
     /**
-     * 标记应用已完成首次使用
+     * Mark application first use as complete
      */
     markFirstUseComplete() {
         this.currentSettings.firstUse = false;
@@ -360,86 +360,86 @@ class AppSettings {
     }
 
     /**
-     * 检查是否首次使用应用
-     * @returns {boolean} 是否首次使用
+     * Check if first time using application
+     * @returns {boolean} Whether first time use
      */
     isFirstUse() {
         return this.currentSettings.firstUse === true;
     }
 
     /**
-     * 检测是否为强制刷新
-     * @returns {boolean} 是否为强制刷新
+     * Detect if force refresh
+     * @returns {boolean} Whether force refresh
      * @private
      */
     detectForceRefresh() {
         try {
-            // 检查是否有强制刷新标记
+            // Check if force refresh flag exists
             const forceRefreshFlag = sessionStorage.getItem('forceRefreshFlag');
             if (forceRefreshFlag === 'true') {
                 return true;
             }
             
-            // 检查 performance.navigation API（已废弃但仍可用）
+            // Check performance.navigation API (deprecated but still usable)
             if (window.performance && window.performance.navigation) {
-                // TYPE_RELOAD = 1 表示刷新
-                // 但无法区分普通刷新和强制刷新
+                // TYPE_RELOAD = 1 indicates refresh
+                // But cannot distinguish between normal refresh and force refresh
                 return false;
             }
             
-            // 检查 performance.getEntriesByType API
+            // Check performance.getEntriesByType API
             if (window.performance && window.performance.getEntriesByType) {
                 const navEntries = window.performance.getEntriesByType('navigation');
                 if (navEntries.length > 0) {
                     const navEntry = navEntries[0];
-                    // 如果是 reload 类型，可能是刷新
+                    // If reload type, might be refresh
                     return navEntry.type === 'reload';
                 }
             }
             
             return false;
         } catch (error) {
-            console.warn('检测强制刷新失败:', error);
+            console.warn('Failed to detect force refresh:', error);
             return false;
         }
     }
 
     /**
-     * 设置强制刷新标记
+     * Set force refresh flag
      */
     setForceRefreshFlag() {
         try {
             sessionStorage.setItem('forceRefreshFlag', 'true');
         } catch (error) {
-            console.warn('设置强制刷新标记失败:', error);
+            console.warn('Failed to set force refresh flag:', error);
         }
     }
 
     /**
-     * 清除强制刷新标记
+     * Clear force refresh flag
      * @private
      */
     clearForceRefreshFlag() {
         try {
             sessionStorage.removeItem('forceRefreshFlag');
         } catch (error) {
-            console.warn('清除强制刷新标记失败:', error);
+            console.warn('Failed to clear force refresh flag:', error);
         }
     }
 
     /**
-     * 强制重置为默认设置（用于强制刷新）
-     * @returns {Object} 重置后的设置
+     * Force reset to default settings (for force refresh)
+     * @returns {Object} Reset settings
      */
     forceResetToDefaults() {
-        console.log('强制重置为默认设置');
+        console.log('Force reset to default settings');
         this.currentSettings = { ...this.defaultSettings };
         this.saveSettings();
         return this.currentSettings;
     }
 }
 
-// 导出类供其他模块使用
+// Export class for use by other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = AppSettings;
 }
