@@ -5,8 +5,10 @@
 class AppSettings {
     constructor(storageManager) {
         this.storageManager = storageManager;
-        this.settingsKey = 'appSettings';
-        this.stateKey = 'appState';
+        
+        // 统一存储键名规范
+        this.settingsKey = 'work_reminder_settings_v1';
+        this.stateKey = 'work_reminder_state_v1';
         
         // 默认设置
         this.defaultSettings = {

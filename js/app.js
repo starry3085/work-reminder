@@ -363,38 +363,13 @@ class OfficeWellnessApp {
     }
     
     /**
-     * 保存应用状态
+     * 保存应用状态 - 统一状态管理
      * @private
      */
     saveAppState() {
         try {
-            // 获取当前提醒状态
-            const waterStatus = this.waterReminder ? this.waterReminder.getCurrentStatus() : null;
-            const standupStatus = this.standupReminder ? this.standupReminder.getCurrentStatus() : null;
-            
-            // 更新应用状态
-            const currentState = this.appSettings.getState();
-            
-            if (waterStatus) {
-                currentState.waterReminder = {
-                    isActive: waterStatus.isActive,
-                    timeRemaining: waterStatus.timeRemaining,
-                    nextReminderAt: waterStatus.nextReminderAt,
-                    lastAcknowledged: waterStatus.lastAcknowledged
-                };
-            }
-            
-            if (standupStatus) {
-                currentState.standupReminder = {
-                    isActive: standupStatus.isActive,
-                    timeRemaining: standupStatus.timeRemaining,
-                    nextReminderAt: standupStatus.nextReminderAt,
-                    lastAcknowledged: standupStatus.lastAcknowledged
-                };
-            }
-            
-            // 保存状态
-            this.appSettings.saveState(currentState);
+            // 直接由appSettings管理状态，避免重复保存
+            this.appSettings.saveState();
             console.log('应用状态已保存');
             return true;
         } catch (error) {
@@ -408,18 +383,15 @@ class OfficeWellnessApp {
      * @private
      */
     setupEventListeners() {
-        // Set up simplified callbacks
+        // 统一状态更新回调，避免重复保存
         if (this.waterReminder) {
             this.waterReminder.setStatusChangeCallback((status) => {
-                if (status.action === 'saveState') {
-                    // Handle state save request from reminder manager
-                    this.saveAppState();
-                } else {
-                    // Handle regular status updates
-                    if (this.uiController) {
-                        this.uiController.updateReminderStatus('water', status);
-                    }
+                // 统一更新UI状态
+                if (this.uiController) {
+                    this.uiController.updateReminderStatus('water', status);
                 }
+                // 统一状态保存由应用层处理
+                this.saveAppState();
             });
             
             this.waterReminder.setTimeUpdateCallback((timeInfo) => {
@@ -431,15 +403,12 @@ class OfficeWellnessApp {
         
         if (this.standupReminder) {
             this.standupReminder.setStatusChangeCallback((status) => {
-                if (status.action === 'saveState') {
-                    // Handle state save request from reminder manager
-                    this.saveAppState();
-                } else {
-                    // Handle regular status updates
-                    if (this.uiController) {
-                        this.uiController.updateReminderStatus('standup', status);
-                    }
+                // 统一更新UI状态
+                if (this.uiController) {
+                    this.uiController.updateReminderStatus('standup', status);
                 }
+                // 统一状态保存由应用层处理
+                this.saveAppState();
             });
             
             this.standupReminder.setTimeUpdateCallback((timeInfo) => {

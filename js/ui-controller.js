@@ -413,20 +413,13 @@ class UIController {
      * @param {Object} status - Status object
      */
     updateReminderStatus(type, status) {
-        // Update internal state
-        this.reminderStates[type] = {
-            isActive: status.isActive || false,
-            isPaused: status.isPaused || false,
-            timeRemaining: status.timeRemaining || 0
-        };
-
-        // Update UI elements
+        // Update UI elements only - state management handled elsewhere
         this.updateCard(type, status);
         this.updateButtons(type, status);
         this.updateCountdown(type, status.timeRemaining || 0);
         
         // Update app status
-        const anyActive = this.reminderStates.water.isActive || this.reminderStates.standup.isActive;
+        const anyActive = status.isActive || false;
         this.updateAppStatusSummary(anyActive);
     }
 
