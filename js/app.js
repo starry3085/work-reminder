@@ -373,24 +373,24 @@ class OfficeWellnessApp {
             console.log('Application state saved');
             return true;
         } catch (error) {
-            console.error('保存应用状态失败:', error);
+            console.error('Failed to save application state:', error);
             return false;
         }
     }
 
     /**
-     * 设置事件监听器
+     * Set up event listeners
      * @private
      */
     setupEventListeners() {
-        // 统一状态更新回调，避免重复保存
+        // Unified status update callback to avoid duplicate saves
         if (this.waterReminder) {
             this.waterReminder.setStatusChangeCallback((status) => {
-                // 统一更新UI状态
+                // Unified UI status update
                 if (this.uiController) {
                     this.uiController.updateReminderStatus('water', status);
                 }
-                // 统一状态保存由应用层处理
+                // Unified state saving handled by application layer
                 this.saveAppState();
             });
             
@@ -403,11 +403,11 @@ class OfficeWellnessApp {
         
         if (this.standupReminder) {
             this.standupReminder.setStatusChangeCallback((status) => {
-                // 统一更新UI状态
+                // Unified UI status update
                 if (this.uiController) {
                     this.uiController.updateReminderStatus('standup', status);
                 }
-                // 统一状态保存由应用层处理
+                // Unified state saving handled by application layer
                 this.saveAppState();
             });
             
@@ -420,16 +420,16 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 初始化UI
+     * Initialize UI
      * @private
      */
     initializeUI() {
         if (!this.uiController) {
-            console.error('UI控制器未初始化');
+            console.error('UI controller not initialized');
             return;
         }
 
-        // 初始化UI控制器
+        // Initialize UI controller
         this.uiController.initialize();
         
         // Apply settings to UI
@@ -439,13 +439,13 @@ class OfficeWellnessApp {
         // Set up event handlers
         this.setupUIEventHandlers();
         
-        console.log('UI初始化完成');
+        console.log('UI initialization complete');
     }
 
 
 
     /**
-     * 设置UI事件处理器
+     * Set up UI event handlers
      * @private
      */
     setupUIEventHandlers() {
@@ -478,7 +478,7 @@ class OfficeWellnessApp {
 
 
 
-        // 间隔变更事件
+        // Interval change event
         this.uiController.on('waterIntervalChanged', (data) => {
             this.handleIntervalChange('water', data.interval);
         });
@@ -487,7 +487,7 @@ class OfficeWellnessApp {
             this.handleIntervalChange('standup', data.interval);
         });
 
-        // 设置保存事件
+        // Set up save event
         this.uiController.on('saveSettings', () => {
             this.handleSaveSettings();
         });
@@ -521,14 +521,14 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 处理间隔变更
-     * @param {string} type - 提醒类型 ('water' | 'standup')
-     * @param {number} interval - 新的间隔（分钟）
+     * Handle interval change
+     * @param {string} type - reminder type ('water' | 'standup')
+     * @param {number} interval - new interval (minutes)
      * @private
      */
     handleIntervalChange(type, interval) {
         try {
-            // 更新设置
+            // Update settings
             const currentSettings = this.appSettings.getSettings();
             if (type === 'water') {
                 currentSettings.water.interval = interval;
@@ -542,7 +542,7 @@ class OfficeWellnessApp {
                 }
             }
             
-            // 保存设置
+            // Save settings
             this.appSettings.saveSettings(currentSettings);
             
             console.log(`${type} reminder interval updated to ${interval} minutes`);
@@ -553,22 +553,22 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 处理保存设置
+     * Handle save settings
      * @private
      */
     handleSaveSettings() {
         try {
             const newSettings = this.uiController.getSettingsFromUI();
             
-            // 验证设置
+            // Validate settings
             if (!this.appSettings.validateSettings(newSettings)) {
-                throw new Error('设置验证失败');
+                throw new Error('Settings validation failed');
             }
             
-            // 更新设置
+            // Update settings
             this.appSettings.updateSettings(newSettings);
             
-            // 更新提醒管理器
+            // Update reminder manager
             if (this.waterReminder && newSettings.water) {
                 this.waterReminder.updateSettings(newSettings.water);
             }
@@ -582,7 +582,7 @@ class OfficeWellnessApp {
                 message: 'Your settings have been successfully saved and applied'
             });
             
-            // 关闭设置面板
+            // Close settings panel
             this.uiController.hideSettings();
             
         } catch (error) {
@@ -595,18 +595,18 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 处理重置设置
+     * Handle reset settings
      * @private
      */
     handleResetSettings() {
         try {
-            // 重置为默认设置
+            // Reset to default settings
             const defaultSettings = this.appSettings.resetSettings();
             
-            // 应用到UI
+            // Apply to UI
             this.uiController.applySettingsToUI(defaultSettings);
             
-            // 更新提醒管理器
+            // Update reminder manager
             if (this.waterReminder) {
                 this.waterReminder.updateSettings(defaultSettings.water);
             }
@@ -630,20 +630,20 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 处理强制重置设置（强制恢复默认值）
+     * Handle force reset settings (force restore to defaults)
      * @private
      */
     handleForceResetSettings() {
         try {
-            console.log('执行强制重置设置');
+            console.log('Executing force reset settings');
             
-            // 强制重置为默认设置
+            // Force reset to default settings
             const defaultSettings = this.appSettings.forceResetToDefaults();
             
-            // 应用到UI
+            // Apply to UI
             this.uiController.applySettingsToUI(defaultSettings);
             
-            // 停止所有提醒
+            // Stop all reminders
             if (this.waterReminder && this.waterReminder.isActive) {
                 this.waterReminder.stop();
             }
@@ -651,7 +651,7 @@ class OfficeWellnessApp {
                 this.standupReminder.stop();
             }
             
-            // 更新提醒管理器设置
+            // Update reminder manager settings
             if (this.waterReminder) {
                 this.waterReminder.updateSettings(defaultSettings.water);
             }
@@ -659,23 +659,23 @@ class OfficeWellnessApp {
                 this.standupReminder.updateSettings(defaultSettings.standup);
             }
             
-            // 清除所有状态
+            // Clear all state
             this.appSettings.resetState();
             
             // Show force reset success notification
             this.notificationService.showInPageAlert('success', {
-                title: '强制重置完成',
-                message: '所有设置已强制重置为默认值（30分钟间隔），所有提醒已停止'
+                title: 'Force Reset Complete',
+                message: 'All settings have been force reset to default values (30-minute intervals), all reminders stopped'
             });
             
             // 关闭设置面板
             this.uiController.hideSettings();
             
         } catch (error) {
-            console.error('强制重置设置失败:', error);
+            console.error('Force reset settings failed:', error);
             this.notificationService.showInPageAlert('error', {
-                title: '强制重置失败',
-                message: '强制重置设置失败，请刷新页面重试'
+                title: 'Force Reset Failed',
+                message: 'Force reset settings failed, please refresh the page and try again'
             });
         }
     }
@@ -688,17 +688,17 @@ class OfficeWellnessApp {
      */
     async restorePreviousState() {
         try {
-            console.log('正在恢复上次会话状态...');
+            console.log('Restoring previous session state...');
             const currentState = this.appSettings.getState();
             const currentSettings = this.appSettings.getSettings();
             
-            // 恢复水提醒状态
+            // Restore water reminder state
             if (currentState.waterReminder && this.waterReminder) {
-                // 检查是否应该恢复活动状态
+                // Check if should restore active state
                 if (currentState.waterReminder.isActive && currentSettings.water.enabled) {
-                    console.log('恢复水提醒状态');
+                    console.log('Restoring water reminder state');
                     
-                    // 计算剩余时间
+                    // Calculate remaining time
                     let timeRemaining = 0;
                     if (currentState.waterReminder.nextReminderAt) {
                         const now = Date.now();
@@ -706,7 +706,7 @@ class OfficeWellnessApp {
                         timeRemaining = Math.max(0, nextReminder - now);
                     }
                     
-                    // 如果剩余时间有效，则恢复计时器
+                    // If remaining time is valid, restore timer
                     if (timeRemaining > 0 && timeRemaining < currentSettings.water.interval * 60 * 1000) {
                         this.waterReminder.restoreState({
                             isActive: true,
@@ -715,19 +715,19 @@ class OfficeWellnessApp {
                             lastAcknowledged: currentState.waterReminder.lastAcknowledged
                         });
                     } else {
-                        // 如果时间无效，则重新开始
+                        // If time is invalid, restart
                         this.waterReminder.start();
                     }
                 }
             }
             
-            // 恢复久坐提醒状态
+            // Restore standup reminder state
             if (currentState.standupReminder && this.standupReminder) {
-                // 检查是否应该恢复活动状态
+                // Check if should restore active state
                 if (currentState.standupReminder.isActive && currentSettings.standup.enabled) {
-                    console.log('恢复久坐提醒状态');
+                    console.log('Restoring standup reminder state');
                     
-                    // 计算剩余时间
+                    // Calculate remaining time
                     let timeRemaining = 0;
                     if (currentState.standupReminder.nextReminderAt) {
                         const now = Date.now();
@@ -735,7 +735,7 @@ class OfficeWellnessApp {
                         timeRemaining = Math.max(0, nextReminder - now);
                     }
                     
-                    // 如果剩余时间有效，则恢复计时器
+                    // If remaining time is valid, restore timer
                     if (timeRemaining > 0 && timeRemaining < currentSettings.standup.interval * 60 * 1000) {
                         if (typeof this.standupReminder.restoreState === 'function') {
                             this.standupReminder.restoreState({
@@ -745,11 +745,11 @@ class OfficeWellnessApp {
                                 lastAcknowledged: currentState.standupReminder.lastAcknowledged
                             });
                         } else {
-                            // 如果没有restoreState方法，则重新开始
+                            // If no restoreState method, restart
                             this.standupReminder.start();
                         }
                     } else {
-                        // 如果时间无效，则重新开始
+                        // If time is invalid, restart
                         this.standupReminder.start();
                     }
                 }
@@ -757,35 +757,35 @@ class OfficeWellnessApp {
             
             // Activity detector removed for MVP - user activity state no longer tracked
             
-            console.log('会话状态恢复完成');
+            console.log('Session state restoration complete');
             return true;
         } catch (error) {
-            console.error('恢复会话状态失败:', error);
+            console.error('Session state restoration failed:', error);
             return false;
         }
     }
     
     /**
-     * 显示首次使用引导 - HACKATHON版本：简化或移除引导
+     * Show first use guide - HACKATHON version: simplified or removed guide
      * @private
      */
     showFirstUseGuide() {
         try {
-            console.log('HACKATHON模式：跳过首次使用引导');
+            console.log('HACKATHON mode: skipping first use guide');
             
-            // HACKATHON建议：直接标记为已使用，不显示引导
+            // HACKATHON suggestion: mark as used directly, no guide shown
             this.appSettings.markFirstUseComplete();
             
             // 可选：显示一个简洁的欢迎提示条，而不是弹窗
             this.showWelcomeToast();
             
         } catch (error) {
-            console.error('显示首次使用引导失败:', error);
+            console.error('Failed to show first use guide:', error);
         }
     }
 
     /**
-     * 显示简洁欢迎提示条
+     * Show simple welcome toast
      * @private
      */
     showWelcomeToast() {
@@ -842,9 +842,9 @@ class OfficeWellnessApp {
 
 
     /**
-     * 获取错误信息
-     * @param {Error} error - 错误对象
-     * @returns {string} 用户友好的错误信息
+     * Get error message
+     * @param {Error} error - error object
+     * @returns {string} user-friendly error message
      * @private
      */
     getErrorMessage(error) {
@@ -860,8 +860,8 @@ class OfficeWellnessApp {
     }
 
     /**
-     * 显示备用错误信息
-     * @param {string} message - 错误信息
+     * Show fallback error message
+     * @param {string} message - error message
      * @private
      */
     showFallbackError(message) {
@@ -1303,7 +1303,7 @@ class OfficeWellnessApp {
 }
 
 // 全局应用实例
-let app = null;
+
 
 // DOM加载完成后初始化应用
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1507,184 +1507,23 @@ function setupFallbackButtons() {
 
 }
 
-// 简单通知函数
-function showSimpleNotification(message) {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        background: #3498db;
-        color: white;
-        padding: 12px 20px;
-        border-radius: 6px;
-        z-index: 10000;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        white-space: nowrap;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        max-width: 300px;
-        word-wrap: break-word;
-    `;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    }, 3000);
-}
-
 // 应用初始化
 document.addEventListener('DOMContentLoaded', async () => {
-    // 立即初始化备用按钮处理，确保按钮总是能工作
-    initializeFallbackButtons();
-    
     try {
         console.log('Starting application initialization...');
         
         // 创建应用实例
-        app = new OfficeWellnessApp();
-        window.app = app; // 确保全局可访问
+        const app = new OfficeWellnessApp();
         
         // 初始化应用
         await app.initialize();
         
         console.log('Application initialized successfully');
         
-        // 如果主应用初始化成功，移除备用处理器的标记，让主应用接管
-        setTimeout(() => {
-            const waterToggle = document.getElementById('water-toggle');
-            const standupToggle = document.getElementById('standup-toggle');
-            
-            if (waterToggle) waterToggle.removeAttribute('data-fallback-bound');
-            if (standupToggle) standupToggle.removeAttribute('data-fallback-bound');
-            
-            console.log('Main app took over button handling');
-        }, 1000);
-        
     } catch (error) {
         console.error('Failed to initialize application:', error);
-        console.log('Using fallback button handlers');
     }
 });
-
-// 备用按钮初始化 - 确保按钮总是能工作
-function initializeFallbackButtons() {
-    console.log('Initializing fallback button handlers...');
-    
-    // 立即尝试绑定，然后再延迟尝试
-    bindFallbackHandlers();
-    setTimeout(bindFallbackHandlers, 100);
-    setTimeout(bindFallbackHandlers, 500);
-}
-
-function bindFallbackHandlers() {
-    const waterToggle = document.getElementById('water-toggle');
-    const standupToggle = document.getElementById('standup-toggle');
-    
-    if (waterToggle && !waterToggle.hasAttribute('data-fallback-bound')) {
-        console.log('Binding fallback water toggle handler');
-        waterToggle.setAttribute('data-fallback-bound', 'true');
-        
-        const waterHandler = function(e) {
-            console.log('Fallback water toggle click');
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const isActive = this.textContent.trim() === 'Start';
-            
-            // 尝试调用主应用的方法
-            if (window.app && window.app.startReminder && window.app.pauseReminder) {
-                if (isActive) {
-                    window.app.startReminder('water');
-                } else {
-                    window.app.pauseReminder('water');
-                }
-            } else {
-                // 备用逻辑：手动更新UI
-                if (isActive) {
-                    this.textContent = 'Pause';
-                    this.className = 'btn-secondary';
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('water-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Active';
-                        statusBadge.classList.add('active');
-                        statusBadge.classList.remove('inactive');
-                    }
-                    showSimpleNotification('Water reminder started!');
-                } else {
-                    this.textContent = 'Start';
-                    this.className = 'btn-primary';
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('water-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Inactive';
-                        statusBadge.classList.remove('active');
-                        statusBadge.classList.add('inactive');
-                    }
-                    showSimpleNotification('Water reminder paused!');
-                }
-            }
-        };
-        
-        waterToggle.addEventListener('click', waterHandler, true);
-        waterToggle.addEventListener('click', waterHandler, false); // 双重绑定确保触发
-    }
-    
-    if (standupToggle && !standupToggle.hasAttribute('data-fallback-bound')) {
-        console.log('Binding fallback standup toggle handler');
-        standupToggle.setAttribute('data-fallback-bound', 'true');
-        
-        const standupHandler = function(e) {
-            console.log('Fallback standup toggle click');
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const isActive = this.textContent.trim() === 'Start';
-            
-            // 尝试调用主应用的方法
-            if (window.app && window.app.startReminder && window.app.pauseReminder) {
-                if (isActive) {
-                    window.app.startReminder('standup');
-                } else {
-                    window.app.pauseReminder('standup');
-                }
-            } else {
-                // 备用逻辑：手动更新UI
-                if (isActive) {
-                    this.textContent = 'Pause';
-                    this.className = 'btn-secondary';
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('standup-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Active';
-                        statusBadge.classList.add('active');
-                        statusBadge.classList.remove('inactive');
-                    }
-                    showSimpleNotification('Standup reminder started!');
-                } else {
-                    this.textContent = 'Start';
-                    this.className = 'btn-primary';
-                    // 更新状态标签
-                    const statusBadge = document.getElementById('standup-status-badge');
-                    if (statusBadge) {
-                        statusBadge.textContent = 'Inactive';
-                        statusBadge.classList.remove('active');
-                        statusBadge.classList.add('inactive');
-                    }
-                    showSimpleNotification('Standup reminder paused!');
-                }
-            }
-        };
-        
-        standupToggle.addEventListener('click', standupHandler, true);
-        standupToggle.addEventListener('click', standupHandler, false); // 双重绑定确保触发
-    }
-
-}
 
 // 导出类供其他模块使用
 if (typeof module !== 'undefined' && module.exports) {
