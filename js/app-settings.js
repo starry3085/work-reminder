@@ -102,7 +102,7 @@ class AppSettings {
     }
 
     /**
-     * Load application settings and state (atomic operation to ensure consistency)
+     * Load application settings and state via StateManager
      * @param {boolean} forceDefault - Whether to force use default settings (on force refresh)
      * @returns {Object} Loaded settings
      */
@@ -122,47 +122,8 @@ class AppSettings {
                 return this.currentSettings;
             }
             
-            // If we have StateManager, get settings from there
-            if (this.stateManager) {
-                return this.getSettings();
-            }
-            
-            // Otherwise, use legacy approach
-            const savedSettings = this.storageManager.loadSettings(this.settingsKey);
-            const savedState = this.storageManager.loadSettings(this.stateKey);
-            
-            // Ensure consistency between settings and state
-            let settingsValid = false;
-            let stateValid = false;
-            
-            if (savedSettings && this.validateSettings(savedSettings)) {
-                this.currentSettings = this.mergeSettings(this.defaultSettings, savedSettings);
-                settingsValid = true;
-                console.log('User settings loaded:', this.currentSettings);
-            } else {
-                console.log('Using default settings');
-                this.currentSettings = { ...this.defaultSettings };
-            }
-            
-            if (savedState && this.isStateValid(savedState)) {
-                this.currentState = this.mergeSettings(this.defaultState, savedState);
-                stateValid = true;
-                console.log('Application state loaded:', this.currentState);
-            } else {
-                console.log('Using default state');
-                this.currentState = { ...this.defaultState };
-            }
-            
-            // If settings or state invalid, ensure both are reset to defaults
-            if (!settingsValid || !stateValid) {
-                console.log('Settings or state invalid, resetting to defaults');
-                this.currentSettings = { ...this.defaultSettings };
-                this.currentState = { ...this.defaultState };
-                this.saveSettings();
-                this.saveState();
-            }
-            
-            return this.currentSettings;
+            // Get settings from StateManager
+            return this.getSettings();
         } catch (error) {
             console.warn('Failed to load settings, using default settings and state:', error);
             this.currentSettings = { ...this.defaultSettings };
@@ -174,7 +135,7 @@ class AppSettings {
     }
 
     /**
-     * Save application settings - now delegates to StateManager if available
+     * Save application settings via StateManager
      * @param {Object} settings - Settings to save
      * @returns {boolean} Whether save was successful
      */
@@ -182,41 +143,30 @@ class AppSettings {
         try {
             const settingsToSave = settings || this.currentSettings;
             
-            // If we have StateManager, update settings there instead
-            if (this.stateManager) {
-                // Update water settings if provided
-                if (settingsToSave.water) {
-                    this.stateManager.updateState('water', { settings: settingsToSave.water });
-                }
-                
-                // Update standup settings if provided
-                if (settingsToSave.standup) {
-                    this.stateManager.updateState('standup', { settings: settingsToSave.standup });
-                }
-                
-                // Update app settings if provided
-                const appSettings = {};
-                if (settingsToSave.notifications) {
-                    appSettings.notifications = settingsToSave.notifications;
-                }
-                if (settingsToSave.appearance) {
-                    appSettings.appearance = settingsToSave.appearance;
-                }
-                if (Object.keys(appSettings).length > 0) {
-                    this.stateManager.updateState('app', appSettings);
-                }
-                
-                console.log('Settings saved via StateManager');
-                return true;
+            // Update water settings if provided
+            if (settingsToSave.water) {
+                this.stateManager.updateState('water', { settings: settingsToSave.water });
             }
             
-            // Legacy approach if no StateManager
-            const result = this.storageManager.saveSettings(this.settingsKey, settingsToSave);
-            if (result) {
-                this.currentSettings = settingsToSave;
-                console.log('Settings saved');
+            // Update standup settings if provided
+            if (settingsToSave.standup) {
+                this.stateManager.updateState('standup', { settings: settingsToSave.standup });
             }
-            return result;
+            
+            // Update app settings if provided
+            const appSettings = {};
+            if (settingsToSave.notifications) {
+                appSettings.notifications = settingsToSave.notifications;
+            }
+            if (settingsToSave.appearance) {
+                appSettings.appearance = settingsToSave.appearance;
+            }
+            if (Object.keys(appSettings).length > 0) {
+                this.stateManager.updateState('app', appSettings);
+            }
+            
+            console.log('Settings saved via StateManager');
+            return true;
         } catch (error) {
             console.error('Failed to save settings:', error);
             return false;
@@ -224,33 +174,13 @@ class AppSettings {
     }
 
     /**
-     * Load application state
+     * Load application state via StateManager
      * @returns {Object} Loaded state
      */
     loadState() {
         try {
-            // If we have StateManager, get state from there
-            if (this.stateManager) {
-                const appState = this.stateManager.getState('app');
-                return appState || { ...this.defaultState };
-            }
-            
-            // Legacy approach
-            const savedState = this.storageManager.loadSettings(this.stateKey);
-            if (savedState) {
-                // Validate state validity
-                if (this.isStateValid(savedState)) {
-                    this.currentState = this.mergeSettings(this.defaultState, savedState);
-                    console.log('Application state loaded:', this.currentState);
-                } else {
-                    console.warn('Saved state expired or invalid, using default state');
-                    this.currentState = { ...this.defaultState };
-                }
-            } else {
-                console.log('No saved state found, using default state');
-                this.currentState = { ...this.defaultState };
-            }
-            return this.currentState;
+            const appState = this.stateManager.getState('app');
+            return appState || { ...this.defaultState };
         } catch (error) {
             console.warn('Failed to load state, using default state:', error);
             this.currentState = { ...this.defaultState };
@@ -259,7 +189,7 @@ class AppSettings {
     }
 
     /**
-     * Save application state - now delegates to StateManager if available
+     * Save application state via StateManager
      * @param {Object} state - State to save
      * @returns {boolean} Whether save was successful
      */
@@ -267,22 +197,10 @@ class AppSettings {
         try {
             const stateToSave = state || this.currentState;
             
-            // If we have StateManager, it handles state saving automatically
-            if (this.stateManager) {
-                console.log('State saving handled by StateManager');
-                return true;
-            }
-            
-            // Legacy approach if no StateManager
-            // Update last saved time
-            stateToSave.lastSaved = Date.now();
-            
-            const result = this.storageManager.saveSettings(this.stateKey, stateToSave);
-            if (result) {
-                this.currentState = stateToSave;
-                console.log('Application state saved');
-            }
-            return result;
+            // Update app state
+            this.stateManager.updateState('app', stateToSave);
+            console.log('State saved via StateManager');
+            return true;
         } catch (error) {
             console.error('Failed to save application state:', error);
             return false;

@@ -28,7 +28,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Initialize application
+     * Initialize application with unified StateManager
      */
     async initialize() {
         try {
@@ -38,13 +38,13 @@ class OfficeWellnessApp {
             // Initialize components
             await this.initializeComponents();
             
-            // Load user settings and state
+            // Load settings and state via StateManager
             await this.loadSettingsAndState();
             
             // Initialize UI
             this.initializeUI();
             
-            // Set up event listeners
+            // Setup event listeners
             this.setupEventListeners();
             
             // Request notification permission (non-blocking)
@@ -86,7 +86,7 @@ class OfficeWellnessApp {
             console.error('❌ Application initialization failed:', error);
             this.appState.isInitializing = false;
             this.handleInitializationError(error);
-            throw error; // Re-throw to be caught by the calling code
+            throw error;
         }
     }
 
@@ -662,81 +662,34 @@ class OfficeWellnessApp {
 
 
     /**
-     * Restore previous session state
+     * Restore previous session state via StateManager
      * @private
      */
     async restorePreviousState() {
         try {
-            console.log('Restoring previous session state...');
-            const currentState = this.appSettings.getState();
+            console.log('Restoring previous session state via StateManager...');
+            
             const currentSettings = this.appSettings.getSettings();
             
-            // Restore water reminder state
-            if (currentState.waterReminder && this.waterReminder) {
-                // Check if should restore active state
-                if (currentState.waterReminder.isActive && currentSettings.water.enabled) {
-                    console.log('Restoring water reminder state');
-                    
-                    // Calculate remaining time
-                    let timeRemaining = 0;
-                    if (currentState.waterReminder.nextReminderAt) {
-                        const now = Date.now();
-                        const nextReminder = currentState.waterReminder.nextReminderAt;
-                        timeRemaining = Math.max(0, nextReminder - now);
-                    }
-                    
-                    // If remaining time is valid, restore timer
-                    if (timeRemaining > 0 && timeRemaining < currentSettings.water.interval * 60 * 1000) {
-                        this.waterReminder.restoreState({
-                            isActive: true,
-                            timeRemaining: timeRemaining,
-                            nextReminderAt: currentState.waterReminder.nextReminderAt,
-                            lastAcknowledged: currentState.waterReminder.lastAcknowledged
-                        });
-                    } else {
-                        // If time is invalid, restart
-                        this.waterReminder.start();
-                    }
+            // Restore water reminder state via StateManager
+            if (this.waterReminder && currentSettings.water.enabled) {
+                const waterState = this.stateManager.getState('water');
+                if (waterState?.isActive) {
+                    console.log('Restoring water reminder via StateManager');
+                    // StateManager handles the restoration logic
                 }
             }
             
-            // Restore standup reminder state
-            if (currentState.standupReminder && this.standupReminder) {
-                // Check if should restore active state
-                if (currentState.standupReminder.isActive && currentSettings.standup.enabled) {
-                    console.log('Restoring standup reminder state');
-                    
-                    // Calculate remaining time
-                    let timeRemaining = 0;
-                    if (currentState.standupReminder.nextReminderAt) {
-                        const now = Date.now();
-                        const nextReminder = currentState.standupReminder.nextReminderAt;
-                        timeRemaining = Math.max(0, nextReminder - now);
-                    }
-                    
-                    // If remaining time is valid, restore timer
-                    if (timeRemaining > 0 && timeRemaining < currentSettings.standup.interval * 60 * 1000) {
-                        if (typeof this.standupReminder.restoreState === 'function') {
-                            this.standupReminder.restoreState({
-                                isActive: true,
-                                timeRemaining: timeRemaining,
-                                nextReminderAt: currentState.standupReminder.nextReminderAt,
-                                lastAcknowledged: currentState.standupReminder.lastAcknowledged
-                            });
-                        } else {
-                            // If no restoreState method, restart
-                            this.standupReminder.start();
-                        }
-                    } else {
-                        // If time is invalid, restart
-                        this.standupReminder.start();
-                    }
+            // Restore standup reminder state via StateManager
+            if (this.standupReminder && currentSettings.standup.enabled) {
+                const standupState = this.stateManager.getState('standup');
+                if (standupState?.isActive) {
+                    console.log('Restoring standup reminder via StateManager');
+                    // StateManager handles the restoration logic
                 }
             }
             
-            // Activity detector removed for MVP - user activity state no longer tracked
-            
-            console.log('Session state restoration complete');
+            console.log('Session state restoration complete via StateManager');
             return true;
         } catch (error) {
             console.error('Session state restoration failed:', error);

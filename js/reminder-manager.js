@@ -546,12 +546,12 @@ class ReminderManager {
     }
 
     /**
-     * 设置状态管理器
+     * Set state manager as single source of truth
      */
     setStateManager(stateManager) {
         this.stateManager = stateManager;
         
-        // 订阅状态变化
+        // Subscribe to state changes
         this.unsubscribe = stateManager.subscribe(this.type, (state) => {
             this.syncWithState(state);
         });
@@ -560,26 +560,26 @@ class ReminderManager {
     }
 
     /**
-     * 同步状态 - 从StateManager同步状态
+     * Sync state from StateManager (single source of truth)
      * @private
      */
     syncWithState(state) {
         if (!state) return;
         
         try {
-            // 更新内部状态
-            this.isActive = state.isActive || false;
-            this.isPaused = state.isPaused || false;
-            this.timeRemaining = state.timeRemaining || 0;
+            // Update internal state from single source
+            this.isActive = Boolean(state.isActive);
+            this.isPaused = Boolean(state.isPaused);
+            this.timeRemaining = Math.max(0, state.timeRemaining || 0);
             this.nextReminderTime = state.nextReminderAt || 0;
             
-            // 更新设置
+            // Update settings from state
             this.settings = { ...this.settings, ...state.settings };
             
-            // 同步定时器
+            // Sync timers based on authoritative state
             this.syncTimers();
             
-            console.log(`${this.type} reminder synced with state:`, {
+            console.log(`${this.type} reminder synced with StateManager state:`, {
                 isActive: this.isActive,
                 isPaused: this.isPaused,
                 timeRemaining: this.timeRemaining
@@ -590,7 +590,7 @@ class ReminderManager {
     }
 
     /**
-     * 同步定时器状态
+     * Sync timer state based on authoritative state
      * @private
      */
     syncTimers() {
@@ -621,60 +621,25 @@ class ReminderManager {
     }
 
     /**
-     * 更新状态 - 统一状态更新入口
+     * Update state through StateManager (single source of truth)
      * @private
      */
     updateState(updates) {
         if (this.stateManager) {
             this.stateManager.updateState(this.type, updates);
-        } else {
-            // 兼容旧模式
-            this.handleLegacyStateUpdate(updates);
         }
     }
 
     /**
-     * 处理旧模式状态更新（兼容）
-     * @private
-     */
-    handleLegacyStateUpdate(updates) {
-        // 仅在无StateManager时执行
-        console.warn('Using legacy state update for', this.type);
-    }
-
-    /**
-     * 恢复状态（兼容旧接口）
-     * @param {Object} state - 要恢复的状态
+     * Restore state from StateManager
+     * @param {Object} state - State to restore
      */
     restoreState(state) {
-        if (!state) return;
+        if (!state || !this.stateManager) return;
         
-        // 如果已连接StateManager，通过StateManager恢复
-        if (this.stateManager) {
-            this.stateManager.updateState(this.type, state);
-            return true;
-        }
-        
-        // 旧模式兼容
-        try {
-            this.isActive = state.isActive || false;
-            this.isPaused = state.isPaused || false;
-            this.timeRemaining = state.timeRemaining || 0;
-            this.nextReminderTime = state.nextReminderAt || 0;
-            
-            this.syncTimers();
-            
-            console.log(`${this.type} reminder state restored (legacy):`, {
-                isActive: this.isActive,
-                isPaused: this.isPaused,
-                timeRemaining: this.timeRemaining
-            });
-            
-            return true;
-        } catch (error) {
-            console.error(`Failed to restore ${this.type} reminder state:`, error);
-            return false;
-        }
+        // State restoration is handled by StateManager subscription
+        this.stateManager.updateState(this.type, state);
+        return true;
     }
 
     /**
