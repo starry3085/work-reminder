@@ -21,6 +21,7 @@ class UIController {
         this.cleanup();
         this.cacheElements();
         this.bindEvents();
+        this.setupInitialState();
         return this;
     }
 
@@ -352,12 +353,13 @@ class UIController {
     }
 
     /**
-     * 设置状态管理器
+     * Set up state manager for unified state management
+     * @param {StateManager} stateManager - State manager instance
      */
     setStateManager(stateManager) {
         this.stateManager = stateManager;
         
-        // 订阅状态变化
+        // Subscribe to state changes
         this.unsubscribeWater = stateManager.subscribe('water', (state) => {
             this.updateCard('water', state);
             this.updateButtons('water', state);

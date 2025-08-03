@@ -7,10 +7,10 @@ class StorageManager {
         this.STORAGE_PREFIX = 'wellness-reminder';
         this.STORAGE_VERSION = '1.0.0';
         this.storageKeys = {
-            // 为 AppSettings 保留的键（避免与 StateManager 冲突）
+            // Reserved keys for AppSettings (to avoid conflicts with StateManager)
             appSettings: 'app-settings-v1',
             appState: 'app-state-v1',
-            // 保留这些键以确保向后兼容性
+            // Keep these keys for backward compatibility
             waterSettings: 'water-reminder-settings',
             standupSettings: 'standup-reminder-settings',
             waterState: 'water-reminder-state',
@@ -27,7 +27,7 @@ class StorageManager {
      */
     checkStorageAvailability() {
         try {
-            const testKey = this.storagePrefix + 'test';
+            const testKey = this.STORAGE_PREFIX + '.test';
             localStorage.setItem(testKey, 'test');
             localStorage.removeItem(testKey);
             return true;

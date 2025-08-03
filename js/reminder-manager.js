@@ -61,7 +61,7 @@ class ReminderManager {
         // Start time update timer
         this.startUpdateTimer();
         
-        // 通过StateManager统一更新状态
+        // Update state uniformly through StateManager
         const updates = {
             isActive: true,
             isPaused: false,
@@ -100,7 +100,7 @@ class ReminderManager {
         // Reset state
         this.resetState();
         
-        // 通过StateManager统一更新状态
+        // Update state uniformly through StateManager
         const updates = {
             isActive: false,
             isPaused: false,
@@ -138,7 +138,7 @@ class ReminderManager {
         // Clear timer
         this.clearTimer();
         
-        // 通过StateManager统一更新状态
+        // Update state uniformly through StateManager
         const updates = {
             isActive: true,
             isPaused: true,
@@ -174,7 +174,7 @@ class ReminderManager {
         // Restart timer
         this.startTimer();
         
-        // 通过StateManager统一更新状态
+        // Update state uniformly through StateManager
         const updates = {
             isActive: true,
             isPaused: false,
@@ -209,7 +209,7 @@ class ReminderManager {
         this.clearUpdateTimer();
         this.resetState();
         
-        // 通过StateManager统一更新状态
+        // Update state uniformly through StateManager
         const updates = {
             isActive: false,
             isPaused: false,
@@ -246,7 +246,7 @@ class ReminderManager {
         // Update last reminder time
         this.settings.lastReminder = Date.now();
         
-        // 通过StateManager更新设置
+        // Update settings through StateManager
         this.updateState({ settings: this.settings });
         
         // Reset and restart timer
@@ -276,7 +276,7 @@ class ReminderManager {
         this.startTimer();
         this.startUpdateTimer();
         
-        // 通过StateManager统一更新状态
+        // Update state uniformly through StateManager
         const updates = {
             isActive: true,
             isPaused: false,
@@ -499,7 +499,7 @@ class ReminderManager {
         this.clearTimer();
         this.startTimer();
         
-        // 通过StateManager统一更新状态
+        // Update state uniformly through StateManager
         const updates = {
             isActive: true,
             isPaused: false,

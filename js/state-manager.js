@@ -1,6 +1,6 @@
 /**
  * Unified State Manager - Centralized state management
- * 统一状态管理器 - 解决状态管理冲突和重复保存问题
+ * Solves state management conflicts and duplicate save issues
  */
 class StateManager {
     constructor(storageManager) {
@@ -9,7 +9,7 @@ class StateManager {
         this.stateCache = new Map();
         this.saveQueue = new Map();
         
-        // 统一的状态结构
+        // Unified state structure
         this.stateSchema = {
             app: {
                 isFirstUse: true,
@@ -40,7 +40,7 @@ class StateManager {
             }
         };
         
-        // 防抖配置
+        // Debounce configuration
         this.debounceConfig = {
             delay: 150,
             maxDelay: 1000
@@ -48,7 +48,7 @@ class StateManager {
     }
 
     /**
-     * 初始化状态管理器
+     * Initialize state manager
      */
     async initialize() {
         await this.loadAllStates();
@@ -56,16 +56,16 @@ class StateManager {
     }
 
     /**
-     * 加载所有状态
+     * Load all states
      * @private
      */
     async loadAllStates() {
         try {
-            // 加载应用状态
+            // Load application state
             const appState = this.storage.getItem('appState', this.stateSchema.app);
             this.stateCache.set('app', appState);
             
-            // 加载提醒状态
+            // Load reminder states
             const waterState = this.storage.getItem('waterState', this.stateSchema.reminders.water);
             const standupState = this.storage.getItem('standupState', this.stateSchema.reminders.standup);
             
@@ -85,7 +85,7 @@ class StateManager {
     }
 
     /**
-     * 获取状态（只读）
+     * Get state (read-only)
      */
     getState(type) {
         if (type === 'app') {
@@ -97,7 +97,7 @@ class StateManager {
     }
 
     /**
-     * 更新状态 - 统一入口，避免重复保存
+     * Update state - unified entry point to avoid duplicate saves
      */
     updateState(type, updates, options = {}) {
         try {
@@ -106,23 +106,23 @@ class StateManager {
                 throw new Error(`State type '${type}' not found`);
             }
             
-            // 合并更新
+            // Merge updates
             const newState = this.mergeState(currentState, updates);
             
-            // 验证状态
+            // Validate state
             if (!this.validateState(type, newState)) {
                 console.warn('Invalid state update rejected:', type, updates);
                 return false;
             }
             
-            // 更新缓存
+            // Update cache
             this.stateCache.set(type, newState);
             
-            // 防抖保存
+            // Debounce save
             this.scheduleSave(type, newState, options);
             
-            // 通知订阅者
-            this.notifySubscribers(type, newState);
+            // Notify subscribers
+        this.notifySubscribers(type, newState);
             
             return true;
         } catch (error) {
@@ -132,7 +132,7 @@ class StateManager {
     }
 
     /**
-     * 合并状态（深合并）
+     * Merge state (deep merge)
      * @private
      */
     mergeState(current, updates) {
@@ -154,7 +154,7 @@ class StateManager {
     }
 
     /**
-     * 验证状态
+     * Validate state
      * @private
      */
     validateState(type, state) {
@@ -179,13 +179,13 @@ class StateManager {
     }
 
     /**
-     * 防抖保存机制
+     * Debounce save mechanism
      * @private
      */
     scheduleSave(type, state, options) {
         const key = type;
         
-        // 清除现有的保存队列
+        // Clear existing save queue
         if (this.saveQueue.has(key)) {
             clearTimeout(this.saveQueue.get(key));
         }
@@ -216,7 +216,7 @@ class StateManager {
     }
 
     /**
-     * 订阅状态变化
+     * Subscribe to state changes
      */
     subscribe(type, callback) {
         if (!this.subscribers.has(type)) {
@@ -225,13 +225,13 @@ class StateManager {
         
         this.subscribers.get(type).add(callback);
         
-        // 立即返回当前状态
+        // Return current state immediately
         const currentState = this.getState(type);
         if (currentState) {
             callback(currentState, type);
         }
         
-        // 返回取消订阅函数
+        // Return unsubscribe function
         return () => {
             const callbacks = this.subscribers.get(type);
             if (callbacks) {
@@ -241,7 +241,7 @@ class StateManager {
     }
 
     /**
-     * 通知订阅者状态变化
+     * Notify subscribers of state changes
      * @private
      */
     notifySubscribers(type, state) {
@@ -258,14 +258,14 @@ class StateManager {
     }
 
     /**
-     * 重置为默认状态
+     * Reset to default state
      */
     resetToDefaults() {
         this.stateCache.set('app', { ...this.stateSchema.app });
         this.stateCache.set('water', { ...this.stateSchema.reminders.water });
         this.stateCache.set('standup', { ...this.stateSchema.reminders.standup });
         
-        // 立即保存所有状态
+        // Save all states immediately
         this.stateCache.forEach((state, type) => {
             this.storage.setItem(type, state, { immediate: true });
         });
@@ -274,10 +274,10 @@ class StateManager {
     }
 
     /**
-     * 清理资源
+     * Clean up resources
      */
     destroy() {
-        // 清除所有待保存的队列
+        // Clear all pending save queues
         this.saveQueue.forEach(timer => clearTimeout(timer));
         this.saveQueue.clear();
         
