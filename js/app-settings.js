@@ -6,9 +6,9 @@ class AppSettings {
     constructor(storageManager) {
         this.storageManager = storageManager;
         
-        // Unified storage key naming convention
-        this.settingsKey = 'wellness_reminder_settings_v1';
-        this.stateKey = 'wellness_reminder_state_v1';
+        // Use storage manager's prefix mechanism for consistency
+        this.settingsKey = 'settings_v1';
+        this.stateKey = 'state_v1';
         
         // Default settings
         this.defaultSettings = {

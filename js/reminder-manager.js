@@ -182,23 +182,20 @@ class ReminderManager {
     reset() {
         const wasActive = this.isActive;
         
-        if (this.isActive) {
-            // Clear timers
-            this.clearTimer();
-            this.clearUpdateTimer();
-            // Set to inactive so start() can work properly
-            this.isActive = false;
-            this.isPaused = false;
-        }
+        // Ensure clean state before restart
+        this.isActive = false;
+        this.isPaused = false;
         
-        // Reset state
+        // Clear all timers and state
+        this.clearTimer();
+        this.clearUpdateTimer();
         this.resetState();
         
         if (wasActive) {
-            // If previously active, restart
+            // Restart with fresh interval
             this.start();
         } else {
-            // If not active, still trigger status change to update UI
+            // Update UI if not restarting
             this.triggerStatusChange({
                 status: 'reset',
                 isActive: false,
