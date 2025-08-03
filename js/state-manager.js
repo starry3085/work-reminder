@@ -190,12 +190,12 @@ class StateManager {
             clearTimeout(this.saveQueue.get(key));
         }
         
-        // 立即保存或防抖保存
+        // Save immediately or debounce save
         const saveOperation = () => {
             try {
                 this.storage.setItem(key, state, { immediate: true });
                 
-                // 更新最后保存时间
+                // Update last save time
                 if (type === 'app') {
                     state.lastSaved = Date.now();
                 }
@@ -281,7 +281,7 @@ class StateManager {
         this.saveQueue.forEach(timer => clearTimeout(timer));
         this.saveQueue.clear();
         
-        // 清空缓存
+        // Clear cache
         this.stateCache.clear();
         this.subscribers.clear();
         

@@ -67,7 +67,7 @@ class StorageManager {
                 const keysToRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (key && key.startsWith(this.storagePrefix)) {
+                    if (key && key.startsWith(this.STORAGE_PREFIX)) {
                         keysToRemove.push(key);
                     }
                 }
@@ -114,7 +114,7 @@ class StorageManager {
                     const size = localStorage[key].length;
                     totalSize += size;
                     
-                    if (key.startsWith(this.storagePrefix)) {
+                    if (key.startsWith(this.STORAGE_PREFIX)) {
                         appSize += size;
                     }
                 }
@@ -279,18 +279,18 @@ class StorageManager {
             if (this.isStorageAvailable) {
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (key && key.startsWith(this.storagePrefix)) {
-                        const shortKey = key.replace(this.storagePrefix, '');
+                    if (key && key.startsWith(this.STORAGE_PREFIX)) {
+                        const shortKey = key.replace(this.STORAGE_PREFIX, '');
                         backup[shortKey] = JSON.parse(localStorage.getItem(key));
                     }
                 }
             } else {
                 // Backup from memory storage
                 this.memoryStorage.forEach((value, key) => {
-                    if (key.startsWith(this.storagePrefix)) {
-                        const shortKey = key.replace(this.storagePrefix, '');
-                        backup[shortKey] = JSON.parse(value);
-                    }
+                    if (key.startsWith(this.STORAGE_PREFIX)) {
+                    const shortKey = key.replace(this.STORAGE_PREFIX, '');
+                    backup[shortKey] = JSON.parse(value);
+                }
                 });
             }
             
