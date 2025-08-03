@@ -434,7 +434,14 @@ class ReminderManager {
         const now = Date.now();
         this.timeRemaining = Math.max(0, this.nextReminderTime - now);
         
-        // Trigger time update callback
+        // Update state to ensure UI gets fresh data
+        const updates = {
+            timeRemaining: this.timeRemaining,
+            nextReminderAt: this.nextReminderTime
+        };
+        this.updateState(updates);
+        
+        // Trigger time update callback for immediate UI update
         if (this.timeUpdateCallback) {
             this.timeUpdateCallback({
                 type: this.type,

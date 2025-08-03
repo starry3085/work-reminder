@@ -51,13 +51,13 @@ class NotificationService {
     showNotification(type, title, message) {
         console.log(`Showing notification: ${title} - ${message}`);
         
-        // Try browser notification first if supported
-        if (this.hasPermission) {
-            this.showBrowserNotification(type, title, message);
-        }
+        // Try browser notification first, fallback to in-page
+        const browserSuccess = this.hasPermission && this.showBrowserNotification(type, title, message);
         
-        // Always show in-page notification as fallback
-        this.showInPageAlert(type, title, message);
+        if (!browserSuccess) {
+            // Only show in-page if browser notification failed
+            this.showInPageAlert(type, title, message);
+        }
         
         return true;
     }

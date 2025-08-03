@@ -7,43 +7,33 @@ class StateManager {
         this.storage = storageManager;
         this.subscribers = new Map();
         this.stateCache = new Map();
-        this.saveQueue = new Map();
         
-        // Unified state structure
+        // Simplified state structure for MVP
         this.stateSchema = {
             app: {
                 isFirstUse: true,
-                compatibilityChecked: false,
-                lastSaved: 0
+                compatibilityChecked: false
             },
-            reminders: {
-                water: {
-                    isActive: false,
-                    isPaused: false,
-                    timeRemaining: 0,
-                    nextReminderAt: 0,
-                    settings: {
-                        interval: 30,
-                        enabled: true
-                    }
-                },
-                standup: {
-                    isActive: false,
-                    isPaused: false,
-                    timeRemaining: 0,
-                    nextReminderAt: 0,
-                    settings: {
-                        interval: 45,
-                        enabled: true
-                    }
+            water: {
+                isActive: false,
+                isPaused: false,
+                timeRemaining: 0,
+                nextReminderAt: 0,
+                settings: {
+                    interval: 30,
+                    enabled: true
+                }
+            },
+            standup: {
+                isActive: false,
+                isPaused: false,
+                timeRemaining: 0,
+                nextReminderAt: 0,
+                settings: {
+                    interval: 45,
+                    enabled: true
                 }
             }
-        };
-        
-        // Debounce configuration
-        this.debounceConfig = {
-            delay: 150,
-            maxDelay: 1000
         };
     }
 
@@ -61,22 +51,16 @@ class StateManager {
      */
     async loadAllStates() {
         try {
-            // Load application state
-            const appState = this.storage.getItem('appState', this.stateSchema.app);
+            // Load states directly
+            const appState = this.storage.getItem('app', this.stateSchema.app);
+            const waterState = this.storage.getItem('water', this.stateSchema.water);
+            const standupState = this.storage.getItem('standup', this.stateSchema.standup);
+            
             this.stateCache.set('app', appState);
-            
-            // Load reminder states
-            const waterState = this.storage.getItem('waterState', this.stateSchema.reminders.water);
-            const standupState = this.storage.getItem('standupState', this.stateSchema.reminders.standup);
-            
             this.stateCache.set('water', waterState);
             this.stateCache.set('standup', standupState);
             
-            console.log('All states loaded:', {
-                app: appState,
-                water: waterState,
-                standup: standupState
-            });
+            console.log('States loaded successfully');
             
         } catch (error) {
             console.error('Failed to load states:', error);
@@ -97,9 +81,9 @@ class StateManager {
     }
 
     /**
-     * Update state - unified entry point to avoid duplicate saves
+     * Update state - simplified for MVP
      */
-    updateState(type, updates, options = {}) {
+    updateState(type, updates) {
         try {
             const currentState = this.stateCache.get(type);
             if (!currentState) {
@@ -109,20 +93,14 @@ class StateManager {
             // Merge updates
             const newState = this.mergeState(currentState, updates);
             
-            // Validate state
-            if (!this.validateState(type, newState)) {
-                console.warn('Invalid state update rejected:', type, updates);
-                return false;
-            }
-            
             // Update cache
             this.stateCache.set(type, newState);
             
-            // Debounce save
-            this.scheduleSave(type, newState, options);
+            // Save immediately
+            this.storage.setItem(type, newState);
             
             // Notify subscribers
-        this.notifySubscribers(type, newState);
+            this.notifySubscribers(type, newState);
             
             return true;
         } catch (error) {
@@ -153,67 +131,9 @@ class StateManager {
         return merged;
     }
 
-    /**
-     * Validate state
-     * @private
-     */
-    validateState(type, state) {
-        if (type === 'app') {
-            return typeof state === 'object' && state !== null;
-        }
-        
-        if (type === 'water' || type === 'standup') {
-            return (
-                typeof state === 'object' &&
-                state !== null &&
-                typeof state.isActive === 'boolean' &&
-                typeof state.isPaused === 'boolean' &&
-                typeof state.timeRemaining === 'number' &&
-                state.timeRemaining >= 0 &&
-                typeof state.settings === 'object' &&
-                state.settings !== null
-            );
-        }
-        
-        return false;
-    }
 
-    /**
-     * Debounce save mechanism
-     * @private
-     */
-    scheduleSave(type, state, options) {
-        const key = type;
-        
-        // Clear existing save queue
-        if (this.saveQueue.has(key)) {
-            clearTimeout(this.saveQueue.get(key));
-        }
-        
-        // Save immediately or debounce save
-        const saveOperation = () => {
-            try {
-                this.storage.setItem(key, state, { immediate: true });
-                
-                // Update last save time
-                if (type === 'app') {
-                    state.lastSaved = Date.now();
-                }
-                
-                console.log(`State saved: ${type}`);
-                this.saveQueue.delete(key);
-            } catch (error) {
-                console.error('State save failed:', error);
-            }
-        };
-        
-        if (options.immediate) {
-            saveOperation();
-        } else {
-            const timer = setTimeout(saveOperation, this.debounceConfig.delay);
-            this.saveQueue.set(key, timer);
-        }
-    }
+
+
 
     /**
      * Subscribe to state changes
@@ -262,8 +182,8 @@ class StateManager {
      */
     resetToDefaults() {
         this.stateCache.set('app', { ...this.stateSchema.app });
-        this.stateCache.set('water', { ...this.stateSchema.reminders.water });
-        this.stateCache.set('standup', { ...this.stateSchema.reminders.standup });
+        this.stateCache.set('water', { ...this.stateSchema.water });
+        this.stateCache.set('standup', { ...this.stateSchema.standup });
         
         // Save all states immediately
         this.stateCache.forEach((state, type) => {
