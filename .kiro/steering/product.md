@@ -2,31 +2,24 @@
 
 ## Core Principles
 
-### Development Guidelines (CRITICAL)
-- **Best Practices**: All code must follow industry best practices and modern web standards
-- **MVP Principle**: Strictly adhere to Minimum Viable Product - build only essential features first
-- **English Documentation**: All comments, documentation, and naming must be in English
-
-### Development Constraints (CRITICAL)
-- **Pure Frontend Only**: No backend server, no APIs, no databases
-- **GitHub Pages Compatible**: Static files only, no build process required
-- **Privacy-First**: All data stays on user's device (localStorage only)
-- **No Registration**: Zero user accounts or external dependencies
-
-### Feature Priorities
-1. **Water Reminder** - Primary feature, simple and reliable
-2. **Standup Reminder** - Secondary feature with simple time-based reminders
-3. **Settings Persistence** - Essential for user experience
-4. **Responsive Design** - Must work on mobile and desktop
+### Product Vision
+Office Wellness Reminder is a lightweight, privacy-first web application that helps office workers maintain healthy habits through simple, non-intrusive reminders.
 
 ### User Experience Guidelines
 - **Non-Intrusive**: Notifications should not disrupt work flow
 - **Accessible**: Follow WCAG guidelines for accessibility
 - **Progressive Enhancement**: Graceful degradation for older browsers
 - **Offline-First**: Must work without internet connection
+- **Privacy-First**: All data stays on user's device (localStorage only)
+- **Zero Setup**: No registration or external dependencies required
 
-### Technical Constraints
-- **Vanilla JavaScript**: No frameworks or libraries
-- **Modern Web APIs**: Use native browser capabilities
-- **Lightweight**: Minimize resource usage and load times
-- **Cross-Browser**: Support Chrome, Firefox, Safari, Edge
+### Target Users
+- Office workers who spend long hours at computers
+- Remote workers needing health habit reminders
+- Anyone seeking simple wellness tracking without complex apps
+
+### Success Metrics
+- User can set up reminders in under 30 seconds
+- Notifications are helpful, not annoying
+- Application works reliably across all major browsers
+- Zero data privacy concerns
