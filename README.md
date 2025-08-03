@@ -4,21 +4,30 @@ A health reminder web application designed specifically for office workers to he
 
 ## Features
 
-- 🥤 **Water Reminder** - Simple timed reminders to stay hydrated
-- 🪑 **Standup Reminder** - Timed reminders to get up and move regularly
+- 🥤 **Water Reminder** - Simple time-based reminders to stay hydrated (MVP focus)
+- 🪑 **Standup Reminder** - Simple time-based reminders to get up and move regularly
 - 🔔 **Automatic Notifications** - In-page alerts that auto-dismiss after 5 seconds
 - ⚙️ **Simple Settings** - Basic reminder intervals customization
 - 📱 **Responsive Design** - Works on desktop and mobile devices
 - 💾 **Local Storage** - Settings saved automatically, no registration needed
+- 🔒 **Privacy-First** - All data stays on your device, no external dependencies
 
 ## Tech Stack
 
-- **Frontend**: Vanilla JavaScript (ES6+)
-- **Styling**: CSS3 + Flexbox/Grid
-- **Storage**: localStorage API
+- **Frontend**: Vanilla JavaScript (ES6+) - No frameworks or libraries
+- **Styling**: CSS3 with CSS Custom Properties (CSS Variables)
+- **HTML**: Semantic HTML5
+- **Storage**: localStorage API for data persistence
 - **Notifications**: Web Notifications API
-- **Deployment**: GitHub Pages
+- **PWA**: Progressive Web App with manifest.json
+- **Deployment**: GitHub Pages (static files only)
 - **Development Tools**: Kiro AI Assistant with automated documentation updates
+
+### Architecture Highlights
+- **Single Source of Truth**: StateManager handles all application state
+- **Class-Based Architecture**: Modular ES6+ classes with clear separation of concerns
+- **Event-Driven Communication**: Components communicate through callbacks and subscriptions
+- **Privacy-First Design**: No backend server, no APIs, no external dependencies
 
 ## Project Structure
 
@@ -30,8 +39,9 @@ work-reminder/
 │   └── main.css           # Main stylesheet
 ├── js/
 │   ├── app.js             # Main application orchestrator
+│   ├── state-manager.js   # Single source of truth for state management
 │   ├── storage-manager.js # localStorage abstraction layer
-│   ├── app-settings.js    # Settings and state management
+│   ├── app-settings.js    # Settings validation and defaults only
 │   ├── notification-service.js # Notification handling
 │   ├── reminder-manager.js     # Base reminder functionality
 │   ├── water-reminder.js       # Water reminder implementation
@@ -47,11 +57,25 @@ work-reminder/
 
 ## Development Notes
 
-This project is a Kiro Hackathon entry, strictly following competition rules:
-- Pure frontend implementation, no backend server required
-- Direct deployment to GitHub Pages
-- Modern web technology stack
-- Focus on user experience and accessibility
+This project follows strict MVP (Minimum Viable Product) principles:
+- **Pure Frontend Only**: No backend server, no APIs, no databases
+- **GitHub Pages Compatible**: Static files only, no build process required
+- **Privacy-First**: All data stays on user's device (localStorage only)
+- **Vanilla JavaScript**: No frameworks or libraries, ES6+ only
+- **Focus on Core Features**: Water and standup reminders with simple time-based intervals
+- **User Experience**: Non-intrusive notifications, accessible design, offline-first
+
+### Architecture Decisions
+
+**State Management**: 
+- StateManager is the single source of truth for all application state
+- AppSettings only provides validation and default values (no state management)
+- StorageManager only handles localStorage operations (called by StateManager only)
+
+**MVP Simplifications**:
+- ActivityDetector removed - using simple time-based reminders instead
+- No user activity detection or intelligent pause/resume
+- Focus on core reminder functionality only
 
 ### Development Automation
 
@@ -69,15 +93,18 @@ The project uses Kiro AI Assistant for development assistance, including the fol
 
 ## Development Progress
 
-- [x] Project foundation structure
-- [x] Storage management system
-- [x] Notification service
-- [x] Simple time-based reminders (MVP focus)
-- [x] Reminder management core functionality
-- [x] UI interaction control
-- [x] Responsive design
+- [x] Project foundation structure and core interfaces
+- [x] Storage management and settings system (StateManager + StorageManager)
+- [x] Notification service (browser notifications + in-page fallback)
+- [x] Simple time-based reminders (MVP focus - ActivityDetector removed)
+- [x] Water reminder functionality
+- [x] Standup reminder functionality  
+- [x] User interface controller
+- [x] Responsive design and mobile adaptation
+- [x] Application initialization and state recovery
+- [x] Error handling and compatibility support
 - [x] Code internationalization (all English)
-- [x] Architecture optimization
+- [x] Architecture optimization (unified state management)
 - [x] Testing and optimization
 - [x] GitHub Pages deployment
 

@@ -29,8 +29,8 @@ The Office Wellness Reminder System is a pure frontend web application designed 
 2. When the set sedentary reminder time is reached, the system should display a stand-up activity reminder notification
 3. When the sedentary reminder time is reached, the system should display a notification that automatically disappears after 5 seconds and then reset the timer
 4. When the user pauses the sedentary reminder, the system should stop timing and save the state
-5. When the user has mouse or keyboard activity within the set time, the system should automatically extend the sedentary timing
-6. If the user leaves the computer for more than 5 minutes, the system should pause the sedentary timing
+5. ~~When the user has mouse or keyboard activity within the set time, the system should automatically extend the sedentary timing~~ (REMOVED FOR MVP - using simple time-based reminders)
+6. ~~If the user leaves the computer for more than 5 minutes, the system should pause the sedentary timing~~ (REMOVED FOR MVP - using simple time-based reminders)
 
 ### Requirement 3 - User Interface and Experience
 

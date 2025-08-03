@@ -32,18 +32,18 @@
   - Implement notification show and hide animations
   - _Requirements: 3.3, 1.3, 2.2_
 
-- [x] 4. Implement user activity detection system
-- [x] 4.1 Create ActivityDetector class (removed for MVP - deferred)
-  - Implement mouse and keyboard event listening
-  - Add user activity status judgment logic
-  - Implement page unfocus detection functionality
-  - _Requirements: 2.5, 2.6_
+- [x] 4. Implement user activity detection system (REMOVED FOR MVP)
+- [x] 4.1 Create ActivityDetector class (REMOVED - simplified to time-based reminders)
+  - ~~Implement mouse and keyboard event listening~~ (Removed for MVP)
+  - ~~Add user activity status judgment logic~~ (Removed for MVP)
+  - ~~Implement page unfocus detection functionality~~ (Removed for MVP)
+  - _Requirements: 2.5, 2.6 - DEFERRED TO FUTURE RELEASE_
 
-- [x] 4.2 Integrate activity detection with sedentary reminders
-  - Combine activity detector with sedentary reminder logic
-  - Implement intelligent pause and resume functionality
-  - Add activity detection configuration options
-  - _Requirements: 2.5, 2.6_
+- [x] 4.2 Integrate activity detection with sedentary reminders (REMOVED - using simple time-based)
+  - ~~Combine activity detector with sedentary reminder logic~~ (Removed for MVP)
+  - ~~Implement intelligent pause and resume functionality~~ (Removed for MVP)
+  - ~~Add activity detection configuration options~~ (Removed for MVP)
+  - _Requirements: 2.5, 2.6 - DEFERRED TO FUTURE RELEASE_
 
 - [x] 5. Develop reminder management core functionality
 - [x] 5.1 Implement ReminderManager base class
