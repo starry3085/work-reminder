@@ -5,6 +5,7 @@
 class AppSettings {
     constructor(storageManager) {
         this.storageManager = storageManager;
+        this.stateManager = null; // Initialize state manager reference
         
         // Use storage manager's prefix mechanism for consistency
         this.settingsKey = 'settings_v1';
@@ -30,7 +31,7 @@ class AppSettings {
                 style: 'standard' // notification style: standard, minimal, detailed
             },
             appearance: {
-                theme: 'light', // theme: light, dark, auto
+    
                 language: 'en-US'
             },
             firstUse: true // whether first time use
@@ -61,6 +62,47 @@ class AppSettings {
     }
 
     /**
+     * Initialize with StateManager
+     * @param {StateManager} stateManager - State manager instance
+     */
+    async initialize(stateManager) {
+        this.stateManager = stateManager;
+        console.log('AppSettings initialized with StateManager');
+    }
+
+    /**
+     * Set StateManager reference (backward compatibility)
+     * @param {StateManager} stateManager - State manager instance
+     */
+    setStateManager(stateManager) {
+        this.stateManager = stateManager;
+    }
+
+    /**
+     * Get current settings from StateManager if available, otherwise use internal state
+     * @returns {Object} Current settings
+     */
+    getSettings() {
+        // If StateManager is available, get settings from there
+        if (this.stateManager) {
+            const waterState = this.stateManager.getState('water');
+            const standupState = this.stateManager.getState('standup');
+            const appState = this.stateManager.getState('app');
+            
+            return {
+                water: waterState && waterState.settings ? waterState.settings : this.defaultSettings.water,
+                standup: standupState && standupState.settings ? standupState.settings : this.defaultSettings.standup,
+                notifications: this.defaultSettings.notifications,
+    
+                firstUse: appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.firstUse
+            };
+        }
+        
+        // Otherwise, return internal settings
+        return this.currentSettings;
+    }
+
+    /**
      * Load application settings and state (atomic operation to ensure consistency)
      * @param {boolean} forceDefault - Whether to force use default settings (on force refresh)
      * @returns {Object} Loaded settings
@@ -81,6 +123,12 @@ class AppSettings {
                 return this.currentSettings;
             }
             
+            // If we have StateManager, get settings from there
+            if (this.stateManager) {
+                return this.getSettings();
+            }
+            
+            // Otherwise, use legacy approach
             const savedSettings = this.storageManager.loadSettings(this.settingsKey);
             const savedState = this.storageManager.loadSettings(this.stateKey);
             
@@ -127,13 +175,43 @@ class AppSettings {
     }
 
     /**
-     * Save application settings
+     * Save application settings - now delegates to StateManager if available
      * @param {Object} settings - Settings to save
      * @returns {boolean} Whether save was successful
      */
     saveSettings(settings = null) {
         try {
             const settingsToSave = settings || this.currentSettings;
+            
+            // If we have StateManager, update settings there instead
+            if (this.stateManager) {
+                // Update water settings if provided
+                if (settingsToSave.water) {
+                    this.stateManager.updateState('water', { settings: settingsToSave.water });
+                }
+                
+                // Update standup settings if provided
+                if (settingsToSave.standup) {
+                    this.stateManager.updateState('standup', { settings: settingsToSave.standup });
+                }
+                
+                // Update app settings if provided
+                const appSettings = {};
+                if (settingsToSave.notifications) {
+                    appSettings.notifications = settingsToSave.notifications;
+                }
+                if (settingsToSave.appearance) {
+        
+                }
+                if (Object.keys(appSettings).length > 0) {
+                    this.stateManager.updateState('app', appSettings);
+                }
+                
+                console.log('Settings saved via StateManager');
+                return true;
+            }
+            
+            // Legacy approach if no StateManager
             const result = this.storageManager.saveSettings(this.settingsKey, settingsToSave);
             if (result) {
                 this.currentSettings = settingsToSave;
@@ -152,6 +230,13 @@ class AppSettings {
      */
     loadState() {
         try {
+            // If we have StateManager, get state from there
+            if (this.stateManager) {
+                const appState = this.stateManager.getState('app');
+                return appState || { ...this.defaultState };
+            }
+            
+            // Legacy approach
             const savedState = this.storageManager.loadSettings(this.stateKey);
             if (savedState) {
                 // Validate state validity
@@ -175,13 +260,21 @@ class AppSettings {
     }
 
     /**
-     * Save application state
+     * Save application state - now delegates to StateManager if available
      * @param {Object} state - State to save
      * @returns {boolean} Whether save was successful
      */
     saveState(state = null) {
         try {
             const stateToSave = state || this.currentState;
+            
+            // If we have StateManager, it handles state saving automatically
+            if (this.stateManager) {
+                console.log('State saving handled by StateManager');
+                return true;
+            }
+            
+            // Legacy approach if no StateManager
             // Update last saved time
             stateToSave.lastSaved = Date.now();
             
@@ -209,11 +302,19 @@ class AppSettings {
     }
 
     /**
-     * Update application state
+     * Update application state - now delegates to StateManager if available
      * @param {Object} newState - New state
      * @returns {Object} Updated state
      */
     updateState(newState) {
+        // If we have StateManager, it handles state updates automatically
+        if (this.stateManager) {
+            // For app-specific state updates
+            this.stateManager.updateState('app', newState);
+            return this.stateManager.getState('app');
+        }
+        
+        // Legacy approach
         this.currentState = this.mergeSettings(this.currentState, newState);
         this.saveState();
         return this.currentState;
@@ -230,10 +331,15 @@ class AppSettings {
     }
 
     /**
-     * Reset application state to defaults
+     * Reset application state to defaults - now delegates to StateManager if available
      * @returns {Object} Reset state
      */
     resetState() {
+        if (this.stateManager) {
+            this.stateManager.resetToDefaults();
+            return this.stateManager.getState('app');
+        }
+        
         this.currentState = { ...this.defaultState };
         this.saveState();
         return this.currentState;
@@ -288,7 +394,7 @@ class AppSettings {
             water: waterState ? waterState.settings : this.defaultSettings.water,
             standup: standupState ? standupState.settings : this.defaultSettings.standup,
             notifications: this.defaultSettings.notifications,
-            appearance: this.defaultSettings.appearance,
+
             firstUse: this.defaultSettings.firstUse
         };
     }
@@ -315,92 +421,6 @@ class AppSettings {
         console.log('AppSettings initialized with StateManager');
     }
 
-    /**
-     * 兼容旧接口 - 设置状态管理器
-     */
-    setStateManager(stateManager) {
-        this.stateManager = stateManager;
-    }
-
-    /**
-     * 检查是否首次使用
-     */
-    isFirstUse() {
-        const appState = this.stateManager ? this.stateManager.getState('app') : this.currentState;
-        return appState ? appState.isFirstUse : true;
-    }
-
-    /**
-     * 标记为已使用
-     */
-    markAsUsed() {
-        if (this.stateManager) {
-            this.stateManager.updateState('app', { isFirstUse: false });
-        }
-    }
-
-    /**
-     * 检测强制刷新
-     */
-    detectForceRefresh() {
-        return false; // MVP版本不实现版本检测
-    }
-
-    /**
-     * 保存设置（兼容旧接口）
-     */
-    saveSettings(settings) {
-        // 通过StateManager更新设置
-        if (settings.water && this.stateManager) {
-            this.stateManager.updateState('water', { settings: settings.water });
-        }
-        if (settings.standup && this.stateManager) {
-            this.stateManager.updateState('standup', { settings: settings.standup });
-        }
-        if (settings.notifications && this.stateManager) {
-            this.stateManager.updateState('app', { notifications: settings.notifications });
-        }
-    }
-
-    /**
-     * 加载设置（兼容旧接口）
-     */
-    loadSettings(useDefaults = false) {
-        if (useDefaults || !this.stateManager) {
-            return {
-                water: { ...this.defaultSettings.water },
-                standup: { ...this.defaultSettings.standup },
-                notifications: { ...this.defaultSettings.notifications },
-                appearance: { ...this.defaultSettings.appearance },
-                firstUse: this.defaultSettings.firstUse
-            };
-        }
-        
-        return this.getSettings();
-    }
-
-    /**
-     * 加载状态（兼容旧接口）
-     */
-    loadState() {
-        return this.stateManager ? this.stateManager.getState('app') : this.currentState;
-    }
-
-    /**
-     * 保存状态（兼容旧接口）
-     */
-    saveState() {
-        // 状态保存由StateManager统一处理，无需额外操作
-    }
-
-    /**
-     * 重置状态（兼容旧接口）
-     */
-    resetState() {
-        if (this.stateManager) {
-            this.stateManager.resetToDefaults();
-        }
-    }
 
     /**
      * Validate if settings are valid
@@ -451,6 +471,9 @@ class AppSettings {
      * @returns {Object} Current state
      */
     getState() {
+        if (this.stateManager) {
+            return this.stateManager.getState('app');
+        }
         return this.currentState;
     }
 

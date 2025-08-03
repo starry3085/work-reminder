@@ -717,52 +717,7 @@ input[type="number"] {
     gap: 1rem;
 }
 
-/* Theme selector */
-.theme-selector {
-    display: flex;
-    gap: 0.5rem;
-}
 
-.theme-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    border: 2px solid transparent;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    background: none;
-    transition: var(--transition);
-}
-
-.theme-option.active {
-    border-color: var(--primary-color);
-}
-
-.theme-preview {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--border-color);
-}
-
-.theme-preview.light-theme {
-    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
-}
-
-.theme-preview.dark-theme {
-    background: linear-gradient(135deg, #2c3e50 0%, #1a1a1a 100%);
-}
-
-.theme-preview.auto-theme {
-    background: linear-gradient(135deg, #ffffff 0%, #1a1a1a 100%);
-}
-
-.theme-option span {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
 
 /* Notification popup */
 .notification-overlay, .help-overlay {
@@ -1234,11 +1189,7 @@ input[type="number"] {
         justify-content: space-between;
     }
     
-    /* Adjust theme selector for mobile */
-    .theme-selector {
-        width: 100%;
-        justify-content: space-between;
-    }
+
 }
 
 /* Portrait orientation specific styles */

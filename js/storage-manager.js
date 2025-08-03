@@ -7,10 +7,12 @@ class StorageManager {
         this.STORAGE_PREFIX = 'wellness-reminder';
         this.STORAGE_VERSION = '1.0.0';
         this.storageKeys = {
+            // 为 AppSettings 保留的键（避免与 StateManager 冲突）
+            appSettings: 'app-settings-v1',
+            appState: 'app-state-v1',
+            // 保留这些键以确保向后兼容性
             waterSettings: 'water-reminder-settings',
             standupSettings: 'standup-reminder-settings',
-            appSettings: 'app-settings',
-            appState: 'app-state',
             waterState: 'water-reminder-state',
             standupState: 'standup-reminder-state'
         };
