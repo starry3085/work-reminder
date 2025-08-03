@@ -300,46 +300,6 @@ class AppSettings {
     }
 
     /**
-     * 统一设置管理 - 通过StateManager管理
-     */
-    getSettings() {
-        // 从StateManager获取当前设置
-        const waterState = this.stateManager ? this.stateManager.getState('water') : null;
-        const standupState = this.stateManager ? this.stateManager.getState('standup') : null;
-        
-        return {
-            water: waterState ? waterState.settings : this.defaultSettings.water,
-            standup: standupState ? standupState.settings : this.defaultSettings.standup,
-            notifications: this.defaultSettings.notifications,
-
-            firstUse: this.defaultSettings.firstUse
-        };
-    }
-
-    /**
-     * 更新设置 - 通过StateManager统一更新
-     */
-    updateSettings(type, settings) {
-        if (this.stateManager) {
-            this.stateManager.updateState(type, { settings });
-        }
-    }
-
-    /**
-     * 初始化状态管理器
-     */
-    async initialize(stateManager) {
-        this.stateManager = stateManager;
-        
-        // 从StateManager加载状态
-        const appState = this.stateManager.getState('app');
-        this.currentState = { ...this.currentState, ...appState };
-        
-        console.log('AppSettings initialized with StateManager');
-    }
-
-
-    /**
      * Validate if settings are valid
      * @param {Object} settings - Settings to validate
      * @returns {Object} Validation result {isValid: boolean, errors: Array}
@@ -373,14 +333,6 @@ class AppSettings {
             isValid: errors.length === 0,
             errors
         };
-    }
-
-    /**
-     * Get current settings
-     * @returns {Object} Current settings
-     */
-    getSettings() {
-        return this.currentSettings;
     }
 
     /**

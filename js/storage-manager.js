@@ -7,10 +7,10 @@ class StorageManager {
         this.STORAGE_PREFIX = 'wellness-reminder';
         this.STORAGE_VERSION = '1.0.0';
         this.storageKeys = {
-            // 为 AppSettings 保留的键（避免与 StateManager 冲突）
+            // Reserved keys for AppSettings (to avoid conflicts with StateManager)
             appSettings: 'app-settings-v1',
             appState: 'app-state-v1',
-            // 保留这些键以确保向后兼容性
+            // Keep these keys for backward compatibility
             waterSettings: 'water-reminder-settings',
             standupSettings: 'standup-reminder-settings',
             waterState: 'water-reminder-state',
@@ -27,7 +27,7 @@ class StorageManager {
      */
     checkStorageAvailability() {
         try {
-            const testKey = this.storagePrefix + 'test';
+            const testKey = this.STORAGE_PREFIX + '.test';
             localStorage.setItem(testKey, 'test');
             localStorage.removeItem(testKey);
             return true;
@@ -67,7 +67,7 @@ class StorageManager {
                 const keysToRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (key && key.startsWith(this.storagePrefix)) {
+                    if (key && key.startsWith(this.STORAGE_PREFIX)) {
                         keysToRemove.push(key);
                     }
                 }
@@ -114,7 +114,7 @@ class StorageManager {
                     const size = localStorage[key].length;
                     totalSize += size;
                     
-                    if (key.startsWith(this.storagePrefix)) {
+                    if (key.startsWith(this.STORAGE_PREFIX)) {
                         appSize += size;
                     }
                 }
@@ -279,18 +279,18 @@ class StorageManager {
             if (this.isStorageAvailable) {
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (key && key.startsWith(this.storagePrefix)) {
-                        const shortKey = key.replace(this.storagePrefix, '');
+                    if (key && key.startsWith(this.STORAGE_PREFIX)) {
+                        const shortKey = key.replace(this.STORAGE_PREFIX, '');
                         backup[shortKey] = JSON.parse(localStorage.getItem(key));
                     }
                 }
             } else {
                 // Backup from memory storage
                 this.memoryStorage.forEach((value, key) => {
-                    if (key.startsWith(this.storagePrefix)) {
-                        const shortKey = key.replace(this.storagePrefix, '');
-                        backup[shortKey] = JSON.parse(value);
-                    }
+                    if (key.startsWith(this.STORAGE_PREFIX)) {
+                    const shortKey = key.replace(this.STORAGE_PREFIX, '');
+                    backup[shortKey] = JSON.parse(value);
+                }
                 });
             }
             
