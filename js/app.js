@@ -456,40 +456,13 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Set up reminder callbacks for UI updates
+     * Set up reminder callbacks for UI updates - now handled by StateManager
      * @private
      */
     setupReminderCallbacks() {
-        if (!this.uiController) {
-            console.error('UI controller not available for reminder callbacks');
-            return;
-        }
-
-        // Set up water reminder callbacks
-        if (this.waterReminder) {
-            this.waterReminder.setTimeUpdateCallback((data) => {
-                this.uiController.updateCountdown('water', data.timeRemaining);
-            });
-            
-            this.waterReminder.setStatusChangeCallback((status) => {
-                this.uiController.updateReminderStatus('water', status);
-            });
-            
-            console.log('Water reminder callbacks set up');
-        }
-
-        // Set up standup reminder callbacks
-        if (this.standupReminder) {
-            this.standupReminder.setTimeUpdateCallback((data) => {
-                this.uiController.updateCountdown('standup', data.timeRemaining);
-            });
-            
-            this.standupReminder.setStatusChangeCallback((status) => {
-                this.uiController.updateReminderStatus('standup', status);
-            });
-            
-            console.log('Standup reminder callbacks set up');
-        }
+        // Reminder callbacks are now handled by StateManager subscriptions
+        // UI updates happen automatically when state changes via StateManager
+        console.log('Reminder callbacks configured via StateManager subscriptions');
     }
 
     /**
@@ -658,23 +631,24 @@ class OfficeWellnessApp {
         try {
             console.log('Restoring previous session state via StateManager...');
             
-            const currentSettings = this.appSettings.getSettings();
+            // Ensure StateManager is fully initialized
+            await this.stateManager.initialize();
             
             // Restore water reminder state via StateManager
-            if (this.waterReminder && currentSettings.water.enabled) {
+            if (this.waterReminder) {
                 const waterState = this.stateManager.getState('water');
                 if (waterState?.isActive) {
                     console.log('Restoring water reminder via StateManager');
-                    // StateManager handles the restoration logic
+                    this.waterReminder.start();
                 }
             }
             
             // Restore standup reminder state via StateManager
-            if (this.standupReminder && currentSettings.standup.enabled) {
+            if (this.standupReminder) {
                 const standupState = this.stateManager.getState('standup');
                 if (standupState?.isActive) {
                     console.log('Restoring standup reminder via StateManager');
-                    // StateManager handles the restoration logic
+                    this.standupReminder.start();
                 }
             }
             
@@ -972,48 +946,19 @@ class OfficeWellnessApp {
      */
     startReminder(type) {
         try {
-            if (!this.appSettings) {
-                console.warn('App settings not initialized, cannot start reminder');
+            const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
+            if (!reminder) {
+                console.warn(`Cannot start ${type} reminder: reminder not initialized`);
                 return;
             }
             
-            const currentSettings = this.appSettings.getSettings();
+            console.log(`Starting ${type} reminder...`);
+            reminder.start();
+            console.log(`${type} reminder started successfully`);
             
-            if (type === 'water' && this.waterReminder) {
-                console.log('Starting water reminder...');
-                this.waterReminder.start();
-                currentSettings.water.enabled = true;
-                this.appSettings.updateSettings(currentSettings);
-                
-                // Save application state
-                this.saveAppState();
-                console.log('Water reminder started successfully');
-                
-                // Manually trigger state update to ensure UI synchronization
-                if (this.uiController) {
-                    const status = this.waterReminder.getCurrentStatus();
-                    console.log('Manual status update for water:', status);
-                    this.uiController.updateReminderStatus('water', status);
-                }
-            } else if (type === 'standup' && this.standupReminder) {
-                console.log('Starting standup reminder...');
-                this.standupReminder.start();
-                currentSettings.standup.enabled = true;
-                this.appSettings.updateSettings(currentSettings);
-                
-                // Save application state
-                this.saveAppState();
-                console.log('Standup reminder started successfully');
-                
-                // Manually trigger state update to ensure UI synchronization
-                if (this.uiController) {
-                    const status = this.standupReminder.getCurrentStatus();
-                    console.log('Manual status update for standup:', status);
-                    this.uiController.updateReminderStatus('standup', status);
-                }
-            } else {
-                console.warn(`Cannot start ${type} reminder: reminder not initialized`);
-            }
+            // State management is handled by StateManager through ReminderManager
+            // No need for manual state updates or duplicate saves
+            
         } catch (error) {
             console.error(`Failed to start ${type} reminder:`, error);
         }
@@ -1025,48 +970,19 @@ class OfficeWellnessApp {
      */
     stopReminder(type) {
         try {
-            if (!this.appSettings) {
-                console.warn('App settings not initialized, cannot stop reminder');
+            const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
+            if (!reminder) {
+                console.warn(`Cannot stop ${type} reminder: reminder not initialized`);
                 return;
             }
             
-            const currentSettings = this.appSettings.getSettings();
+            console.log(`Stopping ${type} reminder...`);
+            reminder.stop();
+            console.log(`${type} reminder stopped successfully`);
             
-            if (type === 'water' && this.waterReminder) {
-                console.log('Stopping water reminder...');
-                this.waterReminder.stop();
-                currentSettings.water.enabled = false;
-                this.appSettings.updateSettings(currentSettings);
-                
-                // Save application state
-                this.saveAppState();
-                console.log('Water reminder stopped successfully');
-                
-                // Manually trigger state update to ensure UI synchronization
-                if (this.uiController) {
-                    const status = this.waterReminder.getCurrentStatus();
-                    console.log('Manual status update for water:', status);
-                    this.uiController.updateReminderStatus('water', status);
-                }
-            } else if (type === 'standup' && this.standupReminder) {
-                console.log('Stopping standup reminder...');
-                this.standupReminder.stop();
-                currentSettings.standup.enabled = false;
-                this.appSettings.updateSettings(currentSettings);
-                
-                // Save application state
-                this.saveAppState();
-                console.log('Standup reminder stopped successfully');
-                
-                // Manually trigger state update to ensure UI synchronization
-                if (this.uiController) {
-                    const status = this.standupReminder.getCurrentStatus();
-                    console.log('Manual status update for standup:', status);
-                    this.uiController.updateReminderStatus('standup', status);
-                }
-            } else {
-                console.warn(`Cannot stop ${type} reminder: reminder not initialized`);
-            }
+            // State management is handled by StateManager through ReminderManager
+            // No need for manual state updates or duplicate saves
+            
         } catch (error) {
             console.error(`Failed to stop ${type} reminder:`, error);
         }
@@ -1077,33 +993,33 @@ class OfficeWellnessApp {
 
 
     /**
-     * Update settings
+     * Update settings through StateManager (single source of truth)
      * @param {Object} newSettings
      */
     updateSettings(newSettings) {
         try {
-            // Update settings
-            const updatedSettings = this.appSettings.updateSettings(newSettings);
-            
-            // Update reminder manager settings
-            if (newSettings.water && this.waterReminder) {
-                this.waterReminder.updateSettings(newSettings.water);
+            // Update settings through StateManager only
+            if (newSettings.water && this.stateManager) {
+                this.stateManager.updateState('water', {
+                    settings: newSettings.water
+                });
             }
             
-            if (newSettings.standup && this.standupReminder) {
-                this.standupReminder.updateSettings(newSettings.standup);
+            if (newSettings.standup && this.stateManager) {
+                this.stateManager.updateState('standup', {
+                    settings: newSettings.standup
+                });
             }
             
-            // Update UI
-            if (this.uiController) {
-                this.uiController.updateSettings(updatedSettings);
+            if (newSettings.notifications && this.stateManager) {
+                this.stateManager.updateState('app', {
+                    notificationSettings: newSettings.notifications
+                });
             }
             
-            // Save application state
-            this.saveAppState();
-            
-            console.log('Settings updated:', updatedSettings);
-            return updatedSettings;
+            // State changes are automatically synchronized via StateManager subscriptions
+            console.log('Settings updated via StateManager:', newSettings);
+            return newSettings;
         } catch (error) {
             console.error('Failed to update settings:', error);
             throw error;
