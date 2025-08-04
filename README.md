@@ -24,10 +24,12 @@ A health reminder web application designed specifically for office workers to he
 - **Development Tools**: Kiro AI Assistant with automated documentation updates
 
 ### Architecture Highlights
-- **Single Source of Truth**: StateManager handles all application state
+- **Single Source of Truth**: StateManager handles all application state (fixed circular updates)
 - **Class-Based Architecture**: Modular ES6+ classes with clear separation of concerns
-- **Event-Driven Communication**: Components communicate through callbacks and subscriptions
+- **State-Driven Communication**: Components communicate through StateManager subscriptions only
 - **Privacy-First Design**: No backend server, no APIs, no external dependencies
+- **MVP Architecture**: Simplified callback system, unified state management
+- **Error Prevention**: Removed method call errors and duplicate state updates
 
 ## Project Structure
 
@@ -68,17 +70,26 @@ This project follows strict MVP (Minimum Viable Product) principles:
 ### Architecture Decisions
 
 **State Management**: 
-- StateManager is the single source of truth for all application state
-- AppSettings only provides validation and default values (no state management)
-- StorageManager only handles localStorage operations (called by StateManager only)
-- Reminder classes integrate with StateManager for unified state synchronization
-- UIController subscribes to StateManager for real-time UI updates
-- Anti-circulation mechanisms prevent duplicate state updates
+- **StateManager** is the single source of truth for all application state (see `.kiro/steering/tech.md` for detailed architecture)
+- **AppSettings** only provides validation and default values (no state management)
+- **StorageManager** only handles localStorage operations (called by StateManager only)
+- **Reminder classes** subscribe to StateManager for unified state synchronization
+- **UIController** subscribes to StateManager for real-time UI updates
+- **Anti-circulation mechanisms** prevent duplicate state updates (fixed circular update issues)
+- **Simplified callback system** - removed redundant callbacks, StateManager subscriptions only
+
+**Key Fixes Applied**:
+- **Fixed method call errors**: Removed calls to non-existent `updateSettings()` method
+- **Fixed duplicate state updates**: All state changes flow through StateManager
+- **Fixed state recovery**: Implemented proper state restoration via StateManager
+- **Fixed circular updates**: Improved `isUpdatingFromState` flag implementation
+- **Fixed state structure**: Unified naming conventions across all components
 
 **MVP Simplifications**:
-- ActivityDetector removed - using simple time-based reminders instead
-- No user activity detection or intelligent pause/resume
-- Focus on core reminder functionality only
+- **ActivityDetector removed** - using simple time-based reminders instead
+- **No user activity detection** or intelligent pause/resume
+- **Simplified callback system** - StateManager subscriptions only
+- **Focus on core reminder functionality** only
 
 ### Development Automation
 

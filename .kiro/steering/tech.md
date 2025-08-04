@@ -67,6 +67,37 @@ The application follows a modular class-based architecture with clear separation
 ### Single Source of Truth Principle
 **StateManager is the ONLY component that manages application state.**
 
+### Unified State Structure (Post-Fixes)
+```javascript
+// Unified state structure after architectural fixes
+{
+  water: {
+    isActive: boolean,
+    interval: number, // minutes
+    timeRemaining: number, // milliseconds
+    nextReminderAt: number, // timestamp
+    settings: {
+      enabled: boolean,
+      interval: number,
+      sound: boolean,
+      lastReminderAt: number
+    }
+  },
+  standup: {
+    // Same structure as water
+  },
+  app: {
+    isFirstUse: boolean,
+    isInitializing: boolean,
+    notificationSettings: {
+      browserNotifications: boolean,
+      soundEnabled: boolean,
+      style: string
+    }
+  }
+}
+```
+
 ### Component Responsibilities (FINAL)
 
 #### StateManager (Single Source of Truth)
@@ -75,6 +106,11 @@ The application follows a modular class-based architecture with clear separation
 - Manages state cache and subscriptions
 - Notifies subscribers of state changes
 - Handles state validation and merging
+- **Methods**:
+  - `updateState(type, updates)`: Update specific state slice
+  - `getState(type)`: Retrieve current state
+  - `subscribe(type, callback)`: Subscribe to state changes
+  - `loadAllStates()`: Load persisted state from storage
 
 #### AppSettings (Validation Only)
 - **ONLY** provides default settings structure
@@ -106,13 +142,22 @@ UI Updates ← UIController ← Subscribers ← StateManager
 3. **All state changes go through StateManager.updateState()**
 4. **All state access goes through StateManager.getState()**
 5. **Components subscribe to StateManager for updates**
+6. **No direct state mutation outside StateManager**
+
+### Key Fixes Implemented
+- **Fixed method call errors**: Removed calls to non-existent `updateSettings()` method
+- **Fixed duplicate state updates**: All state changes now flow through StateManager
+- **Fixed circular updates**: Improved `isUpdatingFromState` flag implementation
+- **Fixed state structure**: Unified naming conventions across all components
+- **Fixed callback system**: Simplified to StateManager subscriptions only
+- **Fixed state recovery**: Proper state restoration via StateManager
 
 ### Code Examples
 
-#### ❌ NEVER DO THIS
+#### ❌ NEVER DO THIS (Pre-Fix Issues)
 ```javascript
 // AppSettings trying to save state directly
-this.stateManager.updateState('water', { settings: newSettings });
+this.appSettings.updateSettings(newSettings); // ERROR: method doesn't exist
 
 // Multiple components saving the same data
 this.storageManager.saveSettings('water', settings);
@@ -123,7 +168,7 @@ this.waterSettings = newSettings;
 this.saveToLocalStorage();
 ```
 
-#### ✅ ALWAYS DO THIS
+#### ✅ ALWAYS DO THIS (Post-Fix)
 ```javascript
 // Only StateManager updates state
 stateManager.updateState('water', { 
@@ -146,8 +191,11 @@ this.stateManager.subscribe('water', (state) => {
 // Prevent circular updates
 updateWaterUI(state) {
     this.isUpdatingFromState = true;
-    // Update UI elements
-    this.isUpdatingFromState = false;
+    try {
+        // Update UI elements
+    } finally {
+        this.isUpdatingFromState = false;
+    }
 }
 ```
 
@@ -192,6 +240,53 @@ updateWaterUI(state) {
 - No user activity detection
 - No intelligent pause/resume
 - Fixed interval reminders
+
+## Best Practices Applied
+
+### 1. Single Responsibility Principle
+Each component has one clear responsibility
+
+### 2. DRY (Don't Repeat Yourself)
+- Centralized state management
+- Reusable validation logic
+- Shared utility functions
+
+### 3. YAGNI (You Aren't Gonna Need It)
+- Removed unused features for MVP
+- Simplified architecture for core functionality
+- Deferred complex features to future iterations
+
+### 4. KISS (Keep It Simple, Stupid)
+- Simple state flow
+- Clear component boundaries
+- Minimal configuration
+
+## Testing Considerations
+
+### Unit Testing
+- Each component can be tested in isolation
+- StateManager provides predictable state updates
+- Mockable dependencies for testing
+
+### Integration Testing
+- Clear interfaces between components
+- Predictable state flow for testing scenarios
+- Easy to simulate user interactions
+
+## Future Enhancements
+
+### Planned Improvements
+1. **Activity Detection**: Add movement tracking for standup reminders
+2. **Analytics**: Track reminder effectiveness
+3. **Customization**: More reminder types and intervals
+4. **Multi-language Support**: Internationalization
+5. **Offline Support**: Service worker for offline functionality
+
+### Architecture Extensions
+- Plugin system for custom reminder types
+- Settings import/export functionality
+- Advanced notification scheduling
+- Usage analytics and reporting
 
 ## Project Structure
 

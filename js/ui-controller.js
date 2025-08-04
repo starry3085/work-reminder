@@ -39,10 +39,20 @@ class UIController {
             this.resizeHandler = null;
         }
         
-        // Remove state manager subscription
-        if (this.stateManager && this.stateSubscription) {
-            this.stateManager.unsubscribe(this.stateSubscription);
-            this.stateSubscription = null;
+        // Remove state manager subscriptions
+        if (this.stateManager) {
+            if (this.waterSubscription) {
+                this.waterSubscription();
+                this.waterSubscription = null;
+            }
+            if (this.standupSubscription) {
+                this.standupSubscription();
+                this.standupSubscription = null;
+            }
+            if (this.appSubscription) {
+                this.appSubscription();
+                this.appSubscription = null;
+            }
         }
     }
 
@@ -372,25 +382,43 @@ class UIController {
             return;
         }
 
-        this.stateSubscription = this.stateManager.subscribe((stateType, newState) => {
+        // Subscribe to water state changes
+        this.waterSubscription = this.stateManager.subscribe('water', (newState) => {
             if (this.isUpdatingFromState) return;
             
             this.isUpdatingFromState = true;
-            
             try {
-                switch (stateType) {
-                    case 'water':
-                        this.updateWaterUI(newState);
-                        break;
-                    case 'standup':
-                        this.updateStandupUI(newState);
-                        break;
-                    case 'app':
-                        this.updateAppUI(newState);
-                        break;
-                }
+                this.updateWaterUI(newState);
             } catch (error) {
-                console.error('Error updating UI from state:', error);
+                console.error('Error updating water UI from state:', error);
+            } finally {
+                this.isUpdatingFromState = false;
+            }
+        });
+
+        // Subscribe to standup state changes
+        this.standupSubscription = this.stateManager.subscribe('standup', (newState) => {
+            if (this.isUpdatingFromState) return;
+            
+            this.isUpdatingFromState = true;
+            try {
+                this.updateStandupUI(newState);
+            } catch (error) {
+                console.error('Error updating standup UI from state:', error);
+            } finally {
+                this.isUpdatingFromState = false;
+            }
+        });
+
+        // Subscribe to app state changes
+        this.appSubscription = this.stateManager.subscribe('app', (newState) => {
+            if (this.isUpdatingFromState) return;
+            
+            this.isUpdatingFromState = true;
+            try {
+                this.updateAppUI(newState);
+            } catch (error) {
+                console.error('Error updating app UI from state:', error);
             } finally {
                 this.isUpdatingFromState = false;
             }
@@ -490,11 +518,10 @@ class UIController {
      */
     updateButtons(type, status) {
         const toggleButton = this.elements[`${type}Toggle`];
-        const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'standupActivity'}`];
 
         if (!toggleButton) return;
 
-        // Update toggle button
+        // Update toggle button based on active status
         if (status.isActive) {
             toggleButton.textContent = 'Stop';
             toggleButton.className = 'btn-secondary';
@@ -502,10 +529,6 @@ class UIController {
             toggleButton.textContent = 'Start';
             toggleButton.className = 'btn-primary';
         }
-
-        // Show/hide action button
-        const showAction = status.isActive;
-        if (actionButton) actionButton.style.display = showAction ? 'inline-block' : 'none';
     }
 
     /**

@@ -4,19 +4,27 @@
  */
 class AppSettings {
     constructor() {
-        // Default settings structure - read-only reference
+        // Default settings structure - read-only reference, aligned with StateManager
         this.defaultSettings = {
             water: {
-                enabled: true,
+                isActive: false,
                 interval: 30, // minutes
-                sound: true,
-                lastReminder: null
+                settings: {
+                    enabled: true,
+                    interval: 30,
+                    sound: true,
+                    lastReminderAt: null
+                }
             },
             standup: {
-                enabled: true,
+                isActive: false,
                 interval: 30, // minutes
-                sound: true,
-                lastReminder: null
+                settings: {
+                    enabled: true,
+                    interval: 30,
+                    sound: true,
+                    lastReminderAt: null
+                }
             },
             notifications: {
                 browserNotifications: true,
@@ -26,7 +34,7 @@ class AppSettings {
             appearance: {
                 language: 'en-US'
             },
-            firstUse: true // whether first time use
+            isFirstUse: true // aligned with StateManager
         };
         
         // StateManager reference for read-only access
@@ -57,11 +65,11 @@ class AppSettings {
         const appState = this.stateManager.getState('app');
         
         return {
-            water: waterState && waterState.settings ? waterState.settings : this.defaultSettings.water,
-            standup: standupState && standupState.settings ? standupState.settings : this.defaultSettings.standup,
+            water: waterState && waterState.settings ? waterState.settings : this.defaultSettings.water.settings,
+            standup: standupState && standupState.settings ? standupState.settings : this.defaultSettings.standup.settings,
             notifications: this.defaultSettings.notifications,
             appearance: this.defaultSettings.appearance,
-            firstUse: appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.firstUse
+            firstUse: appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.isFirstUse
         };
     }
 

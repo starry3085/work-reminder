@@ -23,10 +23,7 @@ class ReminderManager {
         this.nextReminderTime = null;
         this.timeRemaining = 0;
         
-        // Callback functions
-        this.statusChangeCallback = null;
-        this.timeUpdateCallback = null;
-        this.settingsUpdateCallback = null;
+
         
         // Timer update interval (1 second)
         this.updateInterval = 1000;
@@ -71,12 +68,7 @@ class ReminderManager {
         };
         this.updateState(updates);
         
-        // Trigger status change callback
-        this.triggerStatusChange({
-            status: 'started',
-            isActive: true,
-            timeRemaining: this.timeRemaining
-        });
+
         
         console.log(`${this.type} reminder started, interval: ${this.settings.interval} minutes (${intervalMs}ms)`);
     }
@@ -107,12 +99,7 @@ class ReminderManager {
         };
         this.updateState(updates);
         
-        // Trigger status change callback
-        this.triggerStatusChange({
-            status: 'stopped',
-            isActive: false,
-            timeRemaining: 0
-        });
+
         
         console.log(`${this.type} reminder stopped`);
     }
@@ -171,41 +158,14 @@ class ReminderManager {
         };
         this.updateState(updates);
         
-        // Trigger status change
-        this.triggerStatusChange({
-            status: 'restarted',
-            isActive: true,
-            timeRemaining: this.timeRemaining
-        });
+
         
         console.log(`${this.type} reminder reset and restarted with ${this.settings.interval}min interval`);
     }
 
 
 
-    /**
-     * Set status change callback
-     * @param {Function} callback - Callback function
-     */
-    setStatusChangeCallback(callback) {
-        this.statusChangeCallback = callback;
-    }
 
-    /**
-     * Set time update callback
-     * @param {Function} callback - Callback function
-     */
-    setTimeUpdateCallback(callback) {
-        this.timeUpdateCallback = callback;
-    }
-
-    /**
-     * Set settings update callback
-     * @param {Function} callback - Callback function
-     */
-    setSettingsUpdateCallback(callback) {
-        this.settingsUpdateCallback = callback;
-    }
 
     /**
      * Update settings dynamically
@@ -244,17 +204,7 @@ class ReminderManager {
         };
     }
 
-    /**
-     * Notify status change - no longer save state directly, handled uniformly by application
-     * @private
-     */
-    notifyStateChange() {
-        if (this.statusChangeCallback) {
-            const status = this.getCurrentStatus();
-            status.type = this.type;
-            this.statusChangeCallback(status);
-        }
-    }
+
 
     /**
      * Start timer
@@ -325,15 +275,7 @@ class ReminderManager {
         };
         this.updateState(updates);
         
-        // Trigger time update callback for immediate UI update
-        if (this.timeUpdateCallback) {
-            this.timeUpdateCallback({
-                type: this.type,
-                timeRemaining: this.timeRemaining,
-                nextReminderTime: this.nextReminderTime,
-                progress: 1 - (this.timeRemaining / (this.settings.interval * 60 * 1000))
-            });
-        }
+
     }
 
     /**
@@ -357,12 +299,7 @@ class ReminderManager {
             () => this.snooze()       // Snooze callback
         );
         
-        // Trigger status change callback
-        this.triggerStatusChange({
-            status: 'triggered',
-            isActive: true,
-            timeRemaining: 0
-        });
+
         
         // Unified auto-reset mechanism - restart with original interval
         setTimeout(() => {
@@ -397,12 +334,7 @@ class ReminderManager {
         };
         this.updateState(updates);
         
-        // Trigger status change callback
-        this.triggerStatusChange({
-            status: 'snoozed',
-            isActive: true,
-            timeRemaining: this.timeRemaining
-        });
+
         
         console.log(`${this.type} reminder snoozed for 5 minutes`);
     }
@@ -417,20 +349,7 @@ class ReminderManager {
         this.timeRemaining = 0;
     }
 
-    /**
-     * Trigger status change callback
-     * @param {Object} status - Status information
-     * @private
-     */
-    triggerStatusChange(status) {
-        if (this.statusChangeCallback) {
-            this.statusChangeCallback({
-                ...status,
-                type: this.type,
-                timestamp: Date.now()
-            });
-        }
-    }
+
 
     /**
      * Subscribe to state manager changes
@@ -457,10 +376,12 @@ class ReminderManager {
         if (!state) return;
         
         try {
-            // Prevent update loops
+            // Prevent update loops - atomic operation
+            if (this.isUpdatingFromState) return;
             this.isUpdatingFromState = true;
             
             // Update internal state from single source
+            const wasActive = this.isActive;
             this.isActive = Boolean(state.isActive);
             this.timeRemaining = Math.max(0, state.timeRemaining || 0);
             this.nextReminderTime = state.nextReminderAt || 0;
@@ -476,12 +397,10 @@ class ReminderManager {
                 timeRemaining: this.timeRemaining
             });
             
-            // Reset flag after sync
-            setTimeout(() => {
-                this.isUpdatingFromState = false;
-            }, 0);
         } catch (error) {
             console.error(`Failed to sync ${this.type} reminder state:`, error);
+        } finally {
+            // Always reset flag, even on error
             this.isUpdatingFromState = false;
         }
     }
@@ -535,9 +454,7 @@ class ReminderManager {
     destroy() {
         this.stop();
         
-        // Clear all callbacks
-        this.statusChangeCallback = null;
-        this.timeUpdateCallback = null;
+
         
         // Activity detection cleanup removed for MVP
         
