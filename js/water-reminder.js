@@ -5,12 +5,13 @@
 class WaterReminder extends ReminderManager {
     /**
      * Create water reminder instance
+     * @param {string} type - Reminder type ('water')
      * @param {Object} settings - Water reminder settings
      * @param {NotificationService} notificationService - Notification service instance
-     * @param {StateManager} stateManager - State manager instance (optional)
+     * @param {StateManager} stateManager - State manager instance
      */
-    constructor(settings, notificationService, stateManager = null) {
-        super('water', settings, notificationService, stateManager);
+    constructor(type, settings, notificationService, stateManager) {
+        super(type, settings, notificationService, stateManager);
         
         console.log('Water reminder created');
     }
@@ -18,31 +19,12 @@ class WaterReminder extends ReminderManager {
 
 
     /**
-     * Trigger water reminder
+     * Trigger water reminder - use parent implementation
      * @private
      */
     triggerReminder() {
-        if (!this.isActive) return;
-        
-        const title = '💧 Time to Hydrate!';
-        const message = 'Long work sessions can lead to dehydration, remember to drink water!';
-        
-        // Show simple notification without actions
-        this.notificationService.showNotification(
-            'water',
-            title,
-            message
-        );
-        
-        // Trigger status change callback
-        this.triggerStatusChange({
-            status: 'triggered',
-            isActive: true,
-            timeRemaining: 0
-        });
-        
-        // Use parent auto-reset mechanism
-        console.log('Water reminder triggered');
+        // Use parent class implementation for consistency
+        super.triggerReminder();
     }
 
     /**

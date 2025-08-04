@@ -5,42 +5,24 @@
 class StandupReminder extends ReminderManager {
     /**
      * Create standup reminder instance
+     * @param {string} type - Reminder type ('standup')
      * @param {Object} settings - Standup reminder settings
      * @param {NotificationService} notificationService - Notification service instance
-     * @param {StateManager} stateManager - State manager instance (optional)
+     * @param {StateManager} stateManager - State manager instance
      */
-    constructor(settings, notificationService, stateManager = null) {
-        super('standup', settings, notificationService, stateManager);
+    constructor(type, settings, notificationService, stateManager) {
+        super(type, settings, notificationService, stateManager);
         
         console.log('Standup reminder created');
     }
 
     /**
-     * Trigger standup reminder
+     * Trigger standup reminder - use parent implementation
      * @private
      */
     triggerReminder() {
-        if (!this.isActive) return;
-        
-        const title = '🧘 Time to Stand Up!';
-        const message = 'Sitting too long is bad for your health, get up and move around!';
-        
-        // Show simple notification without actions
-        this.notificationService.showNotification(
-            'standup',
-            title,
-            message
-        );
-        
-        // Trigger status change callback
-        this.triggerStatusChange({
-            status: 'triggered',
-            isActive: true,
-            timeRemaining: 0
-        });
-        
-        // Use parent auto-reset mechanism
-        console.log('Standup reminder triggered');
+        // Use parent class implementation for consistency
+        super.triggerReminder();
     }
 
     /**

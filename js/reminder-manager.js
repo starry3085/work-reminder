@@ -8,13 +8,15 @@ class ReminderManager {
      * @param {string} type - Reminder type ('water' | 'standup')
      * @param {Object} settings - Reminder settings
      * @param {NotificationService} notificationService - Notification service instance
+     * @param {StateManager} stateManager - State manager instance
      */
-    constructor(type, settings, notificationService) {
+    constructor(type, settings, notificationService, stateManager) {
         this.type = type;
         this.settings = { ...settings };
         this.notificationService = notificationService;
+        this.stateManager = stateManager;
         
-        // State management
+        // State management - these are now synced from StateManager
         this.isActive = false;
         this.timer = null;
         this.startTime = null;
@@ -30,7 +32,10 @@ class ReminderManager {
         this.updateInterval = 1000;
         this.updateTimer = null;
         
-        console.log(`${this.type} reminder manager created`);
+        // Subscribe to state changes immediately
+        this.subscribeToStateManager();
+        
+        console.log(`${this.type} reminder manager created with StateManager integration`);
     }
 
     // Activity detection removed for MVP - using simpler time-based reminders
@@ -428,17 +433,20 @@ class ReminderManager {
     }
 
     /**
-     * Set state manager as single source of truth
+     * Subscribe to state manager changes
+     * @private
      */
-    setStateManager(stateManager) {
-        this.stateManager = stateManager;
+    subscribeToStateManager() {
+        if (!this.stateManager) return;
         
-        // Subscribe to state changes
-        this.unsubscribe = stateManager.subscribe(this.type, (state) => {
+        this.unsubscribe = this.stateManager.subscribe(this.type, (state) => {
+            // Prevent self-triggered updates
+            if (this.isUpdatingFromState) return;
+            
             this.syncWithState(state);
         });
         
-        console.log(`${this.type} reminder connected to StateManager`);
+        console.log(`${this.type} reminder subscribed to StateManager`);
     }
 
     /**
@@ -449,10 +457,13 @@ class ReminderManager {
         if (!state) return;
         
         try {
+            // Prevent update loops
+            this.isUpdatingFromState = true;
+            
             // Update internal state from single source
-        this.isActive = Boolean(state.isActive);
-        this.timeRemaining = Math.max(0, state.timeRemaining || 0);
-        this.nextReminderTime = state.nextReminderAt || 0;
+            this.isActive = Boolean(state.isActive);
+            this.timeRemaining = Math.max(0, state.timeRemaining || 0);
+            this.nextReminderTime = state.nextReminderAt || 0;
             
             // Update settings from state
             this.settings = { ...this.settings, ...state.settings };
@@ -464,8 +475,14 @@ class ReminderManager {
                 isActive: this.isActive,
                 timeRemaining: this.timeRemaining
             });
+            
+            // Reset flag after sync
+            setTimeout(() => {
+                this.isUpdatingFromState = false;
+            }, 0);
         } catch (error) {
             console.error(`Failed to sync ${this.type} reminder state:`, error);
+            this.isUpdatingFromState = false;
         }
     }
 
@@ -495,7 +512,7 @@ class ReminderManager {
      * @private
      */
     updateState(updates) {
-        if (this.stateManager) {
+        if (this.stateManager && !this.isUpdatingFromState) {
             this.stateManager.updateState(this.type, updates);
         }
     }

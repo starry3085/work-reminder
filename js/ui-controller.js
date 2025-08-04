@@ -6,8 +6,8 @@ class UIController {
         this.elements = {};
         this.currentNotification = null;
         this.eventListeners = {};
-        
-
+        this.stateManager = null;
+        this.isUpdatingFromState = false;
 
         // Bind methods
         this.handleNotificationKeydown = this.handleNotificationKeydown.bind(this);
@@ -22,6 +22,7 @@ class UIController {
         this.cacheElements();
         this.bindEvents();
         this.setupInitialState();
+        this.subscribeToStateManager();
         return this;
     }
 
@@ -38,7 +39,11 @@ class UIController {
             this.resizeHandler = null;
         }
         
-
+        // Remove state manager subscription
+        if (this.stateManager && this.stateSubscription) {
+            this.stateManager.unsubscribe(this.stateSubscription);
+            this.stateSubscription = null;
+        }
     }
 
     /**
@@ -354,21 +359,90 @@ class UIController {
      */
     setStateManager(stateManager) {
         this.stateManager = stateManager;
-        
-        // Subscribe to state changes
-        this.unsubscribeWater = stateManager.subscribe('water', (state) => {
-            this.updateCard('water', state);
-            this.updateButtons('water', state);
-            this.updateCountdown('water', state.timeRemaining || 0);
-        });
-        
-        this.unsubscribeStandup = stateManager.subscribe('standup', (state) => {
-            this.updateCard('standup', state);
-            this.updateButtons('standup', state);
-            this.updateCountdown('standup', state.timeRemaining || 0);
-        });
-        
         console.log('UIController connected to StateManager');
+    }
+
+    /**
+     * Subscribe to StateManager for real-time state synchronization
+     * @private
+     */
+    subscribeToStateManager() {
+        if (!this.stateManager) {
+            console.warn('StateManager not available for UIController subscription');
+            return;
+        }
+
+        this.stateSubscription = this.stateManager.subscribe((stateType, newState) => {
+            if (this.isUpdatingFromState) return;
+            
+            this.isUpdatingFromState = true;
+            
+            try {
+                switch (stateType) {
+                    case 'water':
+                        this.updateWaterUI(newState);
+                        break;
+                    case 'standup':
+                        this.updateStandupUI(newState);
+                        break;
+                    case 'app':
+                        this.updateAppUI(newState);
+                        break;
+                }
+            } catch (error) {
+                console.error('Error updating UI from state:', error);
+            } finally {
+                this.isUpdatingFromState = false;
+            }
+        });
+        
+        console.log('UIController subscribed to StateManager');
+    }
+
+    /**
+     * Update water reminder UI from state
+     * @private
+     */
+    updateWaterUI(state) {
+        if (!state) return;
+        
+        const { isActive, timeRemaining, nextReminderTime, settings } = state;
+        
+        this.updateCard('water', isActive);
+        this.updateCountdown('water', timeRemaining || 0);
+        
+        if (settings && settings.interval) {
+            this.elements.waterIntervalDisplay.value = settings.interval;
+        }
+    }
+
+    /**
+     * Update standup reminder UI from state
+     * @private
+     */
+    updateStandupUI(state) {
+        if (!state) return;
+        
+        const { isActive, timeRemaining, nextReminderTime, settings } = state;
+        
+        this.updateCard('standup', isActive);
+        this.updateCountdown('standup', timeRemaining || 0);
+        
+        if (settings && settings.interval) {
+            this.elements.standupIntervalDisplay.value = settings.interval;
+        }
+    }
+
+    /**
+     * Update app-level UI from state
+     * @private
+     */
+    updateAppUI(state) {
+        if (!state) return;
+        
+        if (state.isInitializing !== undefined) {
+            this.updateAppStatusSummary(!state.isInitializing);
+        }
     }
 
     /**

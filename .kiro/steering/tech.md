@@ -117,6 +117,10 @@ this.stateManager.updateState('water', { settings: newSettings });
 // Multiple components saving the same data
 this.storageManager.saveSettings('water', settings);
 this.stateManager.updateState('water', { settings: settings });
+
+// Direct state mutation without StateManager
+this.waterSettings = newSettings;
+this.saveToLocalStorage();
 ```
 
 #### ✅ ALWAYS DO THIS
@@ -127,10 +131,24 @@ stateManager.updateState('water', {
     isActive: true 
 });
 
-// Other components subscribe to changes
-stateManager.subscribe('water', (state) => {
-    this.updateUI(state);
+// Reminder classes subscribe to StateManager
+this.stateManager.subscribe('water', (state) => {
+    this.handleStateUpdate(state);
 });
+
+// UIController subscribes for real-time updates
+this.stateManager.subscribe('water', (state) => {
+    if (!this.isUpdatingFromState) {
+        this.updateWaterUI(state);
+    }
+});
+
+// Prevent circular updates
+updateWaterUI(state) {
+    this.isUpdatingFromState = true;
+    // Update UI elements
+    this.isUpdatingFromState = false;
+}
 ```
 
 ## Code Style Guidelines

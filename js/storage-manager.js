@@ -8,13 +8,13 @@ class StorageManager {
         this.STORAGE_VERSION = '1.0.0';
         this.storageKeys = {
             // Reserved keys for AppSettings (to avoid conflicts with StateManager)
-            appSettings: 'app-settings-v1',
-            appState: 'app-state-v1',
+            'app-settings': 'app-settings-v1',
+            'app-state': 'app-state-v1',
             // Keep these keys for backward compatibility
-            waterSettings: 'water-reminder-settings',
-            standupSettings: 'standup-reminder-settings',
-            waterState: 'water-reminder-state',
-            standupState: 'standup-reminder-state'
+            'water-settings': 'water-reminder-settings',
+            'standup-settings': 'standup-reminder-settings',
+            'water-state': 'water-reminder-state',
+            'standup-state': 'standup-reminder-state'
         };
         this.isStorageAvailable = this.checkStorageAvailability();
         this.memoryStorage = new Map(); // Backup memory storage
