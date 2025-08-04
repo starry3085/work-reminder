@@ -141,6 +141,8 @@ UI Updates ← UIController ← Subscribers ← StateManager
 - **Fixed state structure**: Unified naming conventions across all components
 - **Fixed callback system**: Simplified to StateManager subscriptions only
 - **Fixed state recovery**: Proper state restoration via StateManager
+- **Fixed beforeunload duplication**: Removed redundant save calls on page unload
+- **Fixed comments consistency**: Updated documentation to match implementation
 
 ## Systematic Bug Fixes Summary (MVP)
 
@@ -183,6 +185,16 @@ UI Updates ← UIController ← Subscribers ← StateManager
 **Problem**: Unsafe DOM element access.
 **Solution**: Added null checks and graceful degradation.
 **File**: `js/ui-controller.js`
+
+#### 9. Page Unload Redundancy ✅
+**Problem**: beforeunload event had redundant save calls to non-existent methods.
+**Solution**: Removed beforeunload handler - StateManager handles persistence automatically.
+**File**: `js/app.js`
+
+#### 10. Documentation Consistency ✅
+**Problem**: Comments mentioned manual saves while StateManager handles automatically.
+**Solution**: Updated comments and documentation to reflect automatic state management.
+**Files**: `js/app.js`, `js/app-settings.js`, `js/state-manager.js`
 
 ### Testing Checklist
 - Settings persistence across page refresh
