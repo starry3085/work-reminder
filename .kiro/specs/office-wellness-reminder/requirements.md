@@ -16,7 +16,7 @@ The Office Wellness Reminder System is a pure frontend web application designed 
 2. When the user sets water reminder interval time, the system should save this setting to local storage
 3. When the set reminder time is reached, the system should display a water reminder notification
 4. When the reminder time is reached, the system should display a notification that automatically disappears after 5 seconds and then reset the timer
-5. When the user pauses the water reminder, the system should stop timing and save the state
+5. ~~When the user pauses the water reminder, the system should stop timing and save the state~~ (REMOVED FOR MVP - using continuous reminders)
 6. If the user closes the browser tab, the system should restore the reminder state when reopened
 
 ### Requirement 2 - Anti-Sedentary Reminder Functionality
@@ -28,7 +28,7 @@ The Office Wellness Reminder System is a pure frontend web application designed 
 1. When the user sets sedentary reminder interval time, the system should save this setting to local storage
 2. When the set sedentary reminder time is reached, the system should display a stand-up activity reminder notification
 3. When the sedentary reminder time is reached, the system should display a notification that automatically disappears after 5 seconds and then reset the timer
-4. When the user pauses the sedentary reminder, the system should stop timing and save the state
+4. ~~When the user pauses the sedentary reminder, the system should stop timing and save the state~~ (REMOVED FOR MVP - using continuous reminders)
 5. ~~When the user has mouse or keyboard activity within the set time, the system should automatically extend the sedentary timing~~ (REMOVED FOR MVP - using simple time-based reminders)
 6. ~~If the user leaves the computer for more than 5 minutes, the system should pause the sedentary timing~~ (REMOVED FOR MVP - using simple time-based reminders)
 
