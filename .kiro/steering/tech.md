@@ -67,28 +67,24 @@ The application follows a modular class-based architecture with clear separation
 ### Single Source of Truth Principle
 **StateManager is the ONLY component that manages application state.**
 
-### Unified State Structure (Post-Fixes)
+### Unified State Structure (MVP)
 ```javascript
-// Unified state structure after architectural fixes
+// Clean state structure following MVP principles
 {
   water: {
     isActive: boolean,
     interval: number, // minutes
     timeRemaining: number, // milliseconds
     nextReminderAt: number, // timestamp
-    settings: {
-      enabled: boolean,
-      interval: number,
-      sound: boolean,
-      lastReminderAt: number
-    }
+    enabled: boolean,
+    sound: boolean,
+    lastReminderAt: number
   },
   standup: {
     // Same structure as water
   },
   app: {
     isFirstUse: boolean,
-    isInitializing: boolean,
     notificationSettings: {
       browserNotifications: boolean,
       soundEnabled: boolean,
@@ -98,14 +94,12 @@ The application follows a modular class-based architecture with clear separation
 }
 ```
 
-### Component Responsibilities (FINAL)
+### Component Responsibilities (MVP)
 
 #### StateManager (Single Source of Truth)
-- **ONLY** component that reads/writes application state
-- **ONLY** component that calls StorageManager for persistence
-- Manages state cache and subscriptions
-- Notifies subscribers of state changes
-- Handles state validation and merging
+- **ONLY** component that manages application state
+- **ONLY** component that persists data
+- Provides simple subscription mechanism
 - **Methods**:
   - `updateState(type, updates)`: Update specific state slice
   - `getState(type)`: Retrieve current state
@@ -113,36 +107,32 @@ The application follows a modular class-based architecture with clear separation
   - `loadAllStates()`: Load persisted state from storage
 
 #### AppSettings (Validation Only)
-- **ONLY** provides default settings structure
-- **ONLY** validates settings format
-- **NEVER** saves or manages state directly
-- **NEVER** calls StorageManager directly
+- Provides default settings structure
+- Validates settings format
+- No state management responsibilities
 
 #### StorageManager (Persistence Only)
-- **ONLY** handles localStorage operations
-- **ONLY** called by StateManager
-- **NEVER** called directly by other components
+- Handles localStorage operations
+- Called exclusively by StateManager
 
-#### Other Components (Business Logic)
-- **ONLY** subscribe to StateManager for state updates
-- **ONLY** request state changes through StateManager
-- **NEVER** access localStorage directly
-- **NEVER** manage state independently
+#### Other Components
+- Subscribe to StateManager for updates
+- Request changes through StateManager
+- Never access localStorage directly
 
-### Data Flow (ENFORCED)
+### Data Flow (MVP)
 ```
 User Action → UIController → App → StateManager → StorageManager
                                       ↓
 UI Updates ← UIController ← Subscribers ← StateManager
 ```
 
-### Critical Rules (NO EXCEPTIONS)
+### MVP Principles (Applied)
 1. **Only StateManager writes to localStorage**
-2. **Only StateManager manages application state**
-3. **All state changes go through StateManager.updateState()**
-4. **All state access goes through StateManager.getState()**
-5. **Components subscribe to StateManager for updates**
-6. **No direct state mutation outside StateManager**
+2. **Only StateManager manages state**
+3. **All state changes through StateManager**
+4. **No complex state management features**
+5. **Simple reset via settings panel only**
 
 ### Key Fixes Implemented
 - **Fixed method call errors**: Removed calls to non-existent `updateSettings()` method
@@ -151,6 +141,54 @@ UI Updates ← UIController ← Subscribers ← StateManager
 - **Fixed state structure**: Unified naming conventions across all components
 - **Fixed callback system**: Simplified to StateManager subscriptions only
 - **Fixed state recovery**: Proper state restoration via StateManager
+
+## Systematic Bug Fixes Summary (MVP)
+
+#### 1. StateManager Missing Methods ✅
+**Problem**: Missing essential state management methods.
+**Solution**: Added core StateManager functionality for MVP.
+**File**: `js/state-manager.js`
+
+#### 2. Orphan Method Calls ✅
+**Problem**: Non-existent method calls causing runtime errors.
+**Solution**: Removed orphaned calls and simplified error handling.
+**File**: `js/reminder-manager.js`
+
+#### 3. Settings Structure ✅
+**Problem**: Inconsistent settings structure across components.
+**Solution**: Unified to simple flat structure for MVP.
+**File**: `js/app-settings.js`
+
+#### 4. State Restoration ✅
+**Problem**: Manual state restoration bypassing StateManager.
+**Solution**: State restoration handled by StateManager subscriptions.
+**File**: `js/app.js`
+
+#### 5. State Management ✅
+**Problem**: Multiple components managing state independently.
+**Solution**: Centralized all state management in StateManager.
+**File**: `js/app.js`
+
+#### 6. Resource Cleanup ✅
+**Problem**: No proper cleanup mechanism.
+**Solution**: Added simple `destroy()` method for resource disposal.
+**File**: `js/app.js`
+
+#### 7. Time Units ✅
+**Problem**: Mixed time units causing calculation errors.
+**Solution**: Standardized: internal=milliseconds, UI=minutes.
+**Files**: All components
+
+#### 8. UI Safety ✅
+**Problem**: Unsafe DOM element access.
+**Solution**: Added null checks and graceful degradation.
+**File**: `js/ui-controller.js`
+
+### Testing Checklist
+- Settings persistence across page refresh
+- Proper component cleanup
+- State synchronization between components
+- Accurate time calculations
 
 ### Code Examples
 
@@ -225,21 +263,7 @@ updateWaterUI(state) {
 - Accessibility attributes (ARIA, alt text)
 - Progressive enhancement approach
 
-## ActivityDetector Status (FINAL)
 
-**ActivityDetector has been REMOVED from MVP.**
-
-### Rationale
-- Simplifies architecture for MVP release
-- Reduces complexity and potential bugs
-- Focuses on core reminder functionality
-- Can be added in future releases
-
-### Current Implementation
-- Simple time-based reminders only
-- No user activity detection
-- No intelligent pause/resume
-- Fixed interval reminders
 
 ## Best Practices Applied
 

@@ -418,11 +418,8 @@ class ReminderManager {
             this.startTimer();
             this.startUpdateTimer();
             
-            this.triggerStatusChange({
-                status: 'synced',
-                isActive: true,
-                timeRemaining: this.timeRemaining
-            });
+            // State changes are handled by StateManager subscription
+            console.log(`${this.type} reminder timers synced with StateManager`);
         }
     }
 

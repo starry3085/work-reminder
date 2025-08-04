@@ -634,25 +634,10 @@ class OfficeWellnessApp {
             // Ensure StateManager is fully initialized
             await this.stateManager.initialize();
             
-            // Restore water reminder state via StateManager
-            if (this.waterReminder) {
-                const waterState = this.stateManager.getState('water');
-                if (waterState?.isActive) {
-                    console.log('Restoring water reminder via StateManager');
-                    this.waterReminder.start();
-                }
-            }
+            // State restoration is now handled automatically by StateManager subscriptions
+            // ReminderManager instances will sync their state via subscribeToStateManager()
             
-            // Restore standup reminder state via StateManager
-            if (this.standupReminder) {
-                const standupState = this.stateManager.getState('standup');
-                if (standupState?.isActive) {
-                    console.log('Restoring standup reminder via StateManager');
-                    this.standupReminder.start();
-                }
-            }
-            
-            console.log('Session state restoration complete via StateManager');
+            console.log('Session state restoration handled by StateManager subscriptions');
             return true;
         } catch (error) {
             console.error('Session state restoration failed:', error);
@@ -735,6 +720,63 @@ class OfficeWellnessApp {
     }
     
 
+
+    /**
+     * Destroy application and clean up all resources
+     */
+    destroy() {
+        try {
+            console.log('Destroying application...');
+            
+            // Stop all reminders first
+            if (this.waterReminder) {
+                this.waterReminder.destroy();
+                this.waterReminder = null;
+            }
+            
+            if (this.standupReminder) {
+                this.standupReminder.destroy();
+                this.standupReminder = null;
+            }
+            
+            // Clean up UI controller
+            if (this.uiController) {
+                this.uiController.cleanup();
+                this.uiController = null;
+            }
+            
+            // Clean up notification service
+            if (this.notificationService && typeof this.notificationService.destroy === 'function') {
+                this.notificationService.destroy();
+            }
+            
+            // Clean up mobile adapter
+            if (this.mobileAdapter && typeof this.mobileAdapter.destroy === 'function') {
+                this.mobileAdapter.destroy();
+            }
+            
+            // Clean up state manager last (saves final state)
+            if (this.stateManager) {
+                this.stateManager.destroy();
+                this.stateManager = null;
+            }
+            
+            // Clean up storage manager
+            if (this.storageManager && typeof this.storageManager.destroy === 'function') {
+                this.storageManager.destroy();
+            }
+            
+            // Clean up error handler
+            if (this.errorHandler && typeof this.errorHandler.destroy === 'function') {
+                this.errorHandler.destroy();
+            }
+            
+            console.log('Application destroyed successfully');
+            
+        } catch (error) {
+            console.error('Failed to destroy application:', error);
+        }
+    }
 
     /**
      * Get error message
@@ -1119,18 +1161,8 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-// Save state on page visibility change
-document.addEventListener('visibilitychange', () => {
-    if (app && app.isInitialized) {
-        if (document.visibilityState === 'hidden') {
-            // Save state when page hidden
-            app.saveAppState();
-        } else if (document.visibilityState === 'visible') {
-            // Check state when page visible
-            // Additional recovery logic can be added here if needed
-        }
-    }
-});
+// State changes are automatically handled by StateManager
+// No need for manual save on visibility change
 
 // Export for other scripts to use
 window.OfficeWellnessApp = OfficeWellnessApp;

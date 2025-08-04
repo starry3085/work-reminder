@@ -7,24 +7,16 @@ class AppSettings {
         // Default settings structure - read-only reference, aligned with StateManager
         this.defaultSettings = {
             water: {
-                isActive: false,
+                enabled: true,
                 interval: 30, // minutes
-                settings: {
-                    enabled: true,
-                    interval: 30,
-                    sound: true,
-                    lastReminderAt: null
-                }
+                sound: true,
+                lastReminderAt: null
             },
             standup: {
-                isActive: false,
+                enabled: true,
                 interval: 30, // minutes
-                settings: {
-                    enabled: true,
-                    interval: 30,
-                    sound: true,
-                    lastReminderAt: null
-                }
+                sound: true,
+                lastReminderAt: null
             },
             notifications: {
                 browserNotifications: true,
@@ -65,10 +57,10 @@ class AppSettings {
         const appState = this.stateManager.getState('app');
         
         return {
-            water: waterState && waterState.settings ? waterState.settings : this.defaultSettings.water.settings,
-            standup: standupState && standupState.settings ? standupState.settings : this.defaultSettings.standup.settings,
-            notifications: this.defaultSettings.notifications,
-            appearance: this.defaultSettings.appearance,
+            water: waterState && waterState.settings ? waterState.settings : this.defaultSettings.water,
+            standup: standupState && standupState.settings ? standupState.settings : this.defaultSettings.standup,
+            notifications: appState && appState.notifications ? appState.notifications : this.defaultSettings.notifications,
+            appearance: appState && appState.appearance ? appState.appearance : this.defaultSettings.appearance,
             firstUse: appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.isFirstUse
         };
     }

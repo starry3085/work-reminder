@@ -207,9 +207,30 @@ class StateManager {
     }
 
     /**
+     * Save all states to storage
+     * @returns {boolean} Success status
+     */
+    saveState() {
+        try {
+            // Save all cached states
+            this.stateCache.forEach((state, type) => {
+                this.storage.setItem(type, state);
+            });
+            console.log('All states saved via StateManager');
+            return true;
+        } catch (error) {
+            console.error('Failed to save states:', error);
+            return false;
+        }
+    }
+
+    /**
      * Clean up resources
      */
     destroy() {
+        // Save final state before cleanup
+        this.saveState();
+        
         // Clear cache
         this.stateCache.clear();
         this.subscribers.clear();
