@@ -199,7 +199,8 @@ class OfficeWellnessApp {
             try {
                 if (typeof WaterReminder !== 'undefined') {
                     this.waterReminder = new WaterReminder(
-                        this.appSettings.getSettings().water, 
+                        'water',
+                        this.appSettings.getSettings().water || {}, 
                         this.notificationService,
                         this.stateManager
                     );
@@ -216,7 +217,8 @@ class OfficeWellnessApp {
             try {
                 if (typeof StandupReminder !== 'undefined') {
                     this.standupReminder = new StandupReminder(
-                        this.appSettings.getSettings().standup, 
+                        'standup',
+                        this.appSettings.getSettings().standup || {}, 
                         this.notificationService,
                         this.stateManager
                     );

@@ -71,6 +71,9 @@ This project follows strict MVP (Minimum Viable Product) principles:
 - StateManager is the single source of truth for all application state
 - AppSettings only provides validation and default values (no state management)
 - StorageManager only handles localStorage operations (called by StateManager only)
+- Reminder classes integrate with StateManager for unified state synchronization
+- UIController subscribes to StateManager for real-time UI updates
+- Anti-circulation mechanisms prevent duplicate state updates
 
 **MVP Simplifications**:
 - ActivityDetector removed - using simple time-based reminders instead
