@@ -1152,17 +1152,9 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// Save state before page unload
-window.addEventListener('beforeunload', () => {
-    if (app && app.isInitialized) {
-        // Save settings and application state
-        app.saveSettings();
-        app.saveAppState();
-    }
-});
-
 // State changes are automatically handled by StateManager
-// No need for manual save on visibility change
+// No need for manual save on page unload - StateManager handles persistence automatically
+// Remove beforeunload handler to prevent duplicate saves and errors
 
 // Export for other scripts to use
 window.OfficeWellnessApp = OfficeWellnessApp;
