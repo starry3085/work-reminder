@@ -63,7 +63,7 @@ class UIController {
             waterTime: document.getElementById('water-time'),
             waterIntervalDisplay: document.getElementById('water-interval-display'),
             waterToggle: document.getElementById('water-toggle'),
-            waterReset: document.getElementById('water-reset'),
+
             waterStats: document.getElementById('water-stats'),
             waterCountdown: document.getElementById('water-countdown'),
             // Standup reminder related
@@ -72,7 +72,7 @@ class UIController {
             standupTime: document.getElementById('standup-time'),
             standupIntervalDisplay: document.getElementById('standup-interval-display'),
             standupToggle: document.getElementById('standup-toggle'),
-            standupReset: document.getElementById('standup-reset'),
+
             standupStats: document.getElementById('standup-stats'),
             standupCountdown: document.getElementById('standup-countdown'),
 
@@ -137,9 +137,7 @@ class UIController {
             this.triggerEvent('waterToggle');
         });
 
-        this.addEventHandler('waterReset', 'click', () => {
-            this.triggerEvent('waterReset');
-        });
+
 
 
 
@@ -147,9 +145,7 @@ class UIController {
             this.triggerEvent('standupToggle');
         });
 
-        this.addEventHandler('standupReset', 'click', () => {
-            this.triggerEvent('standupReset');
-        });
+
 
 
 
@@ -405,12 +401,9 @@ class UIController {
         card.classList.toggle('active', status.isActive);
 
         // Update status badge
-        if (status.isActive && !status.isPaused) {
+        if (status.isActive) {
             statusBadge.textContent = 'Active';
             statusBadge.className = 'status-badge active';
-        } else if (status.isActive && status.isPaused) {
-            statusBadge.textContent = 'Paused';
-            statusBadge.className = 'status-badge paused';
         } else {
             statusBadge.textContent = 'Inactive';
             statusBadge.className = 'status-badge inactive';
@@ -423,27 +416,22 @@ class UIController {
      */
     updateButtons(type, status) {
         const toggleButton = this.elements[`${type}Toggle`];
-        const resetButton = this.elements[`${type}Reset`];
         const actionButton = this.elements[`${type === 'water' ? 'waterDrink' : 'standupActivity'}`];
 
         if (!toggleButton) return;
 
         // Update toggle button
-        if (status.isActive && !status.isPaused) {
-            toggleButton.textContent = 'Pause';
+        if (status.isActive) {
+            toggleButton.textContent = 'Stop';
             toggleButton.className = 'btn-secondary';
-        } else if (status.isActive && status.isPaused) {
-            toggleButton.textContent = 'Resume';
-            toggleButton.className = 'btn-primary';
         } else {
             toggleButton.textContent = 'Start';
             toggleButton.className = 'btn-primary';
         }
 
-        // Show/hide secondary buttons
-        const showSecondary = status.isActive;
-        if (resetButton) resetButton.style.display = showSecondary ? 'inline-block' : 'none';
-        if (actionButton) actionButton.style.display = showSecondary ? 'inline-block' : 'none';
+        // Show/hide action button
+        const showAction = status.isActive;
+        if (actionButton) actionButton.style.display = showAction ? 'inline-block' : 'none';
     }
 
     /**

@@ -50,12 +50,10 @@ The Office Wellness Reminder System is a pure frontend Single Page Application (
 class ReminderManager {
   constructor(type, settings) // type: 'water' | 'posture'
   start()                     // Start reminder
-  pause()                     // Pause reminder
-  reset()                     // Reset timer
+  stop()                      // Stop reminder
   updateSettings(settings)    // Update settings
   getCurrentStatus()          // Get current status
 }
-```
 
 **Responsibilities:**
 - Manage timers for water and sedentary reminders
@@ -64,8 +62,8 @@ class ReminderManager {
 
 #### 2. ActivityDetector (Removed for MVP)
 - **Status**: Removed for MVP - using simple time-based reminders instead
-- **Original Purpose**: Monitor user activity status to intelligently pause/resume reminders
-- **Rationale**: Simplified to focus on core functionality for MVP release - using fixed interval reminders
+- **Original Purpose**: Monitor user activity status to intelligently manage reminders
+- **Rationale**: Simplified to focus on core functionality for MVP release - using fixed interval reminders with start/stop controls
 
 #### 3. NotificationService (Notification Service)
 ```javascript

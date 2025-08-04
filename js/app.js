@@ -422,17 +422,13 @@ class OfficeWellnessApp {
             this.toggleReminder('water');
         });
 
-        this.uiController.on('waterReset', () => {
-            this.resetReminder('water');
-        });
+
 
         this.uiController.on('standupToggle', () => {
             this.toggleReminder('standup');
         });
 
-        this.uiController.on('standupReset', () => {
-            this.resetReminder('standup');
-        });
+
 
         // Interval change event
         this.uiController.on('waterIntervalChanged', (data) => {
@@ -495,7 +491,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Toggle reminder state - simplified logic
+     * Toggle reminder state - simplified logic (start/stop only)
      * @param {string} type - reminder type ('water' | 'standup')
      */
     toggleReminder(type) {
@@ -506,10 +502,8 @@ class OfficeWellnessApp {
         
         if (!status.isActive) {
             this.startReminder(type);
-        } else if (status.isPaused) {
-            this.resumeReminder(type);
         } else {
-            this.pauseReminder(type);
+            this.stopReminder(type);
         }
     }
 
@@ -1076,107 +1070,9 @@ class OfficeWellnessApp {
         }
     }
 
-    /**
-     * Pause reminder
-     * @param {string} type - 'water' | 'standup'
-     */
-    pauseReminder(type) {
-        try {
-            console.log(`GitHub Pages Debug - pauseReminder called for ${type}`);
-            if (type === 'water' && this.waterReminder) {
-                console.log('Pausing water reminder...');
-                console.log('Water reminder status before pause:', this.waterReminder.getCurrentStatus());
-                this.waterReminder.pause();
-                console.log('Water reminder status after pause:', this.waterReminder.getCurrentStatus());
-                
-                // Save application state
-                this.saveAppState();
-                console.log('Water reminder paused successfully');
-                
-            } else if (type === 'standup' && this.standupReminder) {
-                console.log('GitHub Pages Debug - Pausing standup reminder...');
-                console.log('Standup reminder status before pause:', this.standupReminder.getCurrentStatus());
-                this.standupReminder.pause();
-                console.log('Standup reminder status after pause:', this.standupReminder.getCurrentStatus());
-                
-                // Save application state
-                this.saveAppState();
-                console.log('GitHub Pages Debug - Standup reminder paused successfully');
-            } else {
-                console.warn(`Cannot pause ${type} reminder: reminder not initialized`);
-                console.warn(`GitHub Pages Debug - Reminder availability: water=${!!this.waterReminder}, standup=${!!this.standupReminder}`);
-            }
-        } catch (error) {
-            console.error(`Failed to pause ${type} reminder:`, error);
-        }
-    }
 
-    /**
-     * Resume reminder
-     * @param {string} type - 'water' | 'standup'
-     */
-    resumeReminder(type) {
-        try {
-            console.log(`GitHub Pages Debug - resumeReminder called for ${type}`);
-            if (type === 'water' && this.waterReminder) {
-                console.log('Resuming water reminder...');
-                this.waterReminder.resume();
-                
-                // Save application state
-                this.saveAppState();
-                console.log('Water reminder resumed successfully');
-                
-            } else if (type === 'standup' && this.standupReminder) {
-                console.log('GitHub Pages Debug - Resuming standup reminder...');
-                this.standupReminder.resume();
-                
-                // Save application state
-                this.saveAppState();
-                console.log('GitHub Pages Debug - Standup reminder resumed successfully');
-            } else {
-                console.warn(`Cannot resume ${type} reminder: reminder not initialized`);
-                console.warn(`GitHub Pages Debug - Reminder availability: water=${!!this.waterReminder}, standup=${!!this.standupReminder}`);
-            }
-        } catch (error) {
-            console.error(`Failed to resume ${type} reminder:`, error);
-        }
-    }
 
-    /**
-     * Reset reminder
-     * @param {string} type - 'water' | 'standup'
-     */
-    resetReminder(type) {
-        if (type === 'water' && this.waterReminder) {
-            console.log('Resetting water reminder...');
-            this.waterReminder.reset();
-            
-            // Save application state
-            this.saveAppState();
-            console.log('Water reminder reset successfully');
-            
-            // Manually trigger state update to ensure UI synchronization
-            if (this.uiController) {
-                const status = this.waterReminder.getCurrentStatus();
-                console.log('Manual status update for water:', status);
-                this.uiController.updateReminderStatus('water', status);
-            }
-        } else if (type === 'standup' && this.standupReminder) {
-            console.log('Resetting standup reminder...');
-            this.standupReminder.reset();
-            
-            // Save application state
-            this.saveAppState();
-            console.log('Standup reminder reset successfully');
-            
-            // Manually trigger state update to ensure UI synchronization
-            if (this.uiController) {
-                const status = this.standupReminder.getCurrentStatus();
-                console.log('Manual status update for standup:', status);
-                this.uiController.updateReminderStatus('standup', status);
-            }
-        }
-    }
+
 
     /**
      * Update settings
@@ -1365,7 +1261,7 @@ function setupFallbackButtons() {
             const isStart = waterToggle.textContent.trim() === 'Start';
             
             if (isStart) {
-                waterToggle.textContent = 'Pause';
+                waterToggle.textContent = 'Stop';
                 waterToggle.className = 'btn-secondary';
                 waterActive = true;
                 showSimpleNotification('💧 Water reminder started!');
@@ -1373,7 +1269,7 @@ function setupFallbackButtons() {
                 waterToggle.textContent = 'Start';
                 waterToggle.className = 'btn-primary';
                 waterActive = false;
-                showSimpleNotification('💧 Water reminder paused!');
+                showSimpleNotification('💧 Water reminder stopped!');
             }
             
             updateAppStatus();
@@ -1389,16 +1285,16 @@ function setupFallbackButtons() {
             const isStart = standupToggle.textContent.trim() === 'Start';
             
             // Try to call main app methods
-            if (window.app && window.app.startReminder && window.app.pauseReminder) {
+            if (window.app && window.app.startReminder && window.app.stopReminder) {
                 if (isStart) {
                     window.app.startReminder('standup');
                 } else {
-                    window.app.pauseReminder('standup');
+                    window.app.stopReminder('standup');
                 }
             } else {
                 // Fallback logic: manually update UI
                 if (isStart) {
-                    standupToggle.textContent = 'Pause';
+                    standupToggle.textContent = 'Stop';
                     standupToggle.className = 'btn-secondary';
                     standupActive = true;
                     // Update status label
@@ -1420,7 +1316,7 @@ function setupFallbackButtons() {
                         statusBadge.classList.remove('active');
                         statusBadge.classList.add('inactive');
                     }
-                    showSimpleNotification('🧘 Standup reminder paused!');
+                    showSimpleNotification('🧘 Standup reminder stopped!');
                 }
                 
                 updateAppStatus();

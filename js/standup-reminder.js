@@ -36,7 +36,6 @@ class StandupReminder extends ReminderManager {
         this.triggerStatusChange({
             status: 'triggered',
             isActive: true,
-            isPaused: false,
             timeRemaining: 0
         });
         

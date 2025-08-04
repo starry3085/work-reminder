@@ -16,10 +16,8 @@ class ReminderManager {
         
         // State management
         this.isActive = false;
-        this.isPaused = false;
         this.timer = null;
         this.startTime = null;
-        this.pauseTime = null;
         this.nextReminderTime = null;
         this.timeRemaining = 0;
         
@@ -47,7 +45,6 @@ class ReminderManager {
         }
         
         this.isActive = true;
-        this.isPaused = false;
         this.startTime = Date.now();
         
         // Use precise millisecond calculation
@@ -64,7 +61,6 @@ class ReminderManager {
         // Update state uniformly through StateManager
         const updates = {
             isActive: true,
-            isPaused: false,
             timeRemaining: this.timeRemaining,
             nextReminderAt: this.nextReminderTime
         };
@@ -74,7 +70,6 @@ class ReminderManager {
         this.triggerStatusChange({
             status: 'started',
             isActive: true,
-            isPaused: false,
             timeRemaining: this.timeRemaining
         });
         
@@ -91,7 +86,6 @@ class ReminderManager {
         }
         
         this.isActive = false;
-        this.isPaused = false;
         
         // Clear timers
         this.clearTimer();
@@ -103,7 +97,6 @@ class ReminderManager {
         // Update state uniformly through StateManager
         const updates = {
             isActive: false,
-            isPaused: false,
             timeRemaining: 0,
             nextReminderAt: 0
         };
@@ -113,126 +106,15 @@ class ReminderManager {
         this.triggerStatusChange({
             status: 'stopped',
             isActive: false,
-            isPaused: false,
             timeRemaining: 0
         });
         
         console.log(`${this.type} reminder stopped`);
     }
 
-    /**
-     * Pause reminder - simplified
-     * @param {boolean} isAuto - Whether it's auto-pause (triggered by activity detection)
-     */
-    pause(isAuto = false) {
-        if (!this.isActive || this.isPaused) {
-            return;
-        }
-        
-        this.isPaused = true;
-        this.pauseTime = Date.now();
-        
-        // Calculate remaining time
-        this.timeRemaining = Math.max(0, this.nextReminderTime - this.pauseTime);
-        
-        // Clear timer
-        this.clearTimer();
-        
-        // Update state uniformly through StateManager
-        const updates = {
-            isActive: true,
-            isPaused: true,
-            timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime
-        };
-        this.updateState(updates);
-        
-        // Trigger status change callback
-        this.triggerStatusChange({
-            status: isAuto ? 'auto-paused' : 'paused',
-            isActive: true,
-            isPaused: true,
-            timeRemaining: this.timeRemaining
-        });
-        
-        console.log(`${this.type} reminder ${isAuto ? 'auto' : 'manually'} paused`);
-    }
 
-    /**
-     * Resume reminder - simplified
-     * @param {boolean} isAuto - Whether it's auto-resume (triggered by activity detection)
-     */
-    resume(isAuto = false) {
-        if (!this.isActive || !this.isPaused) {
-            return;
-        }
-        
-        this.isPaused = false;
-        this.startTime = Date.now();
-        this.nextReminderTime = this.startTime + this.timeRemaining;
-        
-        // Restart timer
-        this.startTimer();
-        
-        // Update state uniformly through StateManager
-        const updates = {
-            isActive: true,
-            isPaused: false,
-            timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime
-        };
-        this.updateState(updates);
-        
-        // Trigger status change callback
-        this.triggerStatusChange({
-            status: isAuto ? 'auto-resumed' : 'resumed',
-            isActive: true,
-            isPaused: false,
-            timeRemaining: this.timeRemaining
-        });
-        
-        console.log(`${this.type} reminder ${isAuto ? 'auto' : 'manually'} resumed`);
-    }
 
-    /**
-     * Reset reminder timer
-     */
-    reset() {
-        const wasActive = this.isActive;
-        
-        // Ensure clean state before restart
-        this.isActive = false;
-        this.isPaused = false;
-        
-        // Clear all timers and state
-        this.clearTimer();
-        this.clearUpdateTimer();
-        this.resetState();
-        
-        // Update state uniformly through StateManager
-        const updates = {
-            isActive: false,
-            isPaused: false,
-            timeRemaining: 0,
-            nextReminderAt: 0
-        };
-        this.updateState(updates);
-        
-        if (wasActive) {
-            // Restart with fresh interval
-            this.start();
-        } else {
-            // Update UI via state change
-            this.triggerStatusChange({
-                status: 'reset',
-                isActive: false,
-                isPaused: false,
-                timeRemaining: 0
-            });
-        }
-        
-        console.log(`${this.type} reminder reset`);
-    }
+
 
     /**
      * Acknowledge reminder (user has performed the corresponding action)
@@ -279,7 +161,6 @@ class ReminderManager {
         // Update state uniformly through StateManager
         const updates = {
             isActive: true,
-            isPaused: false,
             timeRemaining: this.timeRemaining,
             nextReminderAt: this.nextReminderTime
         };
@@ -289,7 +170,6 @@ class ReminderManager {
         this.triggerStatusChange({
             status: 'restarted',
             isActive: true,
-            isPaused: false,
             timeRemaining: this.timeRemaining
         });
         
@@ -350,7 +230,6 @@ class ReminderManager {
         return {
             type: this.type,
             isActive: this.isActive,
-            isPaused: this.isPaused,
             timeRemaining: this.timeRemaining,
             nextReminderTime: this.nextReminderTime,
             lastAcknowledged: this.settings.lastReminder,
@@ -427,7 +306,7 @@ class ReminderManager {
      * @private
      */
     updateTimeRemaining() {
-        if (!this.isActive || this.isPaused) {
+        if (!this.isActive) {
             return;
         }
         
@@ -477,7 +356,6 @@ class ReminderManager {
         this.triggerStatusChange({
             status: 'triggered',
             isActive: true,
-            isPaused: false,
             timeRemaining: 0
         });
         
@@ -509,7 +387,6 @@ class ReminderManager {
         // Update state uniformly through StateManager
         const updates = {
             isActive: true,
-            isPaused: false,
             timeRemaining: this.timeRemaining,
             nextReminderAt: this.nextReminderTime
         };
@@ -519,7 +396,6 @@ class ReminderManager {
         this.triggerStatusChange({
             status: 'snoozed',
             isActive: true,
-            isPaused: false,
             timeRemaining: this.timeRemaining
         });
         
@@ -532,7 +408,6 @@ class ReminderManager {
      */
     resetState() {
         this.startTime = null;
-        this.pauseTime = null;
         this.nextReminderTime = null;
         this.timeRemaining = 0;
     }
@@ -575,10 +450,9 @@ class ReminderManager {
         
         try {
             // Update internal state from single source
-            this.isActive = Boolean(state.isActive);
-            this.isPaused = Boolean(state.isPaused);
-            this.timeRemaining = Math.max(0, state.timeRemaining || 0);
-            this.nextReminderTime = state.nextReminderAt || 0;
+        this.isActive = Boolean(state.isActive);
+        this.timeRemaining = Math.max(0, state.timeRemaining || 0);
+        this.nextReminderTime = state.nextReminderAt || 0;
             
             // Update settings from state
             this.settings = { ...this.settings, ...state.settings };
@@ -588,7 +462,6 @@ class ReminderManager {
             
             console.log(`${this.type} reminder synced with StateManager state:`, {
                 isActive: this.isActive,
-                isPaused: this.isPaused,
                 timeRemaining: this.timeRemaining
             });
         } catch (error) {
@@ -604,7 +477,7 @@ class ReminderManager {
         this.clearTimer();
         this.clearUpdateTimer();
         
-        if (this.isActive && !this.isPaused) {
+        if (this.isActive) {
             this.startTime = Date.now();
             this.startTimer();
             this.startUpdateTimer();
@@ -612,16 +485,6 @@ class ReminderManager {
             this.triggerStatusChange({
                 status: 'synced',
                 isActive: true,
-                isPaused: false,
-                timeRemaining: this.timeRemaining
-            });
-        } else if (this.isActive && this.isPaused) {
-            this.pauseTime = Date.now();
-            
-            this.triggerStatusChange({
-                status: 'synced',
-                isActive: true,
-                isPaused: true,
                 timeRemaining: this.timeRemaining
             });
         }

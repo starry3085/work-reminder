@@ -48,7 +48,7 @@
 - [x] 5. Develop reminder management core functionality
 - [x] 5.1 Implement ReminderManager base class
   - Create timer management and status tracking functionality
-  - Implement reminder start, pause, reset methods
+  - Implement reminder start and stop methods
   - Add reminder status persistent saving
   - _Requirements: 1.2, 1.4, 1.5, 2.2, 2.4_
 

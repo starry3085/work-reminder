@@ -24,7 +24,6 @@ class StateManager {
             },
             water: {
                 isActive: false,
-                isPaused: false,
                 timeRemaining: 0,
                 nextReminderAt: 0,
                 settings: {
@@ -36,7 +35,6 @@ class StateManager {
             },
             standup: {
                 isActive: false,
-                isPaused: false,
                 timeRemaining: 0,
                 nextReminderAt: 0,
                 settings: {
