@@ -11,6 +11,21 @@ A simple, privacy-first web application that helps office workers maintain healt
 - **Mobile Responsive**: Works seamlessly on desktop and mobile devices
 - **Offline Ready**: Functions without internet connection after initial load
 
+## Recent Fixes & Improvements
+
+### 🐛 Bug Fixes
+- **Fixed START button responsiveness**: Enhanced event binding and initialization order
+- **Fixed time display inconsistency**: Stand-up reminder now correctly displays 30 minutes instead of 45
+- **Improved initialization reliability**: Added comprehensive error handling and validation
+- **Enhanced DOM readiness**: Ensures all elements are properly loaded before event binding
+
+### ✨ Improvements
+- **Better error handling**: Added user-friendly error messages and recovery mechanisms
+- **Component validation**: Validates all critical components during initialization
+- **Real-time synchronization**: UI now accurately reflects actual reminder settings
+- **Retry mechanisms**: Automatic retry for failed UI updates
+- **Enhanced logging**: Detailed console logging for debugging and monitoring
+
 ## Quick Start
 
 1. Open the application in your web browser
