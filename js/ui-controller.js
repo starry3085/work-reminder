@@ -91,8 +91,15 @@ class UIController {
      * @param {StandupReminder} standupReminder - Standup reminder instance
      */
     setReminders(waterReminder, standupReminder) {
+        if (!waterReminder || !standupReminder) {
+            console.error('Invalid reminder instances provided');
+            return;
+        }
+        
         this.waterReminder = waterReminder;
         this.standupReminder = standupReminder;
+        
+        console.log('✅ Reminders successfully linked to UI controller');
         
         // Force immediate UI update
         setTimeout(() => {
@@ -221,9 +228,16 @@ class UIController {
             }
 
             if (!reminder) {
-                this.setReminderInactive(type);
+                // Show initializing state
+                countdownElement.textContent = '...';
+                btnElement.textContent = 'Loading...';
+                btnElement.className = 'btn-secondary';
+                btnElement.disabled = true;
                 return;
             }
+
+            // Enable button once reminder is ready
+            btnElement.disabled = false;
 
             const isActive = reminder.isActive;
 
@@ -250,6 +264,7 @@ class UIController {
 
         } catch (error) {
             console.error(`Error updating ${type} reminder UI:`, error);
+            this.showUserError(`Could not update ${type} display`, error.message);
         }
     }
 
@@ -288,20 +303,35 @@ class UIController {
     toggleReminder(type) {
         try {
             const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
+            
             if (!reminder) {
-                console.error(`${type} reminder not available`);
+                console.error(`${type} reminder not available - still initializing`);
+                // Show user-friendly message
+                const btn = this.elements[`${type}Btn`];
+                if (btn) {
+                    btn.textContent = 'Loading...';
+                    btn.disabled = true;
+                    setTimeout(() => {
+                        btn.textContent = 'Start';
+                        btn.disabled = false;
+                    }, 2000);
+                }
                 return;
             }
 
             if (reminder.isActive) {
                 reminder.stop();
+                console.log(`${type} reminder stopped`);
             } else {
                 reminder.start();
+                console.log(`${type} reminder started`);
             }
             
-            console.log(`${type} reminder toggled: ${reminder.isActive ? 'ON' : 'OFF'}`);
+            this.updateReminderUI(type);
+            
         } catch (error) {
             console.error(`Failed to toggle ${type} reminder:`, error);
+            this.showUserError(`Could not ${type} reminder`, error.message);
         }
     }
 
@@ -315,7 +345,12 @@ class UIController {
             const intervalElement = this.elements[`${type}Interval`];
             const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
             
-            if (!intervalElement || !reminder) return;
+            if (!reminder) {
+                console.warn(`${type} reminder not ready for interval update`);
+                return;
+            }
+            
+            if (!intervalElement) return;
             
             const newInterval = parseInt(intervalElement.value, 10);
             if (newInterval >= 1 && newInterval <= 120) {
@@ -333,6 +368,7 @@ class UIController {
             }
         } catch (error) {
             console.error(`Failed to update ${type} interval:`, error);
+            this.showUserError(`Could not update ${type} interval`, error.message);
         }
     }
 
@@ -428,6 +464,18 @@ class UIController {
                 }, delay - (currentTime - lastExecTime));
             }
         };
+    }
+
+    /**
+     * Show user-friendly error message
+     * @param {string} title - Error title
+     * @param {string} message - Error message
+     * @private
+     */
+    showUserError(title, message) {
+        console.error(`${title}: ${message}`);
+        // In MVP, we'll use alert for simplicity
+        alert(`${title}\n\n${message}`);
     }
 
     /**

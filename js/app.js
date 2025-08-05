@@ -34,8 +34,13 @@ class OfficeWellnessApp {
             // Validate all components are ready
             this.validateInitialization();
             
-            // Set reminders in UI controller
-            this.uiController.setReminders(this.waterReminder, this.standupReminder);
+            // Ensure reminders are properly set before linking to UI
+            if (this.waterReminder && this.standupReminder && this.uiController) {
+                this.uiController.setReminders(this.waterReminder, this.standupReminder);
+                console.log('🔗 Reminders linked to UI controller');
+            } else {
+                console.warn('⚠️ Some components not ready for linking');
+            }
             
             // Force initial UI update with retry mechanism
             this.forceUIUpdate();
@@ -93,6 +98,8 @@ class OfficeWellnessApp {
      */
     async initializeReminders() {
         try {
+            console.log('🔄 Starting reminder initialization...');
+            
             // Initialize notification service first
             const notificationService = new NotificationService();
             
@@ -115,8 +122,9 @@ class OfficeWellnessApp {
                 ...savedSettings.standup
             }, notificationService);
 
-            console.log('⏰ Reminder managers initialized');
+            console.log('✅ Reminder managers initialized successfully');
         } catch (error) {
+            console.error('❌ Reminder initialization failed:', error);
             throw new Error(`Reminder initialization failed: ${error.message}`);
         }
     }
