@@ -28,6 +28,12 @@ class OfficeWellnessApp {
             await this.initializeUI();
             await this.initializeReminders();
             this.uiController.setReminders(this.waterReminder, this.standupReminder);
+            
+            // Force initial UI update
+            setTimeout(() => {
+                this.uiController.updateAllUI();
+            }, 100);
+            
             console.log('Office Wellness App initialized');
         } catch (error) {
             console.error('Failed to initialize:', error);
