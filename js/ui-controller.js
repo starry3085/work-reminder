@@ -52,14 +52,36 @@ class UIController {
      */
     init() {
         try {
+            console.log('🎨 Initializing UI Controller...');
+            
+            // Ensure DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => this.performInit());
+            } else {
+                this.performInit();
+            }
+        } catch (error) {
+            console.error('Failed to initialize UI Controller:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Perform actual initialization after DOM is ready
+     * @private
+     */
+    performInit() {
+        try {
             this.bindElements();
+            this.validateElements();
             this.setupEventListeners();
             this.checkMobile();
             this.startUpdateLoop();
             
-            console.log('UI Controller initialized with cleanup support');
+            console.log('✅ UI Controller initialized successfully');
         } catch (error) {
-            console.error('Failed to initialize UI Controller:', error);
+            console.error('❌ UI Controller initialization failed:', error);
+            throw error;
         }
     }
 
@@ -95,12 +117,29 @@ class UIController {
         Object.keys(selectors).forEach(key => {
             try {
                 this.elements[key] = document.querySelector(selectors[key]);
-
+                if (!this.elements[key]) {
+                    console.warn(`⚠️ Element not found: ${selectors[key]}`);
+                }
             } catch (error) {
-                console.warn(`Element not found: ${selectors[key]}`);
+                console.error(`❌ Error finding element ${selectors[key]}:`, error);
                 this.elements[key] = null;
             }
         });
+    }
+
+    /**
+     * Validate critical elements are found
+     * @private
+     */
+    validateElements() {
+        const criticalElements = ['waterBtn', 'standupBtn', 'waterCountdown', 'standupCountdown'];
+        const missing = criticalElements.filter(key => !this.elements[key]);
+        
+        if (missing.length > 0) {
+            throw new Error(`Critical UI elements missing: ${missing.join(', ')}`);
+        }
+        
+        console.log('✅ All critical UI elements found');
     }
 
     /**
@@ -198,8 +237,8 @@ class UIController {
                 btnElement.textContent = 'Stop';
                 btnElement.className = 'btn-warning';
             } else {
-                // Show full interval time when inactive
-                const intervalMinutes = reminder.settings?.interval || (type === 'water' ? 30 : 45);
+                // Show actual interval time from reminder settings when inactive
+                const intervalMinutes = reminder.settings?.interval || 30;
                 const intervalTime = intervalMinutes * 60 * 1000; // Convert to milliseconds
                 const formattedTime = this.formatTime(intervalTime);
                 countdownElement.textContent = formattedTime;
@@ -223,16 +262,20 @@ class UIController {
         const countdownElement = this.elements[`${type}Countdown`];
         const btnElement = this.elements[`${type}Btn`];
 
-        // Show full interval time instead of "Ready"
-        const defaultInterval = type === 'water' ? 30 : 45; // Default intervals
-        const intervalTime = defaultInterval * 60 * 1000; // Convert to milliseconds
+        if (!countdownElement || !btnElement) {
+            console.warn(`Missing elements for ${type} reminder`);
+            return;
+        }
+
+        // Get actual interval from reminder settings
+        const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
+        const interval = reminder?.settings?.interval || (type === 'water' ? 30 : 30);
+        const intervalTime = interval * 60 * 1000; // Convert to milliseconds
         const formattedTime = this.formatTime(intervalTime);
 
-        if (countdownElement) countdownElement.textContent = formattedTime;
-        if (btnElement) {
-            btnElement.textContent = 'Start';
-            btnElement.className = 'btn-primary';
-        }
+        countdownElement.textContent = formattedTime;
+        btnElement.textContent = 'Start';
+        btnElement.className = 'btn-primary';
     }
 
     // Settings UI methods removed for MVP - using inline inputs

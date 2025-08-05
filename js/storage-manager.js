@@ -6,6 +6,7 @@ class StorageManager {
     constructor() {
         this.STORAGE_PREFIX = 'wellness-reminder';
         this.isStorageAvailable = this.checkStorageAvailability();
+        this.memoryStorage = new Map(); // Fallback memory storage
     }
 
     /**
@@ -129,20 +130,24 @@ class StorageManager {
      */
     generateStorageKey(key) {
         const keyStr = String(key || '');
-        const normalizedKey = this.storageKeys[keyStr] || keyStr.replace(/_/g, '-');
-        return `${this.STORAGE_PREFIX}.${normalizedKey}`;
+        return `${this.STORAGE_PREFIX}.${keyStr}`;
     }
 
     /**
-     * Save data to storage
+     * Save data to storage (setItem API)
      * @param {string} key - Storage key name
      * @param {any} data - Data to save
      * @returns {boolean} Whether save was successful
      */
-    saveSettings(key, data) {
+    setItem(key, data) {
         try {
-            const fullKey = `${this.STORAGE_PREFIX}.${key}`;
-            localStorage.setItem(fullKey, JSON.stringify(data));
+            if (this.isStorageAvailable) {
+                const fullKey = this.generateStorageKey(key);
+                localStorage.setItem(fullKey, JSON.stringify(data));
+            } else {
+                // Use memory storage as fallback
+                this.memoryStorage.set(key, data);
+            }
             return true;
         } catch (error) {
             console.error('Failed to save to storage:', error);
@@ -151,19 +156,43 @@ class StorageManager {
     }
 
     /**
-     * Load data from storage
+     * Load data from storage (getItem API)
      * @param {string} key - Storage key name
      * @returns {any|null} Loaded data, returns null on failure
      */
-    loadSettings(key) {
+    getItem(key) {
         try {
-            const fullKey = `${this.STORAGE_PREFIX}.${key}`;
-            const data = localStorage.getItem(fullKey);
-            return data ? JSON.parse(data) : null;
+            if (this.isStorageAvailable) {
+                const fullKey = this.generateStorageKey(key);
+                const data = localStorage.getItem(fullKey);
+                return data ? JSON.parse(data) : null;
+            } else {
+                // Use memory storage as fallback
+                return this.memoryStorage.get(key) || null;
+            }
         } catch (error) {
             console.error('Failed to load from storage:', error);
             return null;
         }
+    }
+
+    /**
+     * Save data to storage (legacy API)
+     * @param {string} key - Storage key name
+     * @param {any} data - Data to save
+     * @returns {boolean} Whether save was successful
+     */
+    saveSettings(key, data) {
+        return this.setItem(key, data);
+    }
+
+    /**
+     * Load data from storage (legacy API)
+     * @param {string} key - Storage key name
+     * @returns {any|null} Loaded data, returns null on failure
+     */
+    loadSettings(key) {
+        return this.getItem(key);
     }
 
 

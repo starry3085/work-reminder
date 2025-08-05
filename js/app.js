@@ -23,28 +23,36 @@ class OfficeWellnessApp {
 
     async init() {
         try {
-            this.initializeErrorHandler();
+            console.log('Starting application initialization...');
+            
+            // Initialize in strict order with validation
+            await this.initializeErrorHandler();
             await this.initializeStorage();
             await this.initializeUI();
             await this.initializeReminders();
+            
+            // Validate all components are ready
+            this.validateInitialization();
+            
+            // Set reminders in UI controller
             this.uiController.setReminders(this.waterReminder, this.standupReminder);
             
-            // Force initial UI update
-            setTimeout(() => {
-                this.uiController.updateAllUI();
-            }, 100);
+            // Force initial UI update with retry mechanism
+            this.forceUIUpdate();
             
-            console.log('Office Wellness App initialized');
+            console.log('✅ Office Wellness App initialized successfully');
         } catch (error) {
-            console.error('Failed to initialize:', error);
+            console.error('❌ Failed to initialize:', error);
+            this.handleInitializationError(error);
         }
     }
 
-    initializeErrorHandler() {
+    async initializeErrorHandler() {
         try {
             this.errorHandler = new ErrorHandler();
+            console.log('🛡️ Error handler initialized');
         } catch (error) {
-            console.warn('Failed to initialize error handler:', error);
+            console.warn('⚠️ Failed to initialize error handler:', error);
         }
     }
 
@@ -101,7 +109,7 @@ class OfficeWellnessApp {
 
             // Standup Reminder
             this.standupReminder = new StandupReminder('standup', {
-                interval: 45,
+                interval: 30,
                 enabled: true,
                 sound: true,
                 ...savedSettings.standup
@@ -111,6 +119,79 @@ class OfficeWellnessApp {
         } catch (error) {
             throw new Error(`Reminder initialization failed: ${error.message}`);
         }
+    }
+
+    /**
+     * Validate all components are properly initialized
+     * @private
+     */
+    validateInitialization() {
+        const components = {
+            uiController: this.uiController,
+            waterReminder: this.waterReminder,
+            standupReminder: this.standupReminder,
+            storage: this.storage
+        };
+
+        const missing = Object.entries(components)
+            .filter(([name, component]) => !component)
+            .map(([name]) => name);
+
+        if (missing.length > 0) {
+            throw new Error(`Missing components: ${missing.join(', ')}`);
+        }
+
+        console.log('✅ All components validated');
+    }
+
+    /**
+     * Force UI update with retry mechanism
+     * @private
+     */
+    forceUIUpdate() {
+        const maxRetries = 3;
+        let attempt = 0;
+
+        const tryUpdate = () => {
+            attempt++;
+            try {
+                if (this.uiController && this.uiController.updateAllUI) {
+                    this.uiController.updateAllUI();
+                    console.log('🎨 Initial UI update completed');
+                } else {
+                    throw new Error('UI Controller not ready');
+                }
+            } catch (error) {
+                if (attempt < maxRetries) {
+                    console.log(`🔄 UI update retry ${attempt}/${maxRetries}`);
+                    setTimeout(tryUpdate, 100 * attempt);
+                } else {
+                    console.error('❌ UI update failed after retries:', error);
+                }
+            }
+        };
+
+        setTimeout(tryUpdate, 50);
+    }
+
+    /**
+     * Handle initialization errors with user-friendly messages
+     * @param {Error} error - Initialization error
+     * @private
+     */
+    handleInitializationError(error) {
+        console.error('🚨 Initialization error:', error);
+        
+        // Show user-friendly error
+        const errorMessage = error.message || 'Application failed to start';
+        const userMessage = `Office Wellness App Error:\n${errorMessage}\n\nPlease refresh the page to try again.`;
+        
+        // Try to show via UI, fallback to alert
+        setTimeout(() => {
+            if (window.alert) {
+                alert(userMessage);
+            }
+        }, 100);
     }
 
 
@@ -129,6 +210,7 @@ class OfficeWellnessApp {
             };
             
             this.storage.setItem('appSettings', settings);
+            console.log('💾 Settings saved successfully');
         } catch (error) {
             console.warn('Failed to save settings:', error);
         }
