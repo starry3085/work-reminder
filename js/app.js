@@ -22,7 +22,6 @@ class OfficeWellnessApp {
         };
 
         // Core components
-        this.stateManager = null;
         this.uiController = null;
         this.waterReminder = null;
         this.standupReminder = null;
@@ -63,12 +62,15 @@ class OfficeWellnessApp {
             // Initialize error handler first
             this.initializeErrorHandler();
             
-            // Initialize state manager
-            await this.initializeStateManager();
+            // Initialize storage (simple persistence)
+            await this.initializeStorage();
             
             // Initialize UI and reminders
             await this.initializeUI();
             await this.initializeReminders();
+            
+            // Connect UI with reminders
+            this.uiController.setReminders(this.waterReminder, this.standupReminder);
             
             // Setup application lifecycle
             this.setupLifecycleManagement();
@@ -108,33 +110,26 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Initialize StateManager with proper configuration
+     * Initialize storage manager for simple persistence
      * @private
      */
-    async initializeStateManager() {
+    async initializeStorage() {
         try {
-            // Initialize storage manager first
-            const storageManager = new StorageManager();
-            
-            // Initialize state manager with storage dependency
-            this.stateManager = new StateManager(storageManager);
-            
-            // Wait for StateManager to be ready
-            await this.stateManager.initialize();
-            
-            console.log('📊 StateManager initialized');
+            this.storage = new StorageManager();
+            console.log('💾 Storage manager initialized');
         } catch (error) {
-            throw new Error(`StateManager initialization failed: ${error.message}`);
+            console.warn('⚠️ Storage initialization failed, using defaults:', error);
+            this.storage = null;
         }
     }
 
     /**
-     * Initialize UI Controller with StateManager dependency
+     * Initialize UI Controller without StateManager dependency
      * @private
      */
     async initializeUI() {
         try {
-            this.uiController = new UIController(this.stateManager, {
+            this.uiController = new UIController({
                 updateInterval: 1000,
                 mobileBreakpoint: 768
             });
@@ -146,7 +141,7 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Initialize reminder managers with consistent dependency injection
+     * Initialize reminder managers with simplified initialization
      * @private
      */
     async initializeReminders() {
@@ -154,19 +149,24 @@ class OfficeWellnessApp {
             // Initialize notification service first
             const notificationService = new NotificationService();
             
+            // Load saved settings from storage
+            const savedSettings = this.storage?.loadSettings() || {};
+            
             // Water Reminder
             this.waterReminder = new WaterReminder('water', {
                 interval: 30,
                 enabled: true,
-                sound: true
-            }, notificationService, this.stateManager);
+                sound: true,
+                ...savedSettings.water
+            }, notificationService);
 
             // Standup Reminder
             this.standupReminder = new StandupReminder('standup', {
                 interval: 45,
                 enabled: true,
-                sound: true
-            }, notificationService, this.stateManager);
+                sound: true,
+                ...savedSettings.standup
+            }, notificationService);
 
             console.log('⏰ Reminder managers initialized');
         } catch (error) {
@@ -206,14 +206,14 @@ class OfficeWellnessApp {
     }
 
     /**
-     * Setup automatic state saving
+     * Setup automatic settings saving
      * @private
      */
     setupAutoSave() {
-        if (this.config.autoSaveInterval > 0) {
+        if (this.config.autoSaveInterval > 0 && this.storage) {
             this.autoSaveInterval = setInterval(() => {
-                if (this.stateManager && !this.isShuttingDown) {
-                    this.stateManager.saveState();
+                if (!this.isShuttingDown) {
+                    this.saveSettings();
                 }
             }, this.config.autoSaveInterval);
             
@@ -223,6 +223,33 @@ class OfficeWellnessApp {
                     this.autoSaveInterval = null;
                 }
             });
+        }
+    }
+
+    /**
+     * Save current settings to storage
+     * @private
+     */
+    saveSettings() {
+        if (!this.storage) return;
+        
+        try {
+            const settings = {
+                water: {
+                    interval: this.waterReminder?.settings?.interval || 30,
+                    enabled: this.waterReminder?.settings?.enabled !== false,
+                    sound: this.waterReminder?.settings?.sound !== false
+                },
+                standup: {
+                    interval: this.standupReminder?.settings?.interval || 45,
+                    enabled: this.standupReminder?.settings?.enabled !== false,
+                    sound: this.standupReminder?.settings?.sound !== false
+                }
+            };
+            
+            this.storage.saveSettings(settings);
+        } catch (error) {
+            console.warn('Failed to save settings:', error);
         }
     }
 
@@ -328,10 +355,8 @@ class OfficeWellnessApp {
         try {
             this.isShuttingDown = true;
             
-            // Save final state
-            if (this.stateManager) {
-                this.stateManager.saveState();
-            }
+            // Save final settings
+            this.saveSettings();
             
             // Perform cleanup
             this.cleanup();
@@ -354,10 +379,8 @@ class OfficeWellnessApp {
             if (this.waterReminder) this.waterReminder.pause();
             if (this.standupReminder) this.standupReminder.pause();
             
-            // Save state before backgrounding
-            if (this.stateManager) {
-                this.stateManager.saveState();
-            }
+            // Save settings before backgrounding
+            this.saveSettings();
             
         } catch (error) {
             console.error('Error handling app background:', error);
@@ -371,10 +394,6 @@ class OfficeWellnessApp {
     handleAppForeground() {
         try {
             console.log('📱 App entering foreground');
-            
-            // Resume timers when app returns to foreground
-            if (this.waterReminder) this.waterReminder.resume();
-            if (this.standupReminder) this.standupReminder.resume();
             
             // Refresh UI state
             this.updateAppStatus();
@@ -390,11 +409,8 @@ class OfficeWellnessApp {
      */
     updateAppStatus() {
         try {
-            const waterState = this.stateManager?.getState('water');
-            const standupState = this.stateManager?.getState('standup');
-            
-            const waterActive = waterState?.isActive || false;
-            const standupActive = standupState?.isActive || false;
+            const waterActive = this.waterReminder?.isActive || false;
+            const standupActive = this.standupReminder?.isActive || false;
             
             console.log(`📊 App Status - Water: ${waterActive}, Standup: ${standupActive}`);
             
@@ -411,9 +427,18 @@ class OfficeWellnessApp {
     getAppState() {
         try {
             return {
-                water: this.stateManager?.getState('water'),
-                standup: this.stateManager?.getState('standup'),
-                settings: this.stateManager?.getState('app')?.settings,
+                water: {
+                    isActive: this.waterReminder?.isActive || false,
+                    settings: this.waterReminder?.settings || {}
+                },
+                standup: {
+                    isActive: this.standupReminder?.isActive || false,
+                    settings: this.standupReminder?.settings || {}
+                },
+                storage: {
+                    available: this.storage?.isAvailable?.() || false,
+                    type: this.storage?.getStorageType?.() || 'none'
+                },
                 isInitialized: this.isInitialized,
                 isShuttingDown: this.isShuttingDown
             };
@@ -441,8 +466,7 @@ class OfficeWellnessApp {
             const components = [
                 this.waterReminder,
                 this.standupReminder,
-                this.uiController,
-                this.stateManager
+                this.uiController
             ];
             
             for (const component of components) {

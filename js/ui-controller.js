@@ -11,11 +11,9 @@
 class UIController {
     /**
      * Create UI controller instance
-     * @param {StateManager} stateManager - State manager for data synchronization
      * @param {Object} config - UI configuration
      */
-    constructor(stateManager, config = {}) {
-        this.stateManager = stateManager;
+    constructor(config = {}) {
         this.config = {
             updateInterval: 1000,
             mobileBreakpoint: 768,
@@ -45,9 +43,9 @@ class UIController {
         this.resizeObserver = null;
         this.updateInterval = null;
         
-        // State synchronization
-        this.isUpdatingFromState = false;
-        this.stateSubscriptions = [];
+        // Direct reminder references (will be set by app)
+        this.waterReminder = null;
+        this.standupReminder = null;
         
         // Mobile state tracking
         this.isMobile = false;
@@ -64,7 +62,6 @@ class UIController {
         try {
             this.bindElements();
             this.setupEventListeners();
-            this.subscribeToStateChanges();
             this.checkMobile();
             this.startUpdateLoop();
             
@@ -72,6 +69,17 @@ class UIController {
         } catch (error) {
             console.error('Failed to initialize UI Controller:', error);
         }
+    }
+
+    /**
+     * Set reminder instances for direct interaction
+     * @param {WaterReminder} waterReminder - Water reminder instance
+     * @param {StandupReminder} standupReminder - Standup reminder instance
+     */
+    setReminders(waterReminder, standupReminder) {
+        this.waterReminder = waterReminder;
+        this.standupReminder = standupReminder;
+        this.updateAllUI();
     }
 
     /**
@@ -191,44 +199,16 @@ class UIController {
         }
     }
 
-    /**
-     * Subscribe to StateManager changes
-     * @private
-     */
-    subscribeToStateChanges() {
-        if (!this.stateManager) return;
 
-        // Subscribe to water reminder state
-        const waterUnsubscribe = this.stateManager.subscribe('water', (state) => {
-            this.updateReminderUI('water', state);
-        });
-        this.stateSubscriptions.push(waterUnsubscribe);
-
-        // Subscribe to standup reminder state
-        const standupUnsubscribe = this.stateManager.subscribe('standup', (state) => {
-            this.updateReminderUI('standup', state);
-        });
-        this.stateSubscriptions.push(standupUnsubscribe);
-
-        // Subscribe to app settings
-        const appUnsubscribe = this.stateManager.subscribe('app', (state) => {
-            this.updateSettingsUI(state.settings);
-        });
-        this.stateSubscriptions.push(appUnsubscribe);
-    }
 
     /**
-     * Update reminder UI based on state
+     * Update reminder UI based on reminder instance
      * @param {string} type - Reminder type
-     * @param {Object} state - Current state
      * @private
      */
-    updateReminderUI(type, state) {
-        if (this.isUpdatingFromState) return;
-        
+    updateReminderUI(type) {
         try {
-            this.isUpdatingFromState = true;
-            
+            const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
             const timerElement = this.elements[`${type}Timer`];
             const progressElement = this.elements[`${type}Progress`];
             const btnElement = this.elements[`${type}Btn`];
@@ -238,14 +218,14 @@ class UIController {
                 return;
             }
 
-            if (!state) {
+            if (!reminder) {
                 this.setReminderInactive(type);
                 return;
             }
 
-            const isActive = Boolean(state.isActive);
-            const timeRemaining = Math.max(0, state.timeRemaining || 0);
-            const interval = state.settings?.interval || 30;
+            const isActive = reminder.isActive;
+            const timeRemaining = Math.max(0, reminder.getTimeRemaining?.() || 0);
+            const interval = reminder.interval || 30;
             const totalTime = interval * 60 * 1000;
 
             if (isActive) {
@@ -263,8 +243,6 @@ class UIController {
 
         } catch (error) {
             console.error(`Error updating ${type} reminder UI:`, error);
-        } finally {
-            this.isUpdatingFromState = false;
         }
     }
 
@@ -323,29 +301,19 @@ class UIController {
      */
     toggleReminder(type) {
         try {
-            const state = this.stateManager.getState(type);
-            const isActive = state?.isActive || false;
-
-            // Get reminder instance from global app
-            const app = window.app;
-            if (!app) {
-                console.error('App instance not available');
-                return;
-            }
-
-            const reminder = type === 'water' ? app.waterReminder : app.standupReminder;
+            const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
             if (!reminder) {
                 console.error(`${type} reminder not available`);
                 return;
             }
 
-            if (isActive) {
-                // Stop the reminder
+            if (reminder.isActive) {
                 reminder.stop();
             } else {
-                // Start the reminder
                 reminder.start();
             }
+            
+            console.log(`${type} reminder toggled: ${reminder.isActive ? 'ON' : 'OFF'}`);
         } catch (error) {
             console.error(`Failed to toggle ${type} reminder:`, error);
         }
@@ -474,8 +442,7 @@ class UIController {
      */
     updateAllUI() {
         ['water', 'standup'].forEach(type => {
-            const state = this.stateManager.getState(type);
-            this.updateReminderUI(type, state);
+            this.updateReminderUI(type);
         });
     }
 
@@ -539,14 +506,6 @@ class UIController {
                 }
             });
             this.eventListeners.clear();
-
-            // Unsubscribe from state changes
-            this.stateSubscriptions.forEach(unsubscribe => {
-                if (unsubscribe && typeof unsubscribe === 'function') {
-                    unsubscribe();
-                }
-            });
-            this.stateSubscriptions = [];
 
             // Clear any remaining intervals/timeouts
             const highestTimeoutId = setTimeout(() => {});

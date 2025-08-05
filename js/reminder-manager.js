@@ -14,9 +14,8 @@ class ReminderManager {
      * @param {string} type - Reminder type ('water' or 'standup')
      * @param {Object} settings - Initial settings
      * @param {NotificationService} notificationService - Notification service
-     * @param {StateManager} stateManager - State manager
      */
-    constructor(type, settings, notificationService, stateManager) {
+    constructor(type, settings, notificationService) {
         if (!type || !['water', 'standup'].includes(type)) {
             throw new Error('Invalid reminder type');
         }
@@ -24,16 +23,11 @@ class ReminderManager {
         this.type = type;
         this.settings = { ...settings };
         this.notificationService = notificationService;
-        this.stateManager = stateManager;
         
         // Timer management
         this.timerId = null;
         this.updateTimerId = null;
         this.updateInterval = 1000; // 1 second update frequency
-        
-        // State synchronization
-        this.isUpdatingFromState = false; // Atomic flag for state sync
-        this.unsubscribe = null; // State subscription cleanup
         
         // Time tracking (all in milliseconds)
         this.startTime = null;
@@ -41,191 +35,36 @@ class ReminderManager {
         this.timeRemaining = 0;
         this.isActive = false;
         
-        // Error recovery
-        this.lastSyncTime = 0;
-        this.syncRetryCount = 0;
-        this.maxSyncRetries = 3;
-        
-        // Initialize from StateManager
-        this.initializeFromState();
+        // Initialize with default state
+        this.initializeDefaults();
         
         console.log(`${type} reminder manager created with StateManager integration`);
     }
 
     /**
-     * Initialize from StateManager state
+     * Initialize with default state
      * @private
      */
-    initializeFromState() {
-        if (!this.stateManager) return;
-        
-        try {
-            const state = this.stateManager.getState(this.type);
-            if (state) {
-                this.syncWithState(state, true); // Silent sync during init
-                this.subscribeToStateManager();
-            }
-        } catch (error) {
-            console.error(`Failed to initialize ${this.type} from state:`, error);
-        }
+    initializeDefaults() {
+        this.isActive = false;
+        this.timeRemaining = this.settings.interval * 60 * 1000;
+        this.nextReminderTime = 0;
     }
 
     /**
-     * Subscribe to StateManager changes
-     * @private
+     * Get remaining time in milliseconds
+     * @returns {number} Time remaining in milliseconds
      */
-    subscribeToStateManager() {
-        if (!this.stateManager) return;
-        
-        try {
-            this.unsubscribe = this.stateManager.subscribe(this.type, (state) => {
-                // Prevent self-triggered updates
-                if (this.isUpdatingFromState) {
-                    return;
-                }
-                
-                // Throttle updates to prevent rapid state changes
-                const now = Date.now();
-                if (now - this.lastSyncTime < 100) {
-                    return;
-                }
-                
-                this.syncWithState(state);
-            });
-            
-            console.log(`${this.type} reminder subscribed to StateManager with throttling`);
-        } catch (error) {
-            console.error(`Failed to subscribe ${this.type} to StateManager:`, error);
-        }
+    getTimeRemaining() {
+        return Math.max(0, this.timeRemaining);
     }
 
     /**
-     * Sync state from StateManager (single source of truth)
-     * @param {Object} state - State from StateManager
-     * @param {boolean} silent - Don't update StateManager
+     * Get interval in minutes
+     * @returns {number} Interval in minutes
      */
-    syncWithState(state, silent = false) {
-        if (!state) return;
-        
-        try {
-            // Atomic operation flag
-            this.isUpdatingFromState = true;
-            this.lastSyncTime = Date.now();
-            
-            // Store previous state for comparison
-            const wasActive = this.isActive;
-            const prevInterval = this.settings.interval;
-            
-            // Update from authoritative state
-            this.isActive = Boolean(state.isActive);
-            this.settings = { ...this.settings, ...state.settings };
-            
-            // Handle time units - StateManager uses milliseconds for timeRemaining
-            this.timeRemaining = Math.max(0, state.timeRemaining || 0);
-            this.nextReminderTime = state.nextReminderAt || 0;
-            
-            // Validate interval units
-            if (typeof this.settings.interval === 'string') {
-                this.settings.interval = parseInt(this.settings.interval, 10);
-            }
-            
-            // Sync timer state
-            this.syncTimers(wasActive, prevInterval);
-            
-            console.log(`${this.type} reminder synced with StateManager:`, {
-                isActive: this.isActive,
-                timeRemaining: this.timeRemaining,
-                interval: this.settings.interval,
-                nextReminderTime: this.nextReminderTime
-            });
-            
-            // Reset retry count on successful sync
-            this.syncRetryCount = 0;
-            
-        } catch (error) {
-            console.error(`Failed to sync ${this.type} reminder state:`, error);
-            
-            // Error recovery
-            this.handleSyncError(error);
-            
-        } finally {
-            this.isUpdatingFromState = false;
-        }
-    }
-
-    /**
-     * Handle sync errors with retry mechanism
-     * @private
-     */
-    handleSyncError(error) {
-        if (this.syncRetryCount < this.maxSyncRetries) {
-            this.syncRetryCount++;
-            console.warn(`Retrying state sync for ${this.type} (attempt ${this.syncRetryCount})`);
-            
-            setTimeout(() => {
-                try {
-                    const state = this.stateManager.getState(this.type);
-                    this.syncWithState(state);
-                } catch (retryError) {
-                    console.error(`Retry failed for ${this.type} state sync:`, retryError);
-                }
-            }, 100 * this.syncRetryCount);
-        }
-    }
-
-    /**
-     * Sync timer state based on authoritative state
-     * @param {boolean} wasActive - Previous active state
-     * @param {number} prevInterval - Previous interval setting
-     * @private
-     */
-    syncTimers(wasActive, prevInterval) {
-        try {
-            this.clearTimer();
-            this.clearUpdateTimer();
-            
-            if (this.isActive) {
-                // Handle interval changes
-                if (prevInterval !== this.settings.interval) {
-                    const intervalMs = this.settings.interval * 60 * 1000;
-                    this.timeRemaining = intervalMs;
-                    this.nextReminderTime = Date.now() + intervalMs;
-                    
-                    // Update StateManager with new calculation
-                    this.updateState({
-                        timeRemaining: this.timeRemaining,
-                        nextReminderAt: this.nextReminderTime
-                    });
-                }
-                
-                // Validate time remaining
-                if (this.timeRemaining <= 0) {
-                    const intervalMs = this.settings.interval * 60 * 1000;
-                    this.timeRemaining = intervalMs;
-                    this.nextReminderTime = Date.now() + intervalMs;
-                }
-                
-                this.startTime = Date.now();
-                this.startTimer();
-                this.startUpdateTimer();
-                
-                console.log(`${this.type} reminder timers synced:`, {
-                    interval: this.settings.interval,
-                    timeRemaining: this.timeRemaining,
-                    nextReminderTime: this.nextReminderTime
-                });
-            } else if (wasActive && !this.isActive) {
-                // Clean shutdown
-                this.resetState();
-                this.updateState({
-                    timeRemaining: 0,
-                    nextReminderAt: 0
-                });
-            }
-            
-        } catch (error) {
-            console.error(`Error syncing ${this.type} timers:`, error);
-        }
+    get interval() {
+        return this.settings.interval || 30;
     }
 
     /**
@@ -246,13 +85,6 @@ class ReminderManager {
             
             this.startTimer();
             this.startUpdateTimer();
-            
-            // Update StateManager atomically
-            this.updateState({
-                isActive: true,
-                timeRemaining: this.timeRemaining,
-                nextReminderAt: this.nextReminderTime
-            });
             
             console.log(`${this.type} reminder started:`, {
                 interval: this.settings.interval,
@@ -278,13 +110,6 @@ class ReminderManager {
             
             this.isActive = false;
             this.resetState();
-            
-            // Update StateManager atomically
-            this.updateState({
-                isActive: false,
-                timeRemaining: 0,
-                nextReminderAt: 0
-            });
             
             console.log(`${this.type} reminder stopped`);
             return true;
@@ -426,12 +251,6 @@ class ReminderManager {
         this.clearTimer();
         this.startTimer();
         
-        this.updateState({
-            isActive: true,
-            timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime
-        });
-        
         console.log(`${this.type} reminder snoozed for 5 minutes`);
     }
 
@@ -449,11 +268,6 @@ class ReminderManager {
         
         this.clearTimer();
         this.startTimer();
-        
-        this.updateState({
-            timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime
-        });
     }
 
     /**
@@ -466,21 +280,7 @@ class ReminderManager {
         this.timeRemaining = 0;
     }
 
-    /**
-     * Update state through StateManager (atomic operation)
-     * @private
-     */
-    updateState(updates) {
-        if (!this.stateManager || this.isUpdatingFromState) {
-            return;
-        }
-        
-        try {
-            this.stateManager.updateState(this.type, updates);
-        } catch (error) {
-            console.error(`Failed to update ${this.type} state:`, error);
-        }
-    }
+
 
     /**
      * Get current status
@@ -497,18 +297,14 @@ class ReminderManager {
         };
     }
 
+
+
     /**
      * Destroy reminder manager with cleanup
      */
     destroy() {
         try {
             this.stop();
-            
-            // Cleanup state subscription
-            if (this.unsubscribe) {
-                this.unsubscribe();
-                this.unsubscribe = null;
-            }
             
             // Cleanup timers
             this.clearTimer();

@@ -22,17 +22,17 @@ A health reminder web application designed specifically for office workers to he
 - **Notifications**: Web Notifications API with in-page fallback
 - **PWA**: Progressive Web App with manifest.json
 - **Deployment**: GitHub Pages (static files only)
-- **Architecture**: Atomic state management with recovery mechanisms
+- **Architecture**: Direct state management with minimal complexity
 
 ### Architecture Highlights
-- **Atomic State Management**: StateManager provides atomic updates with per-type flags
-- **Anti-Circulation Protection**: Advanced `isUpdatingFromState` mechanism prevents circular updates
-- **Storage Migration**: Automatic handling of storage key conflicts and version upgrades
-- **Error Recovery**: Comprehensive error handling with memory storage fallback
-- **Event Deduplication**: Prevents duplicate event listener registration
+- **Direct State Management**: Simple boolean flags and direct property access
+- **Minimal Complexity**: No complex state synchronization or anti-circulation mechanisms
+- **Clean Architecture**: Each component manages its own state independently
+- **Immediate Updates**: Real-time state changes without synchronization delays
+- **Easy Debugging**: Direct state inspection without abstraction layers
 - **Graceful Degradation**: Continues working even when browser features are unavailable
-- **Unified Time Management**: Standardized milliseconds/minutes conversion throughout
-- **Resource Cleanup**: Proper cleanup of timers, listeners, and observers
+- **Resource Efficiency**: Minimal memory usage and CPU overhead
+- **MVP Principles**: Maximum functionality with minimum code complexity
 
 ## Project Structure
 
@@ -43,17 +43,16 @@ work-reminder/
 ├── styles/
 │   └── main.css                  # Main stylesheet with responsive design
 ├── js/
-│   ├── app.js                    # Main application orchestrator with dependency injection
-│   ├── state-manager.js          # Atomic state management with anti-circulation protection
-│   ├── storage-manager.js        # Storage abstraction with migration support
+│   ├── app.js                    # Main application orchestrator
+│   ├── storage-manager.js        # Simple storage abstraction
 │   ├── app-settings.js           # Settings validation and defaults
 │   ├── notification-service.js   # Notification handling with fallbacks
-│   ├── reminder-manager.js       # Base reminder functionality with error recovery
-│   ├── water-reminder.js         # Water reminder with atomic state updates
-│   ├── standup-reminder.js       # Standup reminder with atomic state updates
-│   ├── ui-controller.js          # UI management with event cleanup
-│   ├── error-handler.js          # Comprehensive error handling and recovery
-│   └── mobile-adapter.js         # Mobile optimization with event deduplication
+│   ├── reminder-manager.js       # Base reminder functionality
+│   ├── water-reminder.js         # Water reminder implementation
+│   ├── standup-reminder.js       # Standup reminder implementation
+│   ├── ui-controller.js          # UI management with direct state access
+│   ├── error-handler.js          # Error handling and recovery
+│   └── mobile-adapter.js         # Mobile optimization
 ├── assets/                       # Static resources (icons, audio)
 ├── manifest.json                 # PWA configuration
 ├── package.json                  # Project configuration
@@ -66,62 +65,62 @@ This project follows strict MVP (Minimum Viable Product) principles with enterpr
 
 ### Core Improvements Applied
 
-**1. Atomic State Management**
-- **Per-type update flags**: `isUpdatingFromState` now uses Map-based tracking per state type
-- **Update queues**: Prevents race conditions with atomic state updates
-- **State migration**: Automatic handling of storage key conflicts and version upgrades
-- **Consistent naming**: Standardized storage keys with version control
+**1. Direct State Management**
+- **Simple boolean flags**: Direct property access without abstraction layers
+- **Immediate updates**: Real-time state changes without synchronization delays
+- **Easy debugging**: Direct state inspection and modification
+- **Clean architecture**: Each component manages its own state independently
 
-**2. Timer Management**
-- **Atomic timer operations**: Prevents synchronization issues during rapid state changes
+**2. Simplified Timer Management**
+- **Direct timer control**: Each reminder manages its own timers directly
 - **Standardized time units**: All internal calculations use milliseconds, UI uses minutes
 - **Timer cleanup**: Proper disposal of timers to prevent memory leaks
-- **Recovery mechanisms**: Automatic timer reset on critical errors
+- **Simple recovery**: Automatic restart on page refresh
 
-**3. UI Synchronization**
-- **State-driven updates**: All UI updates flow through StateManager subscriptions
-- **Debounced rendering**: Prevents excessive DOM updates during rapid state changes
+**3. Direct UI Synchronization**
+- **Immediate state access**: UI reads state directly from reminder instances
+- **Real-time updates**: Changes reflected instantly without synchronization
 - **Event cleanup**: Comprehensive cleanup of DOM event listeners
-- **Responsive breakpoints**: Dynamic handling of mobile/desktop transitions
+- **Responsive design**: Dynamic handling of mobile/desktop transitions
 
-**4. Component Dependencies**
-- **Unified dependency injection**: All components receive StateManager via constructor
-- **Initialization order**: Guaranteed proper initialization sequence
+**4. Simplified Component Architecture**
+- **No dependency injection**: Components created with minimal parameters
+- **Direct initialization**: Simple creation and connection of components
 - **Resource cleanup**: Complete cleanup on application shutdown
-- **Error boundaries**: Isolated error handling per component
+- **Error handling**: Isolated error handling per component
 
-**5. Mobile Event Management**
+**5. Efficient Mobile Support**
 - **Event deduplication**: Prevents duplicate resize/orientation listeners
 - **Efficient observers**: Uses ResizeObserver when available, falls back to debounced resize
 - **Touch optimization**: Mobile-specific optimizations without duplicate registration
 - **Viewport management**: Dynamic viewport adjustments for mobile devices
 
-**6. Error Recovery System**
+**6. Reliable Error Handling**
 - **Memory storage fallback**: Continues operation when localStorage is unavailable
 - **Graceful degradation**: Reduces functionality but maintains core features
 - **User-friendly messages**: Clear communication of issues and solutions
-- **Error statistics**: Comprehensive logging and recovery tracking
+- **Simple recovery**: Automatic restart on page refresh
 
 ### Architecture Decisions
 
 **State Management Architecture**:
-- **Atomic Operations**: All state changes are atomic and reversible
-- **Anti-Circulation**: Advanced mechanism prevents circular state updates
-- **Storage Abstraction**: Unified interface handles both localStorage and memory storage
-- **Migration System**: Automatic handling of storage format changes
-- **Validation Layer**: Comprehensive state validation before updates
+- **Direct Access**: Components access state through direct property access
+- **No Abstraction**: No complex state management layer or synchronization
+- **Simple Storage**: Direct localStorage usage with minimal wrapper
+- **Clear Boundaries**: Each component owns and manages its own state
+- **Immediate Updates**: State changes are reflected immediately without delay
 
 **Error Handling Strategy**:
-- **Hierarchical Error Handling**: Errors handled at component level with global fallback
-- **Recovery Mechanisms**: Automatic recovery for storage, notifications, and timers
+- **Component-level Handling**: Each component handles its own errors
+- **Simple Recovery**: Automatic restart on page refresh
 - **User Communication**: Clear, actionable error messages for users
-- **Logging System**: Comprehensive error tracking with privacy considerations
+- **Minimal Logging**: Essential error logging without complexity
 
 **Performance Optimizations**:
-- **Debounced Updates**: Prevents excessive DOM manipulation
+- **Direct Updates**: Immediate state changes without synchronization overhead
 - **Efficient Observers**: Uses modern browser APIs for performance
 - **Memory Management**: Proactive cleanup of resources
-- **Minimal Re-renders**: State-driven updates prevent unnecessary work
+- **Minimal Complexity**: Maximum functionality with minimum code
 
 ## Browser Support
 
@@ -135,26 +134,23 @@ This project follows strict MVP (Minimum Viable Product) principles with enterpr
 ## Development Progress
 
 ### ✅ Completed Features
-- [x] **Atomic state management** with anti-circulation protection
-- [x] **Storage migration** system for key conflicts and version upgrades
-- [x] **Timer synchronization** with atomic operations
-- [x] **Event deduplication** for mobile/desktop transitions
-- [x] **Comprehensive error recovery** with memory storage fallback
+- [x] **Direct state management** with simple boolean flags
+- [x] **Immediate state updates** without synchronization delays
+- [x] **Clean component architecture** with minimal dependencies
+- [x] **Simple error handling** with memory storage fallback
 - [x] **Resource cleanup** for all components and event listeners
 - [x] **Time unit standardization** across all components
-- [x] **Dependency injection** unification across all components
 - [x] **Mobile optimization** with efficient event handling
-- [x] **Error boundaries** with graceful degradation
-- [x] **Performance optimizations** with debounced updates
 - [x] **User experience** improvements with clear error messages
+- [x] **MVP principles** - Maximum functionality with minimum complexity
 
 ### 🔄 Enhanced Features
-- [x] **StateManager** - Atomic updates, migration support, error recovery
-- [x] **ReminderManager** - Timer synchronization, error handling, cleanup
-- [x] **UIController** - Event cleanup, responsive handling, state synchronization
-- [x] **ErrorHandler** - Comprehensive recovery, user communication, statistics
-- [x] **MobileAdapter** - Event deduplication, efficient observers, touch optimization
-- [x] **StorageManager** - Migration support, key conflict resolution, fallback handling
+- [x] **Direct state access** - No complex state management layer
+- [x] **ReminderManager** - Simple timer management with error handling
+- [x] **UIController** - Direct state access and responsive handling
+- [x] **ErrorHandler** - Simple recovery and user communication
+- [x] **MobileAdapter** - Efficient event handling and touch optimization
+- [x] **StorageManager** - Simple storage abstraction with fallback
 
 ## Quick Start
 
