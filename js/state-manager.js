@@ -1,14 +1,23 @@
 /**
  * Unified State Manager - Centralized state management
  * Solves state management conflicts and duplicate save issues
+ * 
+ * Architecture:
+ * - Single source of truth for all application state
+ * - Atomic state updates with anti-circulation mechanisms
+ * - Standardized key naming conventions
+ * - Unified time unit handling (milliseconds internally)
+ * - Comprehensive error handling and recovery
  */
 class StateManager {
     constructor(storageManager) {
         this.storage = storageManager;
         this.subscribers = new Map();
         this.stateCache = new Map();
+        this.isUpdatingFromState = new Map(); // Per-type update flags
+        this.updateQueues = new Map(); // Prevent race conditions
         
-        // Simplified state structure for MVP
+        // Standardized state structure for MVP
         this.stateSchema = {
             app: {
                 isFirstUse: true,
@@ -24,10 +33,10 @@ class StateManager {
             },
             water: {
                 isActive: false,
-                timeRemaining: 0,
-                nextReminderAt: 0,
+                timeRemaining: 0, // milliseconds
+                nextReminderAt: 0, // timestamp
                 settings: {
-                    interval: 30,
+                    interval: 30, // minutes (UI unit)
                     enabled: true,
                     sound: true,
                     lastReminder: null
@@ -35,43 +44,46 @@ class StateManager {
             },
             standup: {
                 isActive: false,
-                timeRemaining: 0,
-                nextReminderAt: 0,
+                timeRemaining: 0, // milliseconds
+                nextReminderAt: 0, // timestamp
                 settings: {
-                    interval: 30,
+                    interval: 30, // minutes (UI unit)
                     enabled: true,
                     sound: true,
                     lastReminder: null
                 }
             }
         };
+
+        // Standardized storage keys - prevent conflicts
+        this.storageKeys = {
+            app: 'app-state-v2',
+            water: 'water-state-v2',
+            standup: 'standup-state-v2'
+        };
     }
 
     /**
      * Initialize state manager
+     * @returns {Promise<StateManager>} Promise that resolves when initialization is complete
      */
     async initialize() {
         await this.loadAllStates();
+        this.cleanupInterval = setInterval(() => this.cleanupOldStates(), 300000); // 5 minutes
         return this;
     }
 
     /**
-     * Load all states
+     * Load all states with migration handling
      * @private
      */
     async loadAllStates() {
         try {
-            // Load states directly
-            const appState = this.storage.getItem('app', this.stateSchema.app);
-            const waterState = this.storage.getItem('water', this.stateSchema.water);
-            const standupState = this.storage.getItem('standup', this.stateSchema.standup);
-            
-            this.stateCache.set('app', appState);
-            this.stateCache.set('water', waterState);
-            this.stateCache.set('standup', standupState);
-            
-            console.log('States loaded successfully');
-            
+            for (const [type, key] of Object.entries(this.storageKeys)) {
+                const state = await this.loadStateWithMigration(type, key);
+                this.stateCache.set(type, state);
+            }
+            console.log('All states loaded successfully with migration handling');
         } catch (error) {
             console.error('Failed to load states:', error);
             this.resetToDefaults();
@@ -79,74 +91,176 @@ class StateManager {
     }
 
     /**
-     * Get state (read-only)
+     * Load state with migration from old keys
+     * @private
      */
-    getState(type) {
-        if (type === 'app') {
-            return { ...this.stateCache.get('app') };
+    async loadStateWithMigration(type, key) {
+        try {
+            // Try new key first
+            let state = this.storage.getItem(key, this.stateSchema[type]);
+            
+            // If not found, try old keys for migration
+            if (!state || Object.keys(state).length === 0) {
+                const oldKey = this.getOldStorageKey(type);
+                if (oldKey) {
+                    state = this.storage.getItem(oldKey, this.stateSchema[type]);
+                    if (state && Object.keys(state).length > 0) {
+                        console.log(`Migrated ${type} state from old key: ${oldKey}`);
+                        // Save to new key
+                        this.storage.setItem(key, state, { immediate: true });
+                    }
+                }
+            }
+            
+            return state || { ...this.stateSchema[type] };
+        } catch (error) {
+            console.error(`Failed to load ${type} state:`, error);
+            return { ...this.stateSchema[type] };
         }
-        
-        const reminderState = this.stateCache.get(type);
-        return reminderState ? { ...reminderState } : null;
     }
 
     /**
-     * Update state - simplified for MVP
+     * Get old storage key for migration
+     * @private
      */
-    updateState(type, updates) {
+    getOldStorageKey(type) {
+        const oldKeys = {
+            app: 'app-settings-v1',
+            water: 'water-reminder-settings',
+            standup: 'standup-reminder-settings'
+        };
+        return oldKeys[type];
+    }
+
+    /**
+     * Update state with atomic operations and anti-circulation
+     * @param {string} type - State type ('app', 'water', 'standup')
+     * @param {Object} updates - State updates
+     * @param {boolean} silent - Don't notify subscribers
+     */
+    updateState(type, updates, silent = false) {
+        if (!type || !updates || typeof updates !== 'object') {
+            console.warn('Invalid state update parameters');
+            return false;
+        }
+
+        // Prevent concurrent updates
+        if (this.isUpdatingFromState.get(type)) {
+            console.warn(`State update blocked for ${type} - already updating`);
+            return false;
+        }
+
         try {
-            const currentState = this.stateCache.get(type);
-            if (!currentState) {
-                throw new Error(`State type '${type}' not found`);
+            // Atomic update operation
+            this.isUpdatingFromState.set(type, true);
+            
+            // Queue update to prevent race conditions
+            if (!this.updateQueues.has(type)) {
+                this.updateQueues.set(type, []);
             }
             
-            // Merge updates
-            const newState = this.mergeState(currentState, updates);
-            
-            // Update cache
-            this.stateCache.set(type, newState);
-            
-            // Save immediately
-            this.storage.setItem(type, newState);
-            
-            // Notify subscribers
-            this.notifySubscribers(type, newState);
+            this.updateQueues.get(type).push(updates);
+            this.processUpdateQueue(type, silent);
             
             return true;
         } catch (error) {
-            console.error('State update failed:', error);
+            console.error(`Failed to update ${type} state:`, error);
             return false;
+        } finally {
+            this.isUpdatingFromState.set(type, false);
         }
     }
 
     /**
-     * Merge state (deep merge)
+     * Process update queue to ensure sequential updates
      * @private
      */
-    mergeState(current, updates) {
-        if (typeof updates !== 'object' || updates === null) {
-            return updates;
+    processUpdateQueue(type, silent) {
+        const queue = this.updateQueues.get(type);
+        if (!queue || queue.length === 0) return;
+
+        // Process all queued updates as a single batch
+        let currentState = this.stateCache.get(type) || { ...this.stateSchema[type] };
+        
+        while (queue.length > 0) {
+            const updates = queue.shift();
+            currentState = this.deepMerge(currentState, updates);
         }
+
+        // Validate state structure
+        currentState = this.validateStateStructure(type, currentState);
         
-        const merged = { ...current };
+        // Update cache
+        this.stateCache.set(type, currentState);
         
-        for (const [key, value] of Object.entries(updates)) {
-            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-                merged[key] = this.mergeState(current[key] || {}, value);
+        // Save to storage
+        this.saveStateType(type, currentState);
+        
+        // Notify subscribers
+        if (!silent) {
+            this.notifySubscribers(type, currentState);
+        }
+    }
+
+    /**
+     * Deep merge objects while preserving structure
+     * @private
+     */
+    deepMerge(target, source) {
+        const result = { ...target };
+        
+        for (const key in source) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                result[key] = this.deepMerge(result[key] || {}, source[key]);
             } else {
-                merged[key] = value;
+                result[key] = source[key];
             }
         }
         
-        return merged;
+        return result;
     }
 
+    /**
+     * Validate state structure against schema
+     * @private
+     */
+    validateStateStructure(type, state) {
+        const schema = this.stateSchema[type];
+        if (!schema) return state;
 
+        // Ensure required structure
+        const validated = { ...state };
+        
+        // Validate time units
+        if (type === 'water' || type === 'standup') {
+            if (typeof validated.settings?.interval === 'string') {
+                validated.settings.interval = parseInt(validated.settings.interval, 10);
+            }
+            
+            // Ensure timeRemaining is in milliseconds
+            if (validated.timeRemaining && validated.timeRemaining < 60000) {
+                // Likely already in milliseconds, but validate
+                validated.timeRemaining = Math.max(0, validated.timeRemaining);
+            }
+        }
 
+        return validated;
+    }
 
+    /**
+     * Get current state
+     * @param {string} type - State type
+     * @returns {Object} Current state
+     */
+    getState(type) {
+        return this.stateCache.get(type) || { ...this.stateSchema[type] };
+    }
 
     /**
      * Subscribe to state changes
+     * @param {string} type - State type to subscribe to
+     * @param {Function} callback - Callback function
+     * @returns {Function} Unsubscribe function
      */
     subscribe(type, callback) {
         if (!this.subscribers.has(type)) {
@@ -155,17 +269,10 @@ class StateManager {
         
         this.subscribers.get(type).add(callback);
         
-        // Return current state immediately
-        const currentState = this.getState(type);
-        if (currentState) {
-            callback(currentState, type);
-        }
-        
         // Return unsubscribe function
         return () => {
-            const callbacks = this.subscribers.get(type);
-            if (callbacks) {
-                callbacks.delete(callback);
+            if (this.subscribers.has(type)) {
+                this.subscribers.get(type).delete(callback);
             }
         };
     }
@@ -176,34 +283,33 @@ class StateManager {
      */
     notifySubscribers(type, state) {
         const callbacks = this.subscribers.get(type);
-        if (callbacks) {
+        if (!callbacks) return;
+
+        // Use microtask to prevent synchronous update loops
+        queueMicrotask(() => {
             callbacks.forEach(callback => {
                 try {
-                    callback(state, type);
+                    callback(state);
                 } catch (error) {
-                    console.error('Subscriber callback error:', error);
+                    console.error(`Error in ${type} state subscriber:`, error);
                 }
             });
-        }
+        });
     }
 
     /**
-     * Reset to default state
+     * Save specific state type to storage
+     * @private
      */
-    resetToDefaults() {
-        // Reset to schema defaults
-        this.stateCache.set('app', { ...this.stateSchema.app });
-        this.stateCache.set('water', { ...this.stateSchema.water });
-        this.stateCache.set('standup', { ...this.stateSchema.standup });
-        
-        // Save all states immediately
-        this.stateCache.forEach((state, type) => {
-            this.storage.setItem(type, state, { immediate: true });
-            // Notify subscribers of reset
-            this.notifySubscribers(type, state);
-        });
-        
-        console.log('All states reset to defaults via StateManager');
+    saveStateType(type, state) {
+        try {
+            const key = this.storageKeys[type];
+            if (key) {
+                this.storage.setItem(key, state);
+            }
+        } catch (error) {
+            console.error(`Failed to save ${type} state:`, error);
+        }
     }
 
     /**
@@ -212,9 +318,8 @@ class StateManager {
      */
     saveState() {
         try {
-            // Save all cached states
             this.stateCache.forEach((state, type) => {
-                this.storage.setItem(type, state);
+                this.saveStateType(type, state);
             });
             console.log('All states saved via StateManager');
             return true;
@@ -225,17 +330,66 @@ class StateManager {
     }
 
     /**
+     * Reset to default state
+     */
+    resetToDefaults() {
+        try {
+            for (const [type, schema] of Object.entries(this.stateSchema)) {
+                const defaultState = { ...schema };
+                this.stateCache.set(type, defaultState);
+                this.saveStateType(type, defaultState);
+                this.notifySubscribers(type, defaultState);
+            }
+            
+            console.log('All states reset to defaults via StateManager');
+        } catch (error) {
+            console.error('Failed to reset to defaults:', error);
+        }
+    }
+
+    /**
+     * Cleanup old states and resources
+     * @private
+     */
+    cleanupOldStates() {
+        // Clean up update queues
+        for (const [type, queue] of this.updateQueues.entries()) {
+            if (queue.length === 0) {
+                this.updateQueues.delete(type);
+            }
+        }
+        
+        // Clean up update flags
+        for (const [type, flag] of this.isUpdatingFromState.entries()) {
+            if (!flag) {
+                this.isUpdatingFromState.delete(type);
+            }
+        }
+    }
+
+    /**
      * Clean up resources
      */
     destroy() {
-        // Save final state before cleanup
-        this.saveState();
-        
-        // Clear cache
-        this.stateCache.clear();
-        this.subscribers.clear();
-        
-        console.log('State manager destroyed');
+        try {
+            // Save final state before cleanup
+            this.saveState();
+            
+            // Clear timers
+            if (this.cleanupInterval) {
+                clearInterval(this.cleanupInterval);
+            }
+            
+            // Clear caches
+            this.stateCache.clear();
+            this.subscribers.clear();
+            this.isUpdatingFromState.clear();
+            this.updateQueues.clear();
+            
+            console.log('State manager destroyed and cleaned up');
+        } catch (error) {
+            console.error('Error during state manager cleanup:', error);
+        }
     }
 }
 

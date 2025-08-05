@@ -101,12 +101,10 @@ class StorageManager {
 class UIController {
   constructor()
   initializeUI()            // Initialize interface
-  updateStatus(type, status) // Update status display
   showSettings()            // Show settings panel
   hideSettings()            // Hide settings panel
   bindEvents()              // Bind event listeners
 }
-```
 
 **Responsibilities:**
 - Manage user interface state
