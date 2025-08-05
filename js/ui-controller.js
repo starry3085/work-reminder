@@ -22,11 +22,9 @@ class UIController {
 
         // DOM references with null safety
         this.elements = {
-            waterTimer: null,
-            waterProgress: null,
+            waterCountdown: null,
             waterBtn: null,
-            standupTimer: null,
-            standupProgress: null,
+            standupCountdown: null,
             standupBtn: null,
             settingsModal: null,
             settingsBtn: null,
@@ -88,11 +86,9 @@ class UIController {
      */
     bindElements() {
         const selectors = {
-            waterTimer: '#water-timer',
-            waterProgress: '#water-progress',
+            waterCountdown: '#water-countdown',
             waterBtn: '#water-toggle',
-            standupTimer: '#standup-timer',
-            standupProgress: '#standup-progress',
+            standupCountdown: '#standup-countdown',
             standupBtn: '#standup-toggle',
             settingsModal: '#settings-modal',
             settingsBtn: '#settings-btn',
@@ -209,11 +205,10 @@ class UIController {
     updateReminderUI(type) {
         try {
             const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
-            const timerElement = this.elements[`${type}Timer`];
-            const progressElement = this.elements[`${type}Progress`];
+            const countdownElement = this.elements[`${type}Countdown`];
             const btnElement = this.elements[`${type}Btn`];
 
-            if (!timerElement || !progressElement || !btnElement) {
+            if (!countdownElement || !btnElement) {
                 console.warn(`Missing UI elements for ${type}`);
                 return;
             }
@@ -225,16 +220,10 @@ class UIController {
 
             const isActive = reminder.isActive;
             const timeRemaining = Math.max(0, reminder.getTimeRemaining?.() || 0);
-            const interval = reminder.interval || 30;
-            const totalTime = interval * 60 * 1000;
 
             if (isActive) {
-                const progress = Math.max(0, Math.min(100, ((totalTime - timeRemaining) / totalTime) * 100));
                 const formattedTime = this.formatTime(timeRemaining);
-
-                timerElement.textContent = formattedTime;
-                progressElement.style.width = `${progress}%`;
-                progressElement.className = `progress-fill ${type}-progress`;
+                countdownElement.textContent = formattedTime;
                 btnElement.textContent = 'Stop';
                 btnElement.className = `btn btn-${type} btn-stop`;
             } else {
@@ -252,15 +241,10 @@ class UIController {
      * @private
      */
     setReminderInactive(type) {
-        const timerElement = this.elements[`${type}Timer`];
-        const progressElement = this.elements[`${type}Progress`];
+        const countdownElement = this.elements[`${type}Countdown`];
         const btnElement = this.elements[`${type}Btn`];
 
-        if (timerElement) timerElement.textContent = 'Ready';
-        if (progressElement) {
-            progressElement.style.width = '0%';
-            progressElement.className = `progress-fill ${type}-progress`;
-        }
+        if (countdownElement) countdownElement.textContent = 'Ready';
         if (btnElement) {
             btnElement.textContent = 'Start';
             btnElement.className = `btn btn-${type}`;
