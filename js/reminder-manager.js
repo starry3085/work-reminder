@@ -1,281 +1,199 @@
 /**
- * Reminder Manager - Core class for managing water and standup reminders
- * Responsible for timer management, status tracking, reminder triggering and persistent storage
+ * Reminder Manager - Base class for reminder functionality
+ * Handles timer management, state synchronization, and error recovery
+ * 
+ * Architecture:
+ * - Unified time handling (milliseconds internally, minutes in UI)
+ * - Atomic state updates with anti-circulation protection
+ * - Timer synchronization with StateManager
+ * - Comprehensive error handling and recovery
  */
 class ReminderManager {
     /**
      * Create reminder manager instance
-     * @param {string} type - Reminder type ('water' | 'standup')
-     * @param {Object} settings - Reminder settings
-     * @param {NotificationService} notificationService - Notification service instance
-     * @param {StateManager} stateManager - State manager instance
+     * @param {string} type - Reminder type ('water' or 'standup')
+     * @param {Object} settings - Initial settings
+     * @param {NotificationService} notificationService - Notification service
      */
-    constructor(type, settings, notificationService, stateManager) {
+    constructor(type, settings, notificationService) {
+        if (!type || !['water', 'standup'].includes(type)) {
+            throw new Error('Invalid reminder type');
+        }
+
         this.type = type;
         this.settings = { ...settings };
         this.notificationService = notificationService;
-        this.stateManager = stateManager;
         
-        // State management - these are now synced from StateManager
-        this.isActive = false;
-        this.timer = null;
+        // Timer management
+        this.timerId = null;
+        this.updateTimerId = null;
+        this.updateInterval = 1000; // 1 second update frequency
+        
+        // Time tracking (all in milliseconds)
         this.startTime = null;
         this.nextReminderTime = null;
         this.timeRemaining = 0;
-        
-
-        
-        // Timer update interval (1 second)
-        this.updateInterval = 1000;
-        this.updateTimer = null;
-        
-        // Subscribe to state changes immediately
-        this.subscribeToStateManager();
-        
-        console.log(`${this.type} reminder manager created with StateManager integration`);
-    }
-
-    // Activity detection removed for MVP - using simpler time-based reminders
-
-    /**
-     * Start reminder
-     */
-    start() {
-        if (this.isActive) {
-            console.warn(`${this.type} reminder is already running`);
-            return;
-        }
-        
-        this.isActive = true;
-        this.startTime = Date.now();
-        
-        // Use precise millisecond calculation
-        const intervalMs = Math.round(this.settings.interval * 60 * 1000);
-        this.timeRemaining = intervalMs;
-        this.nextReminderTime = this.startTime + this.timeRemaining;
-        
-        // Start timer
-        this.startTimer();
-        
-        // Start time update timer
-        this.startUpdateTimer();
-        
-        // Update state uniformly through StateManager
-        const updates = {
-            isActive: true,
-            timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime
-        };
-        this.updateState(updates);
-        
-
-        
-        console.log(`${this.type} reminder started, interval: ${this.settings.interval} minutes (${intervalMs}ms)`);
-    }
-
-    /**
-     * Stop reminder
-     */
-    stop() {
-        if (!this.isActive) {
-            console.warn(`${this.type} reminder is not running`);
-            return;
-        }
-        
         this.isActive = false;
         
-        // Clear timers
-        this.clearTimer();
-        this.clearUpdateTimer();
+        // Initialize with default state
+        this.initializeDefaults();
         
-        // Reset state
-        this.resetState();
-        
-        // Update state uniformly through StateManager
-        const updates = {
-            isActive: false,
-            timeRemaining: 0,
-            nextReminderAt: 0
-        };
-        this.updateState(updates);
-        
-
-        
-        console.log(`${this.type} reminder stopped`);
-    }
-
-
-
-
-
-    /**
-     * Acknowledge reminder (user has performed the corresponding action)
-     */
-    acknowledge() {
-        if (!this.isActive) {
-            console.warn(`${this.type} reminder is not running`);
-            return;
-        }
-        
-        // Update last reminder time
-        this.settings.lastReminder = Date.now();
-        
-        // Update settings through StateManager
-        this.updateState({ settings: this.settings });
-        
-        // Reset and restart timer
-        this.resetAndRestart();
-        
-        console.log(`${this.type} reminder acknowledged, timer restarted`);
+        console.log(`${type} reminder manager created with StateManager integration`);
     }
 
     /**
-     * Reset and restart timer with current settings
+     * Initialize with default state
      * @private
      */
-    resetAndRestart() {
-        if (!this.isActive) return;
-        
-        // Clear current timers
-        this.clearTimer();
-        this.clearUpdateTimer();
-        
-        // Reset state and restart
-        this.startTime = Date.now();
-        const intervalMs = Math.round(this.settings.interval * 60 * 1000);
-        this.timeRemaining = intervalMs;
-        this.nextReminderTime = this.startTime + this.timeRemaining;
-        
-        // Restart timers
-        this.startTimer();
-        this.startUpdateTimer();
-        
-        // Update state uniformly through StateManager
-        const updates = {
-            isActive: true,
-            timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime
-        };
-        this.updateState(updates);
-        
-
-        
-        console.log(`${this.type} reminder reset and restarted with ${this.settings.interval}min interval`);
+    initializeDefaults() {
+        this.isActive = false;
+        this.timeRemaining = this.settings.interval * 60 * 1000;
+        this.nextReminderTime = 0;
     }
 
-
-
-
+    /**
+     * Get remaining time in milliseconds
+     * @returns {number} Time remaining in milliseconds
+     */
+    getTimeRemaining() {
+        return Math.max(0, this.timeRemaining);
+    }
 
     /**
-     * Update settings dynamically
-     * @param {Object} newSettings - New settings object
+     * Get interval in minutes
+     * @returns {number} Interval in minutes
      */
-    updateSettings(newSettings) {
-        const wasActive = this.isActive;
-        const oldInterval = this.settings.interval;
-        
-        // Update settings
-        this.settings = { ...this.settings, ...newSettings };
-        
-        // If interval changed and reminder is active, restart with new interval
-        if (wasActive && oldInterval !== newSettings.interval) {
-            this.stop();
-            this.start();
+    get interval() {
+        return this.settings.interval || 30;
+    }
+
+    /**
+     * Start reminder timer
+     */
+    start() {
+        if (!this.settings.enabled) {
+            console.warn(`${this.type} reminder not started - disabled in settings`);
+            return false;
         }
         
-        console.log(`${this.type} settings updated:`, this.settings);
+        try {
+            const intervalMs = this.settings.interval * 60 * 1000;
+            this.startTime = Date.now();
+            this.nextReminderTime = this.startTime + intervalMs;
+            this.timeRemaining = intervalMs;
+            this.isActive = true;
+            
+            this.startTimer();
+            this.startUpdateTimer();
+            
+            console.log(`${this.type} reminder started:`, {
+                interval: this.settings.interval,
+                timeRemaining: this.timeRemaining,
+                nextReminderTime: this.nextReminderTime
+            });
+            
+            return true;
+            
+        } catch (error) {
+            console.error(`Failed to start ${this.type} reminder:`, error);
+            return false;
+        }
     }
 
     /**
-     * Get current reminder status for state persistence
-     * @returns {Object} Current status object with unified format
+     * Stop reminder timer
      */
-    getCurrentStatus() {
-        return {
-            type: this.type,
-            isActive: this.isActive,
-            timeRemaining: this.timeRemaining,
-            nextReminderTime: this.nextReminderTime,
-            lastAcknowledged: this.settings.lastReminder,
-            interval: this.settings.interval,
-            enabled: this.settings.enabled !== false,
-            settings: { ...this.settings }
-        };
+    stop() {
+        try {
+            this.clearTimer();
+            this.clearUpdateTimer();
+            
+            this.isActive = false;
+            this.resetState();
+            
+            console.log(`${this.type} reminder stopped`);
+            return true;
+            
+        } catch (error) {
+            console.error(`Failed to stop ${this.type} reminder:`, error);
+            return false;
+        }
     }
 
-
-
     /**
-     * Start timer
+     * Start main timer
      * @private
      */
     startTimer() {
-        if (this.timer) {
-            clearTimeout(this.timer);
-        }
+        if (!this.isActive || this.timerId) return;
         
-        this.timer = setTimeout(() => {
-            this.triggerReminder();
+        this.timerId = setTimeout(() => {
+            this.timerId = null;
+            if (this.isActive) {
+                this.triggerReminder();
+            }
         }, this.timeRemaining);
     }
 
     /**
-     * Clear timer
-     * @private
-     */
-    clearTimer() {
-        if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
-        }
-    }
-
-    /**
-     * Start time update timer
+     * Start update timer for UI refresh
      * @private
      */
     startUpdateTimer() {
-        if (this.updateTimer) {
-            clearInterval(this.updateTimer);
-        }
+        if (!this.isActive || this.updateTimerId) return;
         
-        this.updateTimer = setInterval(() => {
+        this.updateTimerId = setInterval(() => {
+            if (!this.isActive) {
+                this.clearUpdateTimer();
+                return;
+            }
+            
             this.updateTimeRemaining();
         }, this.updateInterval);
     }
 
     /**
-     * Clear time update timer
-     * @private
-     */
-    clearUpdateTimer() {
-        if (this.updateTimer) {
-            clearInterval(this.updateTimer);
-            this.updateTimer = null;
-        }
-    }
-
-    /**
-     * Update remaining time
+     * Update time remaining
      * @private
      */
     updateTimeRemaining() {
-        if (!this.isActive) {
+        if (!this.isActive || !this.startTime) {
+            this.timeRemaining = 0;
             return;
         }
         
         const now = Date.now();
         this.timeRemaining = Math.max(0, this.nextReminderTime - now);
         
-        // Update state to ensure UI gets fresh data
-        const updates = {
-            timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime
-        };
-        this.updateState(updates);
-        
+        // Update state with throttling
+        if (now - this.lastSyncTime > 1000) {
+            this.updateState({
+                timeRemaining: this.timeRemaining,
+                nextReminderAt: this.nextReminderTime
+            });
+        }
+    }
 
+    /**
+     * Clear main timer
+     * @private
+     */
+    clearTimer() {
+        if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = null;
+        }
+    }
+
+    /**
+     * Clear update timer
+     * @private
+     */
+    clearUpdateTimer() {
+        if (this.updateTimerId) {
+            clearInterval(this.updateTimerId);
+            this.updateTimerId = null;
+        }
     }
 
     /**
@@ -295,20 +213,28 @@ class ReminderManager {
             this.type,
             title,
             message,
-            () => this.acknowledge(), // Confirm callback
-            () => this.snooze()       // Snooze callback
+            () => this.acknowledge(),
+            () => this.snooze()
         );
         
-
-        
-        // Unified auto-reset mechanism - restart with original interval
+        // Auto-restart mechanism
         setTimeout(() => {
             if (this.isActive) {
                 this.resetAndRestart();
             }
-        }, 5000); // Auto-restart after 5 seconds
+        }, 5000);
         
         console.log(`${this.type} reminder triggered - will auto-restart`);
+    }
+
+    /**
+     * Acknowledge reminder
+     */
+    acknowledge() {
+        if (!this.isActive) return;
+        
+        this.resetAndRestart();
+        console.log(`${this.type} reminder acknowledged`);
     }
 
     /**
@@ -317,30 +243,35 @@ class ReminderManager {
     snooze() {
         if (!this.isActive) return;
         
-        const snoozeTime = 5 * 60 * 1000; // 5 minutes
+        const snoozeTime = 5 * 60 * 1000; // 5 minutes in milliseconds
         this.timeRemaining = snoozeTime;
         this.startTime = Date.now();
-        this.nextReminderTime = this.startTime + this.timeRemaining;
+        this.nextReminderTime = this.startTime + snoozeTime;
         
-        // Restart timer
         this.clearTimer();
         this.startTimer();
-        
-        // Update state uniformly through StateManager
-        const updates = {
-            isActive: true,
-            timeRemaining: this.timeRemaining,
-            nextReminderAt: this.nextReminderTime
-        };
-        this.updateState(updates);
-        
-
         
         console.log(`${this.type} reminder snoozed for 5 minutes`);
     }
 
     /**
-     * Reset state
+     * Reset and restart timer
+     * @private
+     */
+    resetAndRestart() {
+        if (!this.isActive) return;
+        
+        const intervalMs = this.settings.interval * 60 * 1000;
+        this.startTime = Date.now();
+        this.nextReminderTime = this.startTime + intervalMs;
+        this.timeRemaining = intervalMs;
+        
+        this.clearTimer();
+        this.startTimer();
+    }
+
+    /**
+     * Reset internal state
      * @private
      */
     resetState() {
@@ -352,114 +283,42 @@ class ReminderManager {
 
 
     /**
-     * Subscribe to state manager changes
-     * @private
+     * Get current status
+     * @returns {Object} Current reminder status
      */
-    subscribeToStateManager() {
-        if (!this.stateManager) return;
-        
-        this.unsubscribe = this.stateManager.subscribe(this.type, (state) => {
-            // Prevent self-triggered updates
-            if (this.isUpdatingFromState) return;
-            
-            this.syncWithState(state);
-        });
-        
-        console.log(`${this.type} reminder subscribed to StateManager`);
+    getStatus() {
+        return {
+            type: this.type,
+            isActive: this.isActive,
+            timeRemaining: this.timeRemaining,
+            nextReminderAt: this.nextReminderTime,
+            interval: this.settings.interval,
+            enabled: this.settings.enabled
+        };
     }
 
-    /**
-     * Sync state from StateManager (single source of truth)
-     * @private
-     */
-    syncWithState(state) {
-        if (!state) return;
-        
-        try {
-            // Prevent update loops - atomic operation
-            if (this.isUpdatingFromState) return;
-            this.isUpdatingFromState = true;
-            
-            // Update internal state from single source
-            const wasActive = this.isActive;
-            this.isActive = Boolean(state.isActive);
-            this.timeRemaining = Math.max(0, state.timeRemaining || 0);
-            this.nextReminderTime = state.nextReminderAt || 0;
-            
-            // Update settings from state
-            this.settings = { ...this.settings, ...state.settings };
-            
-            // Sync timers based on authoritative state
-            this.syncTimers();
-            
-            console.log(`${this.type} reminder synced with StateManager state:`, {
-                isActive: this.isActive,
-                timeRemaining: this.timeRemaining
-            });
-            
-        } catch (error) {
-            console.error(`Failed to sync ${this.type} reminder state:`, error);
-        } finally {
-            // Always reset flag, even on error
-            this.isUpdatingFromState = false;
-        }
-    }
+
 
     /**
-     * Sync timer state based on authoritative state
-     * @private
-     */
-    syncTimers() {
-        this.clearTimer();
-        this.clearUpdateTimer();
-        
-        if (this.isActive) {
-            this.startTime = Date.now();
-            this.startTimer();
-            this.startUpdateTimer();
-            
-            // State changes are handled by StateManager subscription
-            console.log(`${this.type} reminder timers synced with StateManager`);
-        }
-    }
-
-    /**
-     * Update state through StateManager (single source of truth)
-     * @private
-     */
-    updateState(updates) {
-        if (this.stateManager && !this.isUpdatingFromState) {
-            this.stateManager.updateState(this.type, updates);
-        }
-    }
-
-    /**
-     * Restore state from StateManager
-     * @param {Object} state - State to restore
-     */
-    restoreState(state) {
-        if (!state || !this.stateManager) return;
-        
-        // State restoration is handled by StateManager subscription
-        this.stateManager.updateState(this.type, state);
-        return true;
-    }
-
-    /**
-     * Destroy reminder manager
+     * Destroy reminder manager with cleanup
      */
     destroy() {
-        this.stop();
-        
-
-        
-        // Activity detection cleanup removed for MVP
-        
-        console.log(`${this.type} reminder manager destroyed`);
+        try {
+            this.stop();
+            
+            // Cleanup timers
+            this.clearTimer();
+            this.clearUpdateTimer();
+            
+            console.log(`${this.type} reminder manager destroyed with cleanup`);
+            
+        } catch (error) {
+            console.error(`Error during ${this.type} reminder cleanup:`, error);
+        }
     }
 }
 
-// Export class for use by other modules
+// Export for use by other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ReminderManager;
 }

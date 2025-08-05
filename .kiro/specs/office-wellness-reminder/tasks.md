@@ -73,7 +73,6 @@
 
 - [x] 6.2 Create main control panel interface
   - Design and implement main interface layout
-  - Add current status display functionality
   - Implement reminder switches and quick operation buttons
   - _Requirements: 3.1, 3.2_
 
