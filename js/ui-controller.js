@@ -24,16 +24,10 @@ class UIController {
         this.elements = {
             waterCountdown: null,
             waterBtn: null,
+            waterInterval: null,
             standupCountdown: null,
             standupBtn: null,
-            settingsModal: null,
-            settingsBtn: null,
-            closeSettings: null,
-            saveSettings: null,
-            mobileToggle: null,
-            desktopToggle: null,
-            mobileMenu: null,
-            overlay: null
+            standupInterval: null
         };
 
         // Event listeners registry for cleanup
@@ -77,7 +71,11 @@ class UIController {
     setReminders(waterReminder, standupReminder) {
         this.waterReminder = waterReminder;
         this.standupReminder = standupReminder;
-        this.updateAllUI();
+        
+        // Force immediate UI update
+        setTimeout(() => {
+            this.updateAllUI();
+        }, 50);
     }
 
     /**
@@ -88,21 +86,16 @@ class UIController {
         const selectors = {
             waterCountdown: '#water-countdown',
             waterBtn: '#water-toggle',
+            waterInterval: '#water-interval-display',
             standupCountdown: '#standup-countdown',
             standupBtn: '#standup-toggle',
-            settingsModal: '#settings-modal',
-            settingsBtn: '#settings-btn',
-            closeSettings: '#close-settings',
-            saveSettings: '#save-settings',
-            mobileToggle: '#mobile-toggle',
-            desktopToggle: '#desktop-toggle',
-            mobileMenu: '#mobile-menu',
-            overlay: '#overlay'
+            standupInterval: '#standup-interval-display'
         };
 
         Object.keys(selectors).forEach(key => {
             try {
                 this.elements[key] = document.querySelector(selectors[key]);
+
             } catch (error) {
                 console.warn(`Element not found: ${selectors[key]}`);
                 this.elements[key] = null;
@@ -111,36 +104,23 @@ class UIController {
     }
 
     /**
-     * Setup event listeners with automatic cleanup
+     * Setup event listeners - MVP version
      * @private
      */
     setupEventListeners() {
-        // Button event listeners
+        // Core button event listeners
         this.addEventListener('waterBtn', 'click', () => this.toggleReminder('water'));
         this.addEventListener('standupBtn', 'click', () => this.toggleReminder('standup'));
-        this.addEventListener('settingsBtn', 'click', () => this.showSettings());
-        this.addEventListener('closeSettings', 'click', () => this.hideSettings());
-        this.addEventListener('saveSettings', 'click', () => this.saveSettings());
-        this.addEventListener('mobileToggle', 'click', () => this.toggleMobileMenu());
-        this.addEventListener('desktopToggle', 'click', () => this.toggleMobileMenu());
-        this.addEventListener('overlay', 'click', () => this.hideSettings());
 
-        // Window resize with throttling
+        // Interval input change listeners
+        this.addEventListener('waterInterval', 'change', () => this.updateInterval('water'));
+        this.addEventListener('standupInterval', 'change', () => this.updateInterval('standup'));
+
+        // Window resize for mobile detection
         this.addEventListener(window, 'resize', this.throttle(() => {
             this.checkMobile();
             this.updateLayout();
         }, 250));
-
-        // Keyboard shortcuts
-        this.addEventListener(document, 'keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.hideSettings();
-                this.hideMobileMenu();
-            }
-        });
-
-        // Prevent duplicate listeners on mobile/desktop toggle
-        this.removeDuplicateListeners();
     }
 
     /**
@@ -181,24 +161,12 @@ class UIController {
         }
     }
 
-    /**
-     * Remove duplicate listeners for mobile/desktop toggle
-     * @private
-     */
-    removeDuplicateListeners() {
-        // Ensure we don't have multiple resize listeners
-        const resizeKey = 'window-resize';
-        if (this.eventListeners.has(resizeKey)) {
-            const listener = this.eventListeners.get(resizeKey);
-            window.removeEventListener('resize', listener.handler);
-            this.eventListeners.delete(resizeKey);
-        }
-    }
+    // Duplicate listener removal not needed for MVP
 
 
 
     /**
-     * Update reminder UI based on reminder instance
+     * Update reminder UI based on reminder instance - MVP version
      * @param {string} type - Reminder type
      * @private
      */
@@ -219,15 +187,26 @@ class UIController {
             }
 
             const isActive = reminder.isActive;
-            const timeRemaining = Math.max(0, reminder.getTimeRemaining?.() || 0);
 
             if (isActive) {
+                // Show countdown time when active
+                const timeRemaining = Math.max(0, reminder.getTimeRemaining?.() || 0);
                 const formattedTime = this.formatTime(timeRemaining);
                 countdownElement.textContent = formattedTime;
+                
+                // Update button to Stop with warning style
                 btnElement.textContent = 'Stop';
-                btnElement.className = `btn btn-${type} btn-stop`;
+                btnElement.className = 'btn-warning';
             } else {
-                this.setReminderInactive(type);
+                // Show full interval time when inactive
+                const intervalMinutes = reminder.settings?.interval || (type === 'water' ? 30 : 45);
+                const intervalTime = intervalMinutes * 60 * 1000; // Convert to milliseconds
+                const formattedTime = this.formatTime(intervalTime);
+                countdownElement.textContent = formattedTime;
+                
+                // Update button to Start with primary style
+                btnElement.textContent = 'Start';
+                btnElement.className = 'btn-primary';
             }
 
         } catch (error) {
@@ -236,7 +215,7 @@ class UIController {
     }
 
     /**
-     * Set reminder to inactive state
+     * Set reminder to inactive state - MVP version
      * @param {string} type - Reminder type
      * @private
      */
@@ -244,39 +223,19 @@ class UIController {
         const countdownElement = this.elements[`${type}Countdown`];
         const btnElement = this.elements[`${type}Btn`];
 
-        if (countdownElement) countdownElement.textContent = 'Ready';
+        // Show full interval time instead of "Ready"
+        const defaultInterval = type === 'water' ? 30 : 45; // Default intervals
+        const intervalTime = defaultInterval * 60 * 1000; // Convert to milliseconds
+        const formattedTime = this.formatTime(intervalTime);
+
+        if (countdownElement) countdownElement.textContent = formattedTime;
         if (btnElement) {
             btnElement.textContent = 'Start';
-            btnElement.className = `btn btn-${type}`;
+            btnElement.className = 'btn-primary';
         }
     }
 
-    /**
-     * Update settings UI
-     * @param {Object} settings - App settings
-     * @private
-     */
-    updateSettingsUI(settings) {
-        if (!settings) return;
-
-        const inputs = {
-            'water-interval': settings.waterInterval,
-            'standup-interval': settings.standupInterval,
-            'water-enabled': settings.waterEnabled,
-            'standup-enabled': settings.standupEnabled
-        };
-
-        Object.keys(inputs).forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                if (element.type === 'checkbox') {
-                    element.checked = Boolean(inputs[id]);
-                } else {
-                    element.value = inputs[id] || '';
-                }
-            }
-        });
-    }
+    // Settings UI methods removed for MVP - using inline inputs
 
     /**
      * Toggle reminder state
@@ -304,85 +263,33 @@ class UIController {
     }
 
     /**
-     * Show settings modal
+     * Update reminder interval from input
+     * @param {string} type - Reminder type
      * @private
      */
-    showSettings() {
-        if (this.elements.settingsModal) {
-            this.elements.settingsModal.classList.add('active');
-            if (this.elements.overlay) {
-                this.elements.overlay.classList.add('active');
-            }
-        }
-    }
-
-    /**
-     * Hide settings modal
-     * @private
-     */
-    hideSettings() {
-        if (this.elements.settingsModal) {
-            this.elements.settingsModal.classList.remove('active');
-            if (this.elements.overlay) {
-                this.elements.overlay.classList.remove('active');
-            }
-        }
-    }
-
-    /**
-     * Toggle mobile menu
-     * @private
-     */
-    toggleMobileMenu() {
-        if (this.elements.mobileMenu) {
-            this.elements.mobileMenu.classList.toggle('active');
-            if (this.elements.overlay) {
-                this.elements.overlay.classList.toggle('active');
-            }
-        }
-    }
-
-    /**
-     * Hide mobile menu
-     * @private
-     */
-    hideMobileMenu() {
-        if (this.elements.mobileMenu) {
-            this.elements.mobileMenu.classList.remove('active');
-            if (this.elements.overlay) {
-                this.elements.overlay.classList.remove('active');
-            }
-        }
-    }
-
-    /**
-     * Save settings from modal
-     * @private
-     */
-    saveSettings() {
+    updateInterval(type) {
         try {
-            const settings = {
-                waterInterval: parseInt(document.getElementById('water-interval')?.value || '30', 10),
-                standupInterval: parseInt(document.getElementById('standup-interval')?.value || '45', 10),
-                waterEnabled: document.getElementById('water-enabled')?.checked || false,
-                standupEnabled: document.getElementById('standup-enabled')?.checked || false
-            };
-
-            // Directly update reminder settings
-            if (this.waterReminder) {
-                this.waterReminder.settings.interval = settings.waterInterval;
-                this.waterReminder.settings.enabled = settings.waterEnabled;
-            }
+            const intervalElement = this.elements[`${type}Interval`];
+            const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
             
-            if (this.standupReminder) {
-                this.standupReminder.settings.interval = settings.standupInterval;
-                this.standupReminder.settings.enabled = settings.standupEnabled;
+            if (!intervalElement || !reminder) return;
+            
+            const newInterval = parseInt(intervalElement.value, 10);
+            if (newInterval >= 1 && newInterval <= 120) {
+                reminder.settings.interval = newInterval;
+                
+                // If reminder is not active, update the countdown display
+                if (!reminder.isActive) {
+                    this.updateReminderUI(type);
+                }
+                
+                console.log(`${type} interval updated to ${newInterval} minutes`);
+            } else {
+                // Reset to previous valid value
+                intervalElement.value = reminder.settings.interval;
             }
-
-            this.hideSettings();
-            console.log('Settings saved:', settings);
         } catch (error) {
-            console.error('Failed to save settings:', error);
+            console.error(`Failed to update ${type} interval:`, error);
         }
     }
 
