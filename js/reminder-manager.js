@@ -1,11 +1,9 @@
 /**
  * Reminder Manager - Base class for reminder functionality
- * Handles timer management, state synchronization, and error recovery
+ * Handles timer management and error recovery
  * 
  * Architecture:
  * - Unified time handling (milliseconds internally, minutes in UI)
- * - Atomic state updates with anti-circulation protection
- * - Timer synchronization with StateManager
  * - Comprehensive error handling and recovery
  */
 class ReminderManager {
@@ -38,7 +36,7 @@ class ReminderManager {
         // Initialize with default state
         this.initializeDefaults();
         
-        console.log(`${type} reminder manager created with StateManager integration`);
+        console.log(`${type} reminder manager created`);
     }
 
     /**
@@ -164,14 +162,6 @@ class ReminderManager {
         
         const now = Date.now();
         this.timeRemaining = Math.max(0, this.nextReminderTime - now);
-        
-        // Update state with throttling
-        if (now - this.lastSyncTime > 1000) {
-            this.updateState({
-                timeRemaining: this.timeRemaining,
-                nextReminderAt: this.nextReminderTime
-            });
-        }
     }
 
     /**

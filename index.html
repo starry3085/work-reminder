@@ -113,7 +113,6 @@
     <!-- JavaScript Files -->
     <script src="js/error-handler.js" onerror="console.error('Failed to load error-handler.js')"></script>
     <script src="js/storage-manager.js" onerror="console.error('Failed to load storage-manager.js')"></script>
-    <script src="js/state-manager.js" onerror="console.error('Failed to load state-manager.js')"></script>
     <script src="js/app-settings.js" onerror="console.error('Failed to load app-settings.js')"></script>
     <script src="js/notification-service.js" onerror="console.error('Failed to load notification-service.js')"></script>
     <script src="js/reminder-manager.js" onerror="console.error('Failed to load reminder-manager.js')"></script>
@@ -127,7 +126,7 @@
     <script>
         console.log('All scripts loaded, checking class availability...');
         const expectedClasses = [
-            'ErrorHandler', 'StorageManager', 'StateManager', 'AppSettings',
+            'ErrorHandler', 'StorageManager', 'AppSettings',
             'NotificationService', 'ReminderManager',
             'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'OfficeWellnessApp'
         ];
@@ -151,7 +150,7 @@
 
                 // Check if required classes exist
                 const requiredClasses = [
-                    'ErrorHandler', 'StorageManager', 'StateManager', 'AppSettings',
+                    'ErrorHandler', 'StorageManager', 'AppSettings',
                     'NotificationService', 'ReminderManager',
                     'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'OfficeWellnessApp'
                 ];

@@ -150,7 +150,7 @@ class OfficeWellnessApp {
             const notificationService = new NotificationService();
             
             // Load saved settings from storage
-            const savedSettings = this.storage?.loadSettings() || {};
+            const savedSettings = this.storage?.getItem('appSettings') || {};
             
             // Water Reminder
             this.waterReminder = new WaterReminder('water', {
@@ -247,7 +247,7 @@ class OfficeWellnessApp {
                 }
             };
             
-            this.storage.saveSettings(settings);
+            this.storage.setItem('appSettings', settings);
         } catch (error) {
             console.warn('Failed to save settings:', error);
         }
@@ -282,11 +282,6 @@ class OfficeWellnessApp {
     async attemptRecovery() {
         try {
             console.log('🔄 Starting recovery process...');
-            
-            // Save current state before recovery
-            if (this.stateManager) {
-                await this.stateManager.saveState();
-            }
             
             // Reinitialize components
             await this.cleanup();
@@ -374,10 +369,6 @@ class OfficeWellnessApp {
     handleAppBackground() {
         try {
             console.log('📱 App entering background');
-            
-            // Pause timers when app is in background
-            if (this.waterReminder) this.waterReminder.pause();
-            if (this.standupReminder) this.standupReminder.pause();
             
             // Save settings before backgrounding
             this.saveSettings();
