@@ -1,10 +1,10 @@
 /**
- * Application Settings Manager - Provides validation and default values only
- * StateManager is the single source of truth for all state management
+ * Application Settings Manager - Provides validation and default values
+ * Simplified settings management without StateManager dependency
  */
 class AppSettings {
     constructor() {
-        // Default settings structure - read-only reference, aligned with StateManager
+        // Default settings structure
         this.defaultSettings = {
             water: {
                 enabled: true,
@@ -14,7 +14,7 @@ class AppSettings {
             },
             standup: {
                 enabled: true,
-                interval: 30, // minutes
+                interval: 45, // minutes
                 sound: true,
                 lastReminderAt: null
             },
@@ -26,43 +26,16 @@ class AppSettings {
             appearance: {
                 language: 'en-US'
             },
-            isFirstUse: true // aligned with StateManager
+            isFirstUse: true
         };
-        
-        // StateManager reference for read-only access
-        this.stateManager = null;
     }
 
     /**
-     * Set StateManager reference for read-only access
-     * @param {StateManager} stateManager - State manager instance
-     */
-    setStateManager(stateManager) {
-        this.stateManager = stateManager;
-        console.log('AppSettings connected to StateManager (read-only)');
-    }
-
-    /**
-     * Get current settings from StateManager (read-only)
+     * Get current settings
      * @returns {Object} Current settings
      */
     getSettings() {
-        if (!this.stateManager) {
-            console.warn('StateManager not available, returning default settings');
-            return { ...this.defaultSettings };
-        }
-
-        const waterState = this.stateManager.getState('water');
-        const standupState = this.stateManager.getState('standup');
-        const appState = this.stateManager.getState('app');
-        
-        return {
-            water: waterState && waterState.settings ? waterState.settings : this.defaultSettings.water,
-            standup: standupState && standupState.settings ? standupState.settings : this.defaultSettings.standup,
-            notifications: appState && appState.notifications ? appState.notifications : this.defaultSettings.notifications,
-            appearance: appState && appState.appearance ? appState.appearance : this.defaultSettings.appearance,
-            firstUse: appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.isFirstUse
-        };
+        return { ...this.defaultSettings };
     }
 
     /**
@@ -72,50 +45,6 @@ class AppSettings {
     getDefaultSettings() {
         return { ...this.defaultSettings };
     }
-
-    // REMOVED: AppSettings no longer saves settings directly
-    // All state changes must go through StateManager only
-
-
-
-    /**
-     * Deep merge settings or state objects
-     * @param {Object} target - Target object
-     * @param {Object} source - Source object to merge
-     * @returns {Object} Merged object
-     * @private
-     */
-    mergeSettings(target, source) {
-        if (!source || typeof source !== 'object') {
-            return target;
-        }
-        
-        const result = { ...target };
-        
-        for (const key in source) {
-            if (source.hasOwnProperty(key)) {
-                if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-                    result[key] = this.mergeSettings(result[key] || {}, source[key]);
-                } else {
-                    result[key] = source[key];
-                }
-            }
-        }
-        
-        return result;
-    }
-
-    // REMOVED: AppSettings no longer updates settings directly
-    // All settings updates must go through StateManager only
-
-
-
-    // REMOVED: AppSettings no longer resets settings directly
-    // All settings resets must go through StateManager only
-
-
-
-
 
     /**
      * Validate if settings are valid
@@ -153,20 +82,12 @@ class AppSettings {
         };
     }
 
-    // REMOVED: AppSettings no longer manages state directly
-    // All state access must go through StateManager only
-
     /**
-     * Check if first time using application (read-only from StateManager)
+     * Check if first time using application
      * @returns {boolean} Whether first time use
      */
     isFirstUse() {
-        if (!this.stateManager) {
-            return this.defaultSettings.firstUse;
-        }
-        
-        const appState = this.stateManager.getState('app');
-        return appState && appState.isFirstUse !== undefined ? appState.isFirstUse : this.defaultSettings.firstUse;
+        return this.defaultSettings.isFirstUse;
     }
 
     /**

@@ -384,9 +384,18 @@ class UIController {
                 standupEnabled: document.getElementById('standup-enabled')?.checked || false
             };
 
-            this.stateManager.updateState('app', { settings });
-            this.hideSettings();
+            // Directly update reminder settings
+            if (this.waterReminder) {
+                this.waterReminder.settings.interval = settings.waterInterval;
+                this.waterReminder.settings.enabled = settings.waterEnabled;
+            }
             
+            if (this.standupReminder) {
+                this.standupReminder.settings.interval = settings.standupInterval;
+                this.standupReminder.settings.enabled = settings.standupEnabled;
+            }
+
+            this.hideSettings();
             console.log('Settings saved:', settings);
         } catch (error) {
             console.error('Failed to save settings:', error);

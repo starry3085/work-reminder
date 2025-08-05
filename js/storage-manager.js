@@ -141,7 +141,8 @@ class StorageManager {
      * @private
      */
     generateStorageKey(key) {
-        const normalizedKey = this.storageKeys[key] || key.replace(/_/g, '-');
+        const keyStr = String(key || '');
+        const normalizedKey = this.storageKeys[keyStr] || keyStr.replace(/_/g, '-');
         return `${this.STORAGE_PREFIX}.${normalizedKey}`;
     }
 
@@ -313,7 +314,7 @@ class StorageManager {
             }
             
             for (const [key, value] of Object.entries(backupData)) {
-                this.saveSettings(key, value);
+                this.setItem(key, value.data || value, { immediate: true });
             }
             
             return true;
