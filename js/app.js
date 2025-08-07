@@ -43,6 +43,10 @@ class OfficeWellnessApp {
             // Ensure reminders are properly set before linking to UI
             if (this.waterReminder && this.standupReminder && this.uiController) {
                 this.uiController.setReminders(this.waterReminder, this.standupReminder);
+                
+                // Sync initial intervals from HTML inputs
+                this.syncInitialIntervals();
+                
                 console.log('🔗 Reminders linked to UI controller');
             } else {
                 console.warn('⚠️ Some components not ready for linking');
@@ -180,6 +184,38 @@ class OfficeWellnessApp {
     }
 
 
+
+    /**
+     * Sync initial intervals from HTML inputs
+     * @private
+     */
+    syncInitialIntervals() {
+        try {
+            // Get HTML input values
+            const waterInput = document.querySelector('#water-interval-display');
+            const standupInput = document.querySelector('#standup-interval-display');
+            
+            if (waterInput && this.waterReminder) {
+                const waterInterval = parseInt(waterInput.value, 10);
+                if (waterInterval >= 1 && waterInterval <= 120) {
+                    this.waterReminder.settings.interval = waterInterval;
+                    this.waterReminder.timeRemaining = waterInterval * 60 * 1000;
+                }
+            }
+            
+            if (standupInput && this.standupReminder) {
+                const standupInterval = parseInt(standupInput.value, 10);
+                if (standupInterval >= 1 && standupInterval <= 120) {
+                    this.standupReminder.settings.interval = standupInterval;
+                    this.standupReminder.timeRemaining = standupInterval * 60 * 1000;
+                }
+            }
+            
+            console.log('🔄 Initial intervals synced from HTML');
+        } catch (error) {
+            console.warn('Failed to sync initial intervals:', error);
+        }
+    }
 
     /**
      * Save current settings to storage

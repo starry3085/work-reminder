@@ -249,10 +249,9 @@ class UIController {
                 btnElement.textContent = 'Stop';
                 btnElement.className = 'btn-warning';
             } else {
-                // Show actual interval time from reminder settings when inactive
-                const intervalMinutes = reminder.settings?.interval || 30;
-                const intervalTime = intervalMinutes * 60 * 1000; // Convert to milliseconds
-                const formattedTime = this.formatTime(intervalTime);
+                // Show time remaining (which should match interval when inactive)
+                const timeRemaining = Math.max(0, reminder.timeRemaining || 0);
+                const formattedTime = this.formatTime(timeRemaining);
                 countdownElement.textContent = formattedTime;
                 
                 // Update button to Start with primary style
@@ -354,8 +353,9 @@ class UIController {
             if (newInterval >= 1 && newInterval <= 120) {
                 reminder.settings.interval = newInterval;
                 
-                // If reminder is not active, update the countdown display
+                // If reminder is not active, update timeRemaining and display
                 if (!reminder.isActive) {
+                    reminder.timeRemaining = newInterval * 60 * 1000;
                     this.updateReminderUI(type);
                 }
                 
@@ -369,6 +369,8 @@ class UIController {
             this.showUserError(`Could not update ${type} interval`, error.message);
         }
     }
+
+
 
     /**
      * Check if device is mobile
