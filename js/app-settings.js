@@ -14,7 +14,7 @@ class AppSettings {
             },
             standup: {
                 enabled: true,
-                interval: 45, // minutes
+                interval: 30, // minutes
                 sound: true,
                 lastReminderAt: null
             },
