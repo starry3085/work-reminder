@@ -8,13 +8,13 @@ class AppSettings {
         this.defaultSettings = {
             water: {
                 enabled: true,
-                interval: 30, // minutes
+                interval: REMINDER_CONSTANTS.DEFAULT_INTERVAL_MINUTES, // Fixed 30 minutes
                 sound: true,
                 lastReminderAt: null
             },
             standup: {
                 enabled: true,
-                interval: 30, // minutes
+                interval: REMINDER_CONSTANTS.DEFAULT_INTERVAL_MINUTES, // Fixed 30 minutes
                 sound: true,
                 lastReminderAt: null
             },
@@ -67,10 +67,7 @@ class AppSettings {
                 return;
             }
 
-            if (!Number.isInteger(reminder.interval) || reminder.interval < 1 || reminder.interval > 120) {
-                errors.push(`${type}: interval must be between 1-120 minutes`);
-            }
-
+            // Interval is now fixed at 30 minutes, no validation needed
             if (typeof reminder.enabled !== 'boolean') {
                 errors.push(`${type}: enabled must be a boolean`);
             }
@@ -98,7 +95,7 @@ class AppSettings {
     detectForceRefresh() {
         try {
             // Check if force refresh flag exists
-            const forceRefreshFlag = sessionStorage.getItem('forceRefreshFlag');
+            const forceRefreshFlag = sessionStorage.getItem(STORAGE_CONSTANTS.FORCE_REFRESH_FLAG);
             if (forceRefreshFlag === 'true') {
                 return true;
             }
@@ -132,7 +129,7 @@ class AppSettings {
      */
     setForceRefreshFlag() {
         try {
-            sessionStorage.setItem('forceRefreshFlag', 'true');
+            sessionStorage.setItem(STORAGE_CONSTANTS.FORCE_REFRESH_FLAG, 'true');
         } catch (error) {
             console.warn('Failed to set force refresh flag:', error);
         }
@@ -144,7 +141,7 @@ class AppSettings {
      */
     clearForceRefreshFlag() {
         try {
-            sessionStorage.removeItem('forceRefreshFlag');
+            sessionStorage.removeItem(STORAGE_CONSTANTS.FORCE_REFRESH_FLAG);
         } catch (error) {
             console.warn('Failed to clear force refresh flag:', error);
         }

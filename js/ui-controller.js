@@ -15,8 +15,8 @@ class UIController {
      */
     constructor(config = {}) {
         this.config = {
-            updateInterval: 1000,
-            mobileBreakpoint: 768,
+            updateInterval: UI_CONSTANTS.UPDATE_LOOP_INTERVAL_MS,
+            mobileBreakpoint: UI_CONSTANTS.MOBILE_BREAKPOINT,
             ...config
         };
 
@@ -24,10 +24,8 @@ class UIController {
         this.elements = {
             waterCountdown: null,
             waterBtn: null,
-            waterInterval: null,
             standupCountdown: null,
-            standupBtn: null,
-            standupInterval: null
+            standupBtn: null
         };
 
         // Event listeners registry for cleanup
@@ -113,10 +111,8 @@ class UIController {
         const selectors = {
             waterCountdown: '#water-countdown',
             waterBtn: '#water-toggle',
-            waterInterval: '#water-interval-display',
             standupCountdown: '#standup-countdown',
-            standupBtn: '#standup-toggle',
-            standupInterval: '#standup-interval-display'
+            standupBtn: '#standup-toggle'
         };
 
         Object.keys(selectors).forEach(key => {
@@ -155,10 +151,6 @@ class UIController {
         // Core button event listeners
         this.addEventListener('waterBtn', 'click', () => this.toggleReminder('water'));
         this.addEventListener('standupBtn', 'click', () => this.toggleReminder('standup'));
-
-        // Interval input change listeners
-        this.addEventListener('waterInterval', 'change', () => this.updateInterval('water'));
-        this.addEventListener('standupInterval', 'change', () => this.updateInterval('standup'));
 
         // Window resize for mobile detection
         this.addEventListener(window, 'resize', this.throttle(() => {
@@ -281,7 +273,7 @@ class UIController {
 
         // Get actual interval from reminder settings
         const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
-        const interval = reminder?.settings?.interval || (type === 'water' ? 30 : 30);
+        const interval = reminder?.settings?.interval || REMINDER_CONSTANTS.DEFAULT_INTERVAL_MINUTES;
         const intervalTime = interval * 60 * 1000; // Convert to milliseconds
         const formattedTime = this.formatTime(intervalTime);
 
@@ -332,43 +324,7 @@ class UIController {
         }
     }
 
-    /**
-     * Update reminder interval from input
-     * @param {string} type - Reminder type
-     * @private
-     */
-    updateInterval(type) {
-        try {
-            const intervalElement = this.elements[`${type}Interval`];
-            const reminder = type === 'water' ? this.waterReminder : this.standupReminder;
-            
-            if (!reminder) {
-                console.warn(`${type} reminder not ready for interval update`);
-                return;
-            }
-            
-            if (!intervalElement) return;
-            
-            const newInterval = parseInt(intervalElement.value, 10);
-            if (newInterval >= 1 && newInterval <= 120) {
-                reminder.settings.interval = newInterval;
-                
-                // If reminder is not active, update timeRemaining and display
-                if (!reminder.isActive) {
-                    reminder.timeRemaining = newInterval * 60 * 1000;
-                    this.updateReminderUI(type);
-                }
-                
-                console.log(`${type} interval updated to ${newInterval} minutes`);
-            } else {
-                // Reset to previous valid value
-                intervalElement.value = reminder.settings.interval;
-            }
-        } catch (error) {
-            console.error(`Failed to update ${type} interval:`, error);
-            this.showUserError(`Could not update ${type} interval`, error.message);
-        }
-    }
+
 
 
 

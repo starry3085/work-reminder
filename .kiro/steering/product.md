@@ -12,6 +12,7 @@ Office Wellness Reminder is a lightweight, privacy-first web application that he
 - **Offline-First**: Must work without internet connection
 - **Privacy-First**: All data stays on user's device (localStorage only)
 - **Zero Setup**: No registration or external dependencies required
+- **Simplified Configuration**: Fixed 30-minute intervals reduce complexity and decision fatigue
 
 ### Target Users
 - Office workers who spend long hours at computers
@@ -23,3 +24,9 @@ Office Wellness Reminder is a lightweight, privacy-first web application that he
 - Notifications are helpful, not annoying
 - Application works reliably across all major browsers
 - Zero data privacy concerns
+- Fixed 30-minute intervals provide optimal health benefits without overwhelming users
+
+### Design Decisions
+- **Fixed 30-minute intervals**: Based on health research showing optimal reminder frequency for hydration and posture breaks
+- **No interval customization**: Reduces cognitive load and prevents analysis paralysis
+- **Centralized constants**: Easy maintenance and consistent behavior across the application

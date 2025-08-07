@@ -16,6 +16,7 @@
 - **Storage**: localStorage API with memory storage fallback
 - **Notifications**: Web Notifications API with in-page fallback
 - **PWA**: Progressive Web App with manifest.json
+- **Constants**: Centralized configuration in js/constants.js
 
 ### Development Tools
 - **Package Manager**: npm
@@ -65,6 +66,35 @@ The application follows a modular class-based architecture with clear separation
 - `MobileAdapter` - Mobile optimization with event deduplication and efficient observers
 - `DebugHelper` - Development and debugging utilities
 
+#### Configuration Layer
+- `constants.js` - Centralized application constants for intervals, UI settings, storage keys, and notification messages
+
+##### Constants Implementation Details
+The application uses centralized constants management following MVP and best practices:
+
+**REMINDER_CONSTANTS**:
+- `DEFAULT_INTERVAL_MINUTES: 30` - Fixed reminder interval (replaces user-configurable intervals)
+- `SNOOZE_DURATION_MINUTES: 5` - Snooze delay duration
+- `UPDATE_INTERVAL_MS: 1000` - UI update frequency
+- `AUTO_RESTART_DELAY_MS: 5000` - Auto-restart delay after reminder trigger
+
+**UI_CONSTANTS**:
+- `MOBILE_BREAKPOINT: 768` - Mobile responsive breakpoint
+- `UPDATE_LOOP_INTERVAL_MS: 1000` - UI update loop frequency
+
+**STORAGE_CONSTANTS**:
+- `SETTINGS_KEY: 'officeWellnessSettings'` - localStorage key for settings
+- `FORCE_REFRESH_FLAG: 'forceRefreshFlag'` - sessionStorage key for refresh detection
+
+**NOTIFICATION_CONSTANTS**:
+- `MESSAGES.WATER/STANDUP` - Centralized notification titles and messages
+
+**Benefits**:
+- Single source of truth for all configuration values
+- Easy maintenance - change interval by modifying one constant
+- Consistent behavior across all components
+- Follows industry standard centralized configuration approach
+
 ## State Management Architecture (Current MVP Implementation)
 
 ### Current State Management
@@ -76,13 +106,13 @@ The application follows a modular class-based architecture with clear separation
 {
   water: {
     enabled: boolean,
-    interval: number, // minutes (30 default)
+    interval: 30, // Fixed 30 minutes (REMINDER_CONSTANTS.DEFAULT_INTERVAL_MINUTES)
     sound: boolean,
     lastReminder: null // timestamp
   },
   posture: {
     enabled: boolean,
-    interval: number, // minutes (60 default)
+    interval: 30, // Fixed 30 minutes (REMINDER_CONSTANTS.DEFAULT_INTERVAL_MINUTES)
     sound: boolean,
     lastReminder: null // timestamp
   },
@@ -324,3 +354,36 @@ Basic Error Handling ← ErrorHandler ← Simple Recovery
 - ⚠️ **Storage migration scenarios** (NOT IMPLEMENTED - manual handling required)
 - ⚠️ **Error recovery mechanisms** (basic implementation only)
 - ⚠️ **Memory usage stability** (needs monitoring)
+## Recen
+t Implementation Changes
+
+### Constants Implementation (Latest)
+**Objective**: Replace hardcoded 30-minute intervals with centralized constants following MVP principles.
+
+**Key Changes**:
+- ✅ Created `js/constants.js` with centralized configuration
+- ✅ Updated all core files to use constants instead of hardcoded values
+- ✅ Removed interval input UI elements (fixed 30-minute intervals)
+- ✅ Simplified user experience by eliminating configuration complexity
+- ✅ Maintained backward compatibility with existing localStorage data
+
+**Files Modified**:
+- `js/constants.js` (NEW) - Centralized constants
+- `js/app-settings.js` - Uses REMINDER_CONSTANTS.DEFAULT_INTERVAL_MINUTES
+- `js/reminder-manager.js` - Uses all relevant constants
+- `js/ui-controller.js` - Removed interval input handling
+- `js/storage-manager.js` - Uses STORAGE_CONSTANTS
+- `index.html` - Added constants.js script, updated UI text
+
+**Migration Notes**:
+- To change reminder interval: Update `REMINDER_CONSTANTS.DEFAULT_INTERVAL_MINUTES`
+- No breaking changes to user experience
+- Settings structure unchanged (only default values updated)
+- All JavaScript files pass syntax validation
+
+**Benefits Achieved**:
+- Single source of truth for configuration
+- Easier maintenance and updates
+- Consistent behavior across components
+- Reduced cognitive load for users (no interval decisions needed)
+- Follows industry best practices for configuration management
