@@ -1,6 +1,6 @@
 {
-  "name": "Office Wellness Reminder",
-  "short_name": "Wellness",
+  "name": "Hydrate Move - Office Wellness",
+  "short_name": "Hydrate Move",
   "description": "An application to help office workers develop healthy work habits with water and standup reminders",
   "start_url": "./index.html",
   "display": "standalone",
