@@ -182,7 +182,9 @@ class StorageManager {
      * @returns {boolean} Whether removal was successful
      */
     removeItem(key) {
-        try {\            if (this.isStorageAvailable) {\                const fullKey = this.generateStorageKey(key);
+        try {
+            if (this.isStorageAvailable) {
+                const fullKey = this.generateStorageKey(key);
                 localStorage.removeItem(fullKey);
             } else {
                 this.memoryStorage.delete(key);

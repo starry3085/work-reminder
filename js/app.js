@@ -10,6 +10,12 @@ class OfficeWellnessApp {
         this.errorHandler = null;
         this.storage = null;
         
+        // Error recovery configuration
+        this.retryCount = 0;
+        this.config = {
+            maxRetries: 3
+        };
+        
         this.init();
     }
 
@@ -26,10 +32,10 @@ class OfficeWellnessApp {
             console.log('Starting application initialization...');
             
             // Initialize in strict order with validation
-            await this.initializeErrorHandler();
-            await this.initializeStorage();
-            await this.initializeUI();
-            await this.initializeReminders();
+            this.initializeErrorHandler();
+            this.initializeStorage();
+            this.initializeUI();
+            this.initializeReminders();
             
             // Validate all components are ready
             this.validateInitialization();
@@ -51,7 +57,7 @@ class OfficeWellnessApp {
         }
     }
 
-    async initializeErrorHandler() {
+    initializeErrorHandler() {
         try {
             this.errorHandler = new ErrorHandler();
             console.log('🛡️ Error handler initialized');
@@ -64,7 +70,7 @@ class OfficeWellnessApp {
      * Initialize storage manager for simple persistence
      * @private
      */
-    async initializeStorage() {
+    initializeStorage() {
         try {
             this.storage = new StorageManager();
             console.log('💾 Storage manager initialized');
@@ -78,7 +84,7 @@ class OfficeWellnessApp {
      * Initialize UI Controller without StateManager dependency
      * @private
      */
-    async initializeUI() {
+    initializeUI() {
         try {
             this.uiController = new UIController({
                 updateInterval: 1000,
@@ -95,7 +101,7 @@ class OfficeWellnessApp {
      * Initialize reminder managers with simplified initialization
      * @private
      */
-    async initializeReminders() {
+    initializeReminders() {
         try {
             console.log('🔄 Starting reminder initialization...');
             
@@ -226,7 +232,7 @@ class OfficeWellnessApp {
             console.log('🔄 Starting recovery process...');
             
             // Reinitialize components
-            await this.cleanup();
+            this.cleanup();
             await this.init();
             
             this.retryCount = 0;
@@ -260,6 +266,32 @@ class OfficeWellnessApp {
         }
     }
 
+    /**
+     * Cleanup application resources
+     * @private
+     */
+    cleanup() {
+        try {
+            if (this.waterReminder) {
+                this.waterReminder.destroy();
+                this.waterReminder = null;
+            }
+            
+            if (this.standupReminder) {
+                this.standupReminder.destroy();
+                this.standupReminder = null;
+            }
+            
+            if (this.uiController) {
+                this.uiController.destroy();
+                this.uiController = null;
+            }
+            
+            console.log('Application cleanup completed');
+        } catch (error) {
+            console.error('Error during cleanup:', error);
+        }
+    }
 
 }
 
