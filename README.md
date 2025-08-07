@@ -1,4 +1,4 @@
-# Office Wellness Reminder
+# Hydrate Move - Office Wellness Reminder
 
 A simple, privacy-first web application that helps office workers maintain healthy habits through water and standup reminders.
 
@@ -109,6 +109,10 @@ npx http-server
 
 # Open http://localhost:8000
 ```
+
+### Repository Links
+- **GitHub**: https://github.com/starry3085/hydrate-move
+- **Gitee**: https://gitee.com/starry3085/hydrate-move
 
 ### File Structure
 ```

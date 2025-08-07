@@ -1,5 +1,5 @@
 {
-  "name": "work-reminder",
+  "name": "hydrate-move",
   "version": "1.0.0",
   "description": "Office Wellness Reminder - Helping office workers develop healthy work habits",
   "main": "index.html",
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/starry3085/work-reminder.git"
+    "url": "git+https://github.com/starry3085/hydrate-move.git"
   },
   "keywords": [
     "health",
@@ -23,9 +23,9 @@
   "author": "Office Wellness Team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/starry3085/work-reminder/issues"
+    "url": "https://github.com/starry3085/hydrate-move/issues"
   },
-  "homepage": "https://starry3085.github.io/work-reminder/",
+  "homepage": "https://starry3085.github.io/hydrate-move/",
   "devDependencies": {
     "http-server": "^14.1.1"
   }
