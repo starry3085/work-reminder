@@ -41,7 +41,7 @@ class ReminderManager {
 
     /**
      * Initialize with default state
-     * @private
+     * @public
      */
     initializeDefaults() {
         this.isActive = false;
