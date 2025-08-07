@@ -5,6 +5,7 @@
 class StorageManager {
     constructor() {
         this.STORAGE_PREFIX = 'wellness-reminder';
+        this.SETTINGS_KEY = STORAGE_CONSTANTS.SETTINGS_KEY;
         this.isStorageAvailable = this.checkStorageAvailability();
         this.memoryStorage = new Map(); // Fallback memory storage
     }

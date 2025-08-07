@@ -25,7 +25,7 @@ class ReminderManager {
         // Timer management
         this.timerId = null;
         this.updateTimerId = null;
-        this.updateInterval = 1000; // 1 second update frequency
+        this.updateInterval = REMINDER_CONSTANTS.UPDATE_INTERVAL_MS; // 1 second update frequency
         
         // Time tracking (all in milliseconds)
         this.startTime = null;
@@ -62,7 +62,7 @@ class ReminderManager {
      * @returns {number} Interval in minutes
      */
     get interval() {
-        return this.settings.interval || 30;
+        return this.settings.interval || REMINDER_CONSTANTS.DEFAULT_INTERVAL_MINUTES;
     }
 
     /**
@@ -186,10 +186,12 @@ class ReminderManager {
     triggerReminder() {
         if (!this.isActive) return;
         
-        const title = this.type === 'water' ? '💧 Time to Hydrate!' : '🧘 Time to Stand Up!';
-        const message = this.type === 'water' 
-            ? 'Long work sessions can lead to dehydration, remember to drink water!' 
-            : 'Sitting too long is bad for your health, get up and move around!';
+        const notificationConfig = this.type === 'water' 
+            ? NOTIFICATION_CONSTANTS.MESSAGES.WATER 
+            : NOTIFICATION_CONSTANTS.MESSAGES.STANDUP;
+        
+        const title = notificationConfig.TITLE;
+        const message = notificationConfig.BODY;
         
         // Show notification
         this.notificationService.showNotification(
@@ -205,7 +207,7 @@ class ReminderManager {
             if (this.isActive) {
                 this.resetAndRestart();
             }
-        }, 5000);
+        }, REMINDER_CONSTANTS.AUTO_RESTART_DELAY_MS);
         
         console.log(`${this.type} reminder triggered - will auto-restart`);
     }
@@ -226,7 +228,7 @@ class ReminderManager {
     snooze() {
         if (!this.isActive) return;
         
-        const snoozeTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const snoozeTime = REMINDER_CONSTANTS.SNOOZE_DURATION_MINUTES * 60 * 1000; // 5 minutes in milliseconds
         this.timeRemaining = snoozeTime;
         this.startTime = Date.now();
         this.nextReminderTime = this.startTime + snoozeTime;

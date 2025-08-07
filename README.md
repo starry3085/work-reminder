@@ -4,8 +4,8 @@ A simple, privacy-first web application that helps office workers maintain healt
 
 ## Features
 
-- **Water Reminders**: Customizable intervals (1-60 minutes) to remind you to stay hydrated
-- **Standup Reminders**: Regular prompts (1-60 minutes) to take breaks and move around
+- **Water Reminders**: Fixed 30-minute intervals to remind you to stay hydrated
+- **Standup Reminders**: Fixed 30-minute intervals to take breaks and move around
 - **Browser Notifications**: Native browser notifications with fallback to in-page alerts
 - **Privacy-First**: All data stays on your device - no external servers or tracking
 - **Mobile Responsive**: Works seamlessly on desktop and mobile devices
@@ -114,10 +114,26 @@ npx http-server
 - **GitHub**: https://github.com/starry3085/hydrate-move
 - **Gitee**: https://gitee.com/starry3085/hydrate-move
 
+### Configuration
+
+The application uses centralized constants for easy maintenance:
+
+```javascript
+// js/constants.js
+REMINDER_CONSTANTS = {
+    DEFAULT_INTERVAL_MINUTES: 30,  // Fixed reminder interval
+    SNOOZE_DURATION_MINUTES: 5,    // Snooze delay
+    UPDATE_INTERVAL_MS: 1000       // UI update frequency
+}
+```
+
+To modify the reminder interval, update `DEFAULT_INTERVAL_MINUTES` in `js/constants.js`.
+
 ### File Structure
 ```
 ├── index.html              # Main application page
-├── styles/main.css         # All styles and responsive design
+├── css/styles.css          # All styles and responsive design
+├── js/constants.js         # Application configuration constants
 ├── js/
 │   ├── app.js             # Application orchestrator
 │   ├── ui-controller.js   # DOM management and user interactions
