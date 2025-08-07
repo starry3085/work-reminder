@@ -132,6 +132,8 @@ class StorageManager {
   constructor()
   saveSettings(key, data)    // Save settings to localStorage
   loadSettings(key)          // Load settings from localStorage
+  setItem(key, data)         // Direct storage access (duplicate method)
+  getItem(key)               // Direct storage access (duplicate method)
   clearAllData()            // Clear all data
   isAvailable()             // Check storage availability
 }
@@ -141,6 +143,7 @@ class StorageManager {
 - Manage localStorage read/write operations
 - Handle storage exception situations
 - Provide memory storage fallback
+- **Note**: Contains duplicate method definitions for backward compatibility
 
 #### 6. UIController (UI Controller)
 ```javascript
@@ -148,6 +151,7 @@ class UIController {
   constructor(options)      // Initialize with options
   setReminders(waterReminder, standupReminder) // Link reminders
   updateAllUI()            // Update all UI elements
+  forceUIUpdate()          // Force immediate UI refresh (used for splash screen handling)
 }
 ```
 
@@ -156,6 +160,7 @@ class UIController {
 - Handle user interaction events
 - Update interface display content
 - Provide mobile responsiveness
+- Handle splash screen state management
 
 #### 7. ErrorHandler (Error Handler)
 ```javascript
@@ -223,16 +228,22 @@ const AppSettings = {
 ```javascript
 const AppState = {
   isInitialized: false,
+  isFirstUse: true,
   waterReminder: {
     isActive: false,
     timeRemaining: 0,
-    nextReminderAt: null
+    nextReminderAt: null,
+    enabled: true,
+    sound: true,
+    interval: 30
   },
   postureReminder: {
     isActive: false,
     timeRemaining: 0,
     nextReminderAt: null,
-    lastActivity: null
+    enabled: true,
+    sound: true,
+    interval: 60
   },
   userActivity: {
     isActive: true,
