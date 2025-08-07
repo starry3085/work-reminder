@@ -132,35 +132,33 @@ class StorageManager {
   constructor()
   saveSettings(key, data)    // Save settings to localStorage
   loadSettings(key)          // Load settings from localStorage
-  setItem(key, data)         // Direct storage access (duplicate method)
-  getItem(key)               // Direct storage access (duplicate method)
+  setItem(key, data)         // Direct storage access
+  getItem(key)               // Direct storage access
+  removeItem(key)           // Remove single item
   clearAllData()            // Clear all data
   isAvailable()             // Check storage availability
 }
-```
 
 **Responsibilities:**
 - Manage localStorage read/write operations
 - Handle storage exception situations
 - Provide memory storage fallback
-- **Note**: Contains duplicate method definitions for backward compatibility
+- **Fixed**: Removed duplicate method definitions
 
-#### 6. UIController (UI Controller)
+#### 7. UIController (UI Controller)
 ```javascript
 class UIController {
   constructor(options)      // Initialize with options
   setReminders(waterReminder, standupReminder) // Link reminders
   updateAllUI()            // Update all UI elements
-  forceUIUpdate()          // Force immediate UI refresh (used for splash screen handling)
 }
-```
 
 **Responsibilities:**
 - Manage user interface state
 - Handle user interaction events
 - Update interface display content
 - Provide mobile responsiveness
-- Handle splash screen state management
+- **Fixed**: Removed forceUIUpdate method, splash screen handled by loading state display
 
 #### 7. ErrorHandler (Error Handler)
 ```javascript
@@ -368,3 +366,17 @@ const TestScenarios = {
 - **Error Monitoring**: Use try-catch and window.onerror
 - **Performance Monitoring**: Use Performance API
 - **User Behavior**: Basic usage statistics (local storage)
+
+## Recent Fixes and Improvements
+
+### Phase 1: Critical Fixes (Completed)
+- **Fixed StorageManager duplicate methods**: Removed duplicate saveSettings/loadSettings definitions
+- **Fixed splash screen issue**: Replaced "--:--" with "Loading..." during initialization
+- **Fixed initialization timing**: Ensured UI updates happen after reminders are properly linked
+- **Removed redundant forceUIUpdate**: Eliminated separate forced UI update mechanism
+
+### Phase 2: Architecture Cleanup (Completed)
+- **Removed StateManager references**: Cleaned up all mentions of non-existent StateManager
+- **Unified timer management**: Consolidated clearTimer/clearUpdateTimer into single clearAllTimers method
+- **Fixed async/await usage**: Removed unnecessary async markers from synchronous functions
+- **Improved code consistency**: Standardized method naming and error handling patterns

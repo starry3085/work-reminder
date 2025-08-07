@@ -150,8 +150,7 @@ class AppSettings {
         }
     }
 
-    // REMOVED: AppSettings no longer resets settings directly
-    // All settings resets must go through StateManager only
+    // AppSettings provides default settings and validation only
 }
 
 // Export class for use by other modules

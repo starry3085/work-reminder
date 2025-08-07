@@ -177,35 +177,16 @@ class StorageManager {
     }
 
     /**
-     * Save data to storage (legacy API)
-     * @param {string} key - Storage key name
-     * @param {any} data - Data to save
-     * @returns {boolean} Whether save was successful
-     */
-    saveSettings(key, data) {
-        return this.setItem(key, data);
-    }
-
-    /**
-     * Load data from storage (legacy API)
-     * @param {string} key - Storage key name
-     * @returns {any|null} Loaded data, returns null on failure
-     */
-    loadSettings(key) {
-        return this.getItem(key);
-    }
-
-
-
-    /**
      * Remove item from storage
      * @param {string} key - Storage key name
      * @returns {boolean} Whether removal was successful
      */
     removeItem(key) {
-        try {
-            const fullKey = `${this.STORAGE_PREFIX}.${key}`;
-            localStorage.removeItem(fullKey);
+        try {\            if (this.isStorageAvailable) {\                const fullKey = this.generateStorageKey(key);
+                localStorage.removeItem(fullKey);
+            } else {
+                this.memoryStorage.delete(key);
+            }
             return true;
         } catch (error) {
             console.error('Failed to remove from storage:', error);
@@ -219,14 +200,21 @@ class StorageManager {
      */
     clearAllData() {
         try {
-            const keysToRemove = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith(this.STORAGE_PREFIX)) {
-                    keysToRemove.push(key);
+            if (this.isStorageAvailable) {
+                // Clear all localStorage items that start with the app prefix
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith(this.STORAGE_PREFIX)) {
+                        keysToRemove.push(key);
+                    }
                 }
+                keysToRemove.forEach(key => localStorage.removeItem(key));
             }
-            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            // Clear memory storage
+            this.memoryStorage.clear();
+            
             return true;
         } catch (error) {
             console.error('Failed to clear data:', error);

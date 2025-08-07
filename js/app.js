@@ -42,8 +42,7 @@ class OfficeWellnessApp {
                 console.warn('⚠️ Some components not ready for linking');
             }
             
-            // Force initial UI update with retry mechanism
-            this.forceUIUpdate();
+            // Initial UI update is now handled by setReminders - no need for separate force update
             
             console.log('✅ Office Wellness App initialized successfully');
         } catch (error) {
@@ -152,35 +151,7 @@ class OfficeWellnessApp {
         console.log('✅ All components validated');
     }
 
-    /**
-     * Force UI update with retry mechanism
-     * @private
-     */
-    forceUIUpdate() {
-        const maxRetries = 3;
-        let attempt = 0;
 
-        const tryUpdate = () => {
-            attempt++;
-            try {
-                if (this.uiController && this.uiController.updateAllUI) {
-                    this.uiController.updateAllUI();
-                    console.log('🎨 Initial UI update completed');
-                } else {
-                    throw new Error('UI Controller not ready');
-                }
-            } catch (error) {
-                if (attempt < maxRetries) {
-                    console.log(`🔄 UI update retry ${attempt}/${maxRetries}`);
-                    setTimeout(tryUpdate, 100 * attempt);
-                } else {
-                    console.error('❌ UI update failed after retries:', error);
-                }
-            }
-        };
-
-        setTimeout(tryUpdate, 50);
-    }
 
     /**
      * Handle initialization errors with user-friendly messages

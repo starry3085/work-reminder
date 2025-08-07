@@ -110,7 +110,7 @@ class NotificationService {
         // Unified notification strategy
         const notificationShown = this.showUnifiedNotification(type, title, message);
 
-        // Play sound
+        // Play sound (synchronous)
         if (this.soundEnabled) {
             this.playSound(type);
         }
