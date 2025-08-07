@@ -49,7 +49,7 @@ A simple, privacy-first web application that helps office workers maintain healt
 - Browser and in-page notifications
 
 ### Standup Reminder
-- Default: Every 30 minutes (same as water for consistency)
+- Default: Every 30 minutes (aligned with water reminder for consistent user experience)
 - Customizable from 1-60 minutes via inline input
 - Encourages movement and posture breaks
 - Visual and audio notifications
