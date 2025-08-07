@@ -326,6 +326,13 @@ body {
     text-align: right;
 }
 
+.countdown-time:contains("Loading") {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    font-family: inherit;
+}
+
 .next-reminder {
     display: flex;
     align-items: center;

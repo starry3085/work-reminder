@@ -47,7 +47,7 @@
                         <div class="daily-stats" id="water-stats">
                             <div class="countdown-info">
                                 <span class="stats-text">Remind after:</span>
-                                <span class="countdown-time" id="water-countdown">--:--</span>
+                                <span class="countdown-time" id="water-countdown">Loading...</span>
                             </div>
                         </div>
 
@@ -73,7 +73,7 @@
                         <div class="daily-stats" id="standup-stats">
                             <div class="countdown-info">
                                 <span class="stats-text">Remind after:</span>
-                                <span class="countdown-time" id="standup-countdown">--:--</span>
+                                <span class="countdown-time" id="standup-countdown">Loading...</span>
                             </div>
                         </div>
 
@@ -272,14 +272,12 @@
         // Initialize app when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
-                initializeApp().then(() => {
-                    ensureAppAvailability();
-                });
-            });
-        } else {
-            initializeApp().then(() => {
+                initializeApp();
                 ensureAppAvailability();
             });
+        } else {
+            initializeApp();
+            ensureAppAvailability();
         }
 
         // Add global error handling

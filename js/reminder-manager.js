@@ -103,8 +103,7 @@ class ReminderManager {
      */
     stop() {
         try {
-            this.clearTimer();
-            this.clearUpdateTimer();
+            this.clearAllTimers();
             
             this.isActive = false;
             this.resetState();
@@ -165,21 +164,15 @@ class ReminderManager {
     }
 
     /**
-     * Clear main timer
+     * Clear all timers (unified cleanup)
      * @private
      */
-    clearTimer() {
+    clearAllTimers() {
         if (this.timerId) {
             clearTimeout(this.timerId);
             this.timerId = null;
         }
-    }
-
-    /**
-     * Clear update timer
-     * @private
-     */
-    clearUpdateTimer() {
+        
         if (this.updateTimerId) {
             clearInterval(this.updateTimerId);
             this.updateTimerId = null;
@@ -256,7 +249,7 @@ class ReminderManager {
         this.nextReminderTime = this.startTime + intervalMs;
         this.timeRemaining = intervalMs;
         
-        this.clearTimer();
+        this.clearAllTimers();
         this.startTimer();
     }
 
@@ -295,10 +288,6 @@ class ReminderManager {
     destroy() {
         try {
             this.stop();
-            
-            // Cleanup timers
-            this.clearTimer();
-            this.clearUpdateTimer();
             
             console.log(`${this.type} reminder manager destroyed with cleanup`);
             

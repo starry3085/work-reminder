@@ -101,10 +101,8 @@ class UIController {
         
         console.log('✅ Reminders successfully linked to UI controller');
         
-        // Force immediate UI update
-        setTimeout(() => {
-            this.updateAllUI();
-        }, 50);
+        // Update UI immediately with proper initialization state
+        this.updateAllUI();
     }
 
     /**

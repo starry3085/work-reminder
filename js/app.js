@@ -10,6 +10,12 @@ class OfficeWellnessApp {
         this.errorHandler = null;
         this.storage = null;
         
+        // Error recovery configuration
+        this.retryCount = 0;
+        this.config = {
+            maxRetries: 3
+        };
+        
         this.init();
     }
 
@@ -26,10 +32,10 @@ class OfficeWellnessApp {
             console.log('Starting application initialization...');
             
             // Initialize in strict order with validation
-            await this.initializeErrorHandler();
-            await this.initializeStorage();
-            await this.initializeUI();
-            await this.initializeReminders();
+            this.initializeErrorHandler();
+            this.initializeStorage();
+            this.initializeUI();
+            this.initializeReminders();
             
             // Validate all components are ready
             this.validateInitialization();
@@ -42,8 +48,7 @@ class OfficeWellnessApp {
                 console.warn('⚠️ Some components not ready for linking');
             }
             
-            // Force initial UI update with retry mechanism
-            this.forceUIUpdate();
+            // Initial UI update is now handled by setReminders - no need for separate force update
             
             console.log('✅ Office Wellness App initialized successfully');
         } catch (error) {
@@ -52,7 +57,7 @@ class OfficeWellnessApp {
         }
     }
 
-    async initializeErrorHandler() {
+    initializeErrorHandler() {
         try {
             this.errorHandler = new ErrorHandler();
             console.log('🛡️ Error handler initialized');
@@ -65,7 +70,7 @@ class OfficeWellnessApp {
      * Initialize storage manager for simple persistence
      * @private
      */
-    async initializeStorage() {
+    initializeStorage() {
         try {
             this.storage = new StorageManager();
             console.log('💾 Storage manager initialized');
@@ -79,7 +84,7 @@ class OfficeWellnessApp {
      * Initialize UI Controller without StateManager dependency
      * @private
      */
-    async initializeUI() {
+    initializeUI() {
         try {
             this.uiController = new UIController({
                 updateInterval: 1000,
@@ -96,7 +101,7 @@ class OfficeWellnessApp {
      * Initialize reminder managers with simplified initialization
      * @private
      */
-    async initializeReminders() {
+    initializeReminders() {
         try {
             console.log('🔄 Starting reminder initialization...');
             
@@ -152,35 +157,7 @@ class OfficeWellnessApp {
         console.log('✅ All components validated');
     }
 
-    /**
-     * Force UI update with retry mechanism
-     * @private
-     */
-    forceUIUpdate() {
-        const maxRetries = 3;
-        let attempt = 0;
 
-        const tryUpdate = () => {
-            attempt++;
-            try {
-                if (this.uiController && this.uiController.updateAllUI) {
-                    this.uiController.updateAllUI();
-                    console.log('🎨 Initial UI update completed');
-                } else {
-                    throw new Error('UI Controller not ready');
-                }
-            } catch (error) {
-                if (attempt < maxRetries) {
-                    console.log(`🔄 UI update retry ${attempt}/${maxRetries}`);
-                    setTimeout(tryUpdate, 100 * attempt);
-                } else {
-                    console.error('❌ UI update failed after retries:', error);
-                }
-            }
-        };
-
-        setTimeout(tryUpdate, 50);
-    }
 
     /**
      * Handle initialization errors with user-friendly messages
@@ -255,7 +232,7 @@ class OfficeWellnessApp {
             console.log('🔄 Starting recovery process...');
             
             // Reinitialize components
-            await this.cleanup();
+            this.cleanup();
             await this.init();
             
             this.retryCount = 0;
@@ -289,6 +266,32 @@ class OfficeWellnessApp {
         }
     }
 
+    /**
+     * Cleanup application resources
+     * @private
+     */
+    cleanup() {
+        try {
+            if (this.waterReminder) {
+                this.waterReminder.destroy();
+                this.waterReminder = null;
+            }
+            
+            if (this.standupReminder) {
+                this.standupReminder.destroy();
+                this.standupReminder = null;
+            }
+            
+            if (this.uiController) {
+                this.uiController.destroy();
+                this.uiController = null;
+            }
+            
+            console.log('Application cleanup completed');
+        } catch (error) {
+            console.error('Error during cleanup:', error);
+        }
+    }
 
 }
 
