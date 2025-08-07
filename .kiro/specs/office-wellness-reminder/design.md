@@ -10,27 +10,39 @@ The Office Wellness Reminder System is a pure frontend Single Page Application (
 
 ### Overall Architecture
 ```
-┌─────────────────────────────────────────┐
-│            User Interface Layer          │
-│  ┌─────────────┐ ┌─────────────────────┐ │
-│  │Main Control │ │   Settings Panel    │ │
-│  │    Panel    │ │                     │ │
-│  └─────────────┘ └─────────────────────┘ │
-└─────────────────────────────────────────┘
-┌─────────────────────────────────────────┐
-│           Business Logic Layer           │
-│  ┌─────────────┐ ┌─────────────────────┐ │
-│  │  Reminder   │ │  User Activity      │ │
-│  │  Manager    │ │    Detector         │ │
-│  └─────────────┘ └─────────────────────┘ │
-└─────────────────────────────────────────┘
-┌─────────────────────────────────────────┐
-│            Data Storage Layer            │
-│  ┌─────────────┐ ┌─────────────────────┐ │
-│  │Local Storage│ │   State Manager     │ │
-│  │  Manager    │ │                     │ │
-│  └─────────────┘ └─────────────────────┘ │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                     User Interface Layer                      │
+│  ┌─────────────────────────────────────────────────────────┐  │
+│  │                  Main Application                      │  │
+│  │                OfficeWellnessApp                       │  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │  │
+│  │  │  UIController│  │WaterReminder│  │StandupReminder│  │  │
+│  │  │             │  │ (extends    │  │ (extends     │   │  │
+│  │  │             │  │ ReminderMgr)│  │ ReminderMgr) │   │  │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘   │  │
+│  └─────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    Service Layer                              │
+│  ┌─────────────────────┐  ┌─────────────────────┐           │
+│  │NotificationService  │  │ StorageManager      │           │
+│  │                     │  │ (localStorage)      │           │
+│  └─────────────────────┘  └─────────────────────┘           │
+│  ┌─────────────────────┐  ┌─────────────────────┐           │
+│  │ ErrorHandler        │  │ MobileAdapter       │           │
+│  │ (error handling)    │  │ (mobile features)   │           │
+│  └─────────────────────┘  └─────────────────────┘           │
+└─────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────────┐
+│                   Data Storage Layer                        │
+│  ┌─────────────────────────────────────────────────────────┐  │
+│  │                  Browser APIs                            │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │  │
+│  │  │ localStorage │  │Notifications │  │    Audio     │  │  │
+│  │  │              │  │     API      │  │     API      │  │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘  │  │
+│  └─────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ### Technology Stack Selection
@@ -45,33 +57,65 @@ The Office Wellness Reminder System is a pure frontend Single Page Application (
 
 ### Core Components
 
-#### 1. ReminderManager (Reminder Manager)
+#### 1. OfficeWellnessApp (Main Application)
 ```javascript
-class ReminderManager {
-  constructor(type, settings) // type: 'water' | 'posture'
-  start()                     // Start reminder
-  stop()                      // Stop reminder
-  updateSettings(settings)    // Update settings
-  getCurrentStatus()          // Get current status
+class OfficeWellnessApp {
+  constructor()              // Initialize main application
+  initialize()               // Public initialize method
+  init()                     // Internal initialization
 }
+```
 
 **Responsibilities:**
-- Manage timers for water and sedentary reminders
+- Coordinate all application components
+- Handle initialization sequence
+- Provide error handling for initialization
+- Manage component lifecycle
+
+#### 2. ReminderManager (Base Reminder Manager)
+```javascript
+class ReminderManager {
+  constructor(type, settings, notificationService) // type: 'water' | 'standup'
+  start()                     // Start reminder
+  stop()                      // Stop reminder
+  getTimeRemaining()          // Get remaining time in milliseconds
+}
+```
+
+**Responsibilities:**
+- Manage timers for water and standup reminders
 - Handle reminder trigger logic
-- Integrate with notification system
+- Provide base functionality for specific reminder types
 
-#### 2. ActivityDetector (Removed for MVP)
-- **Status**: Removed for MVP - using simple time-based reminders instead
-- **Original Purpose**: Monitor user activity status to intelligently manage reminders
-- **Rationale**: Simplified to focus on core functionality for MVP release - using fixed interval reminders with start/stop controls
+#### 3. WaterReminder (Water Reminder)
+```javascript
+class WaterReminder extends ReminderManager {
+  constructor(type, settings, notificationService)
+}
+```
 
-#### 3. NotificationService (Notification Service)
+**Responsibilities:**
+- Handle water-specific reminder logic
+- Extend base ReminderManager functionality
+
+#### 4. StandupReminder (Standup Reminder)
+```javascript
+class StandupReminder extends ReminderManager {
+  constructor(type, settings, notificationService)
+}
+```
+
+**Responsibilities:**
+- Handle standup-specific reminder logic
+- Extend base ReminderManager functionality
+
+#### 5. NotificationService (Notification Service)
 ```javascript
 class NotificationService {
   constructor()
   requestPermission()        // Request notification permission
-  showNotification(type, message) // Show notification
-  showInPageAlert(type, message)  // Show in-page alert
+  showNotification(type, title, message) // Show unified notification
+  showInPageAlert(type, title, message)  // Show in-page alert
   isSupported()             // Check browser support
 }
 ```
@@ -80,12 +124,14 @@ class NotificationService {
 - Manage browser notification permissions
 - Send system-level notifications
 - Provide in-page fallback notification solution
+- Handle audio notifications
 
-#### 4. StorageManager (Storage Manager)
+#### 6. StorageManager (Storage Manager)
 ```javascript
 class StorageManager {
-  saveSettings(key, data)    // Save settings
-  loadSettings(key)          // Load settings
+  constructor()
+  saveSettings(key, data)    // Save settings to localStorage
+  loadSettings(key)          // Load settings from localStorage
   clearAllData()            // Clear all data
   isAvailable()             // Check storage availability
 }
@@ -94,22 +140,54 @@ class StorageManager {
 **Responsibilities:**
 - Manage localStorage read/write operations
 - Handle storage exception situations
-- Provide data backup and recovery functionality
+- Provide memory storage fallback
 
-#### 5. UIController (UI Controller)
+#### 6. UIController (UI Controller)
 ```javascript
 class UIController {
-  constructor()
-  initializeUI()            // Initialize interface
-  showSettings()            // Show settings panel
-  hideSettings()            // Hide settings panel
-  bindEvents()              // Bind event listeners
+  constructor(options)      // Initialize with options
+  setReminders(waterReminder, standupReminder) // Link reminders
+  updateAllUI()            // Update all UI elements
 }
+```
 
 **Responsibilities:**
 - Manage user interface state
 - Handle user interaction events
 - Update interface display content
+- Provide mobile responsiveness
+
+#### 7. ErrorHandler (Error Handler)
+```javascript
+class ErrorHandler {
+  constructor(options)
+  handleError(errorInfo)    // Handle errors with context
+  getErrorStats()          // Get error statistics
+}
+```
+
+**Responsibilities:**
+- Handle global JavaScript errors
+- Provide error logging and statistics
+- Manage error recovery
+
+#### 8. MobileAdapter (Mobile Adapter)
+```javascript
+class MobileAdapter {
+  constructor()
+  applyMobileOptimizations() // Apply mobile-specific optimizations
+}
+```
+
+**Responsibilities:**
+- Handle mobile-specific features
+- Apply mobile optimizations
+- Manage viewport and touch interactions
+
+#### 9. ActivityDetector (Removed for MVP)
+- **Status**: Removed for MVP - using simple time-based reminders instead
+- **Original Purpose**: Monitor user activity status to intelligently manage reminders
+- **Rationale**: Simplified to focus on core functionality for MVP release - using fixed interval reminders with start/stop controls
 
 ### Interface Design
 
