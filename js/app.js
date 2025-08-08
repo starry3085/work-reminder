@@ -10,6 +10,7 @@ class OfficeWellnessApp {
         this.demoController = null;
         this.errorHandler = null;
         this.storage = null;
+        this.analytics = null;
         
         // Error recovery configuration
         this.retryCount = 0;
@@ -35,6 +36,7 @@ class OfficeWellnessApp {
             // Initialize in strict order with validation
             this.initializeErrorHandler();
             this.initializeStorage();
+            this.initializeAnalytics();
             this.initializeUI();
             this.initializeReminders();
             this.initializeDemoController();
@@ -88,6 +90,20 @@ class OfficeWellnessApp {
         } catch (error) {
             console.warn('⚠️ Storage initialization failed, using defaults:', error);
             this.storage = null;
+        }
+    }
+
+    /**
+     * Initialize analytics for user engagement tracking
+     * @private
+     */
+    initializeAnalytics() {
+        try {
+            this.analytics = new Analytics();
+            console.log('📊 Analytics initialized');
+        } catch (error) {
+            console.warn('⚠️ Analytics initialization failed:', error);
+            this.analytics = null;
         }
     }
 
