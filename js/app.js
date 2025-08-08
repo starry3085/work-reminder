@@ -7,6 +7,7 @@ class OfficeWellnessApp {
         this.uiController = null;
         this.waterReminder = null;
         this.standupReminder = null;
+        this.demoController = null;
         this.errorHandler = null;
         this.storage = null;
         
@@ -36,6 +37,7 @@ class OfficeWellnessApp {
             this.initializeStorage();
             this.initializeUI();
             this.initializeReminders();
+            this.initializeDemoController();
             
             // Validate all components are ready
             this.validateInitialization();
@@ -44,10 +46,15 @@ class OfficeWellnessApp {
             if (this.waterReminder && this.standupReminder && this.uiController) {
                 this.uiController.setReminders(this.waterReminder, this.standupReminder);
                 
+                // Link demo controller to UI
+                if (this.demoController) {
+                    this.uiController.setDemoController(this.demoController);
+                }
+                
                 // Sync initial intervals from HTML inputs
                 this.syncInitialIntervals();
                 
-                console.log('🔗 Reminders linked to UI controller');
+                console.log('🔗 Reminders and demo controller linked to UI controller');
             } else {
                 console.warn('⚠️ Some components not ready for linking');
             }
@@ -139,6 +146,32 @@ class OfficeWellnessApp {
     }
 
     /**
+     * Initialize demo controller with required dependencies
+     * @private
+     */
+    initializeDemoController() {
+        try {
+            console.log('🎬 Starting demo controller initialization...');
+            
+            if (!this.waterReminder || !this.standupReminder || !this.uiController) {
+                throw new Error('Demo controller requires water reminder, standup reminder, and UI controller');
+            }
+            
+            this.demoController = new DemoController({
+                waterReminder: this.waterReminder,
+                standupReminder: this.standupReminder,
+                uiController: this.uiController
+            });
+            
+            console.log('✅ Demo controller initialized successfully');
+        } catch (error) {
+            console.error('❌ Demo controller initialization failed:', error);
+            // Demo is not critical - continue without it
+            this.demoController = null;
+        }
+    }
+
+    /**
      * Validate all components are properly initialized
      * @private
      */
@@ -148,6 +181,7 @@ class OfficeWellnessApp {
             waterReminder: this.waterReminder,
             standupReminder: this.standupReminder,
             storage: this.storage
+            // demoController is optional - not required for core functionality
         };
 
         const missing = Object.entries(components)
@@ -316,6 +350,11 @@ class OfficeWellnessApp {
             if (this.standupReminder) {
                 this.standupReminder.destroy();
                 this.standupReminder = null;
+            }
+            
+            if (this.demoController) {
+                this.demoController.destroy();
+                this.demoController = null;
             }
             
             if (this.uiController) {

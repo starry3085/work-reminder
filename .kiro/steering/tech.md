@@ -65,6 +65,7 @@ The application follows a modular class-based architecture with clear separation
 #### Utility Layer
 - `MobileAdapter` - Mobile optimization with event deduplication and efficient observers
 - `DebugHelper` - Development and debugging utilities
+- `DemoController` - Demo mode functionality for user onboarding and feature demonstration
 
 #### Configuration Layer
 - `constants.js` - Centralized application constants for intervals, UI settings, storage keys, and notification messages
@@ -74,6 +75,7 @@ The application uses centralized constants management following MVP and best pra
 
 **REMINDER_CONSTANTS**:
 - `DEFAULT_INTERVAL_MINUTES: 30` - Fixed reminder interval (replaces user-configurable intervals)
+- `DEMO_INTERVAL_SECONDS: 30` - Demo mode interval for quick demonstration
 - `SNOOZE_DURATION_MINUTES: 5` - Snooze delay duration
 - `UPDATE_INTERVAL_MS: 1000` - UI update frequency
 - `AUTO_RESTART_DELAY_MS: 5000` - Auto-restart delay after reminder trigger
@@ -387,3 +389,35 @@ t Implementation Changes
 - Consistent behavior across components
 - Reduced cognitive load for users (no interval decisions needed)
 - Follows industry best practices for configuration management
+
+### Demo Mode Implementation (Latest)
+**Objective**: Add interactive demo functionality to showcase reminder features with accelerated timing.
+
+**Key Features**:
+- ✅ Demo button in header for easy access
+- ✅ 30-second intervals for quick demonstration (vs 30-minute normal intervals)
+- ✅ Automated sequence: Water reminder starts first, Standup reminder starts 10 seconds later
+- ✅ Clear "FOR DEMO PURPOSE" labeling to set user expectations
+- ✅ Automatic cleanup and state restoration after demo completion
+- ✅ Non-intrusive demo mode that doesn't affect normal application functionality
+
+**Files Modified**:
+- `js/constants.js` - Added DEMO_CONSTANTS for demo-specific configuration
+- `js/demo-controller.js` (NEW) - Demo orchestration and state management
+- `js/app.js` - Integrated DemoController into main application
+- `js/ui-controller.js` - Added demo button handling and status display
+- `index.html` - Added demo button and status indicators
+
+**Demo Flow**:
+1. User clicks "Demo" button
+2. System enters demo mode with 30-second intervals
+3. Water reminder automatically starts (30s countdown)
+4. After 10 seconds, Standup reminder automatically starts (30s countdown)
+5. User sees both notifications appear sequentially
+6. Demo automatically ends and restores normal state
+
+**Benefits**:
+- Immediate user onboarding and feature understanding
+- No learning curve - users see exactly what the app does
+- Builds confidence in notification functionality
+- Demonstrates value proposition within 40 seconds
