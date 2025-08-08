@@ -25,7 +25,9 @@ class UIController {
             waterCountdown: null,
             waterBtn: null,
             standupCountdown: null,
-            standupBtn: null
+            standupBtn: null,
+            demoBtn: null,
+            demoStatus: null
         };
 
         // Event listeners registry for cleanup
@@ -36,6 +38,7 @@ class UIController {
         // Direct reminder references (will be set by app)
         this.waterReminder = null;
         this.standupReminder = null;
+        this.demoController = null;
         
         // Mobile state tracking
         this.isMobile = false;
@@ -104,6 +107,20 @@ class UIController {
     }
 
     /**
+     * Set demo controller instance for demo functionality
+     * @param {DemoController} demoController - Demo controller instance
+     */
+    setDemoController(demoController) {
+        if (!demoController) {
+            console.warn('Invalid demo controller instance provided');
+            return;
+        }
+        
+        this.demoController = demoController;
+        console.log('✅ Demo controller successfully linked to UI controller');
+    }
+
+    /**
      * Bind DOM elements with null safety
      * @private
      */
@@ -112,7 +129,9 @@ class UIController {
             waterCountdown: '#water-countdown',
             waterBtn: '#water-toggle',
             standupCountdown: '#standup-countdown',
-            standupBtn: '#standup-toggle'
+            standupBtn: '#standup-toggle',
+            demoBtn: '#demo-btn',
+            demoStatus: '#demo-status'
         };
 
         Object.keys(selectors).forEach(key => {
@@ -151,6 +170,9 @@ class UIController {
         // Core button event listeners
         this.addEventListener('waterBtn', 'click', () => this.toggleReminder('water'));
         this.addEventListener('standupBtn', 'click', () => this.toggleReminder('standup'));
+        
+        // Demo button event listener
+        this.addEventListener('demoBtn', 'click', () => this.handleDemoClick());
 
         // Window resize for mobile detection
         this.addEventListener(window, 'resize', this.throttle(() => {
@@ -324,9 +346,41 @@ class UIController {
         }
     }
 
+    /**
+     * Handle demo button click
+     * @private
+     */
+    handleDemoClick() {
+        try {
+            if (!this.demoController) {
+                console.error('Demo controller not available');
+                this.showUserError('Demo not available', 'Demo functionality is not initialized');
+                return;
+            }
 
+            const demoBtn = this.elements.demoBtn;
+            if (!demoBtn) {
+                console.error('Demo button element not found');
+                return;
+            }
 
-
+            if (this.demoController.isDemoRunning) {
+                // Stop demo if running
+                this.demoController.stopDemo();
+                demoBtn.textContent = 'Demo';
+                demoBtn.className = 'btn-demo';
+            } else {
+                // Start demo
+                this.demoController.startDemo();
+                demoBtn.textContent = 'Stop Demo';
+                demoBtn.className = 'btn-demo active';
+            }
+            
+        } catch (error) {
+            console.error('Failed to handle demo click:', error);
+            this.showUserError('Demo Error', error.message);
+        }
+    }
 
     /**
      * Check if device is mobile

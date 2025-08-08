@@ -10,6 +10,9 @@ const REMINDER_CONSTANTS = {
     // Fixed reminder interval in minutes (MVP requirement)
     DEFAULT_INTERVAL_MINUTES: 30,
     
+    // Demo mode interval in seconds (for quick demonstration)
+    DEMO_INTERVAL_SECONDS: 30,
+    
     // Timer update frequency in milliseconds
     UPDATE_INTERVAL_MS: 1000,
     
@@ -43,6 +46,25 @@ const STORAGE_CONSTANTS = {
 };
 
 /**
+ * Demo Configuration Constants
+ */
+const DEMO_CONSTANTS = {
+    // Demo timing configuration
+    WATER_START_DELAY_MS: 0,        // Start water reminder immediately
+    STANDUP_START_DELAY_MS: 10000,  // Start standup reminder after 10 seconds
+    
+    // Demo status messages
+    STATUS_MESSAGES: {
+        READY: 'Click Demo to see how reminders work',
+        STARTING: 'Demo starting...',
+        WATER_STARTING: 'Starting water reminder (FOR DEMO PURPOSE - 30s interval)',
+        STANDUP_STARTING: 'Starting standup reminder (FOR DEMO PURPOSE - 30s interval)',
+        RUNNING: 'Demo running - watch for notifications!',
+        COMPLETED: 'Demo completed - reminders reset to normal'
+    }
+};
+
+/**
  * Notification Configuration Constants
  */
 const NOTIFICATION_CONSTANTS = {
@@ -71,6 +93,7 @@ if (typeof module !== 'undefined' && module.exports) {
         REMINDER_CONSTANTS,
         UI_CONSTANTS,
         STORAGE_CONSTANTS,
+        DEMO_CONSTANTS,
         NOTIFICATION_CONSTANTS
     };
 }
@@ -79,4 +102,5 @@ if (typeof module !== 'undefined' && module.exports) {
 window.REMINDER_CONSTANTS = REMINDER_CONSTANTS;
 window.UI_CONSTANTS = UI_CONSTANTS;
 window.STORAGE_CONSTANTS = STORAGE_CONSTANTS;
+window.DEMO_CONSTANTS = DEMO_CONSTANTS;
 window.NOTIFICATION_CONSTANTS = NOTIFICATION_CONSTANTS;
