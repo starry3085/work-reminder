@@ -50,6 +50,18 @@ body {
     margin-bottom: 0.5rem;
 }
 
+.hero-description {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin: 1rem 0;
+    line-height: 1.5;
+}
+
+.hero-description small {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
 .app-subtitle {
     color: var(--text-secondary);
     font-size: 1rem;
