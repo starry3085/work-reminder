@@ -1,6 +1,15 @@
-# Hydrate Move - Office Wellness Reminder
+# Hydrate Move – Free Office Wellness Timer
 
-A simple, privacy-first web application that helps office workers maintain healthy habits through water and standup reminders.
+🚰💪 A simple, privacy-first web application that helps office workers maintain healthy habits through water and standup reminders every 30 minutes.
+
+**🌟 Key Features:**
+- ⏰ **30-minute cycle reminders** for water and movement
+- 📱 **PWA support** - install on desktop/mobile
+- 🔒 **Privacy-first** - all data stays on your device
+- 🌐 **Works offline** - no internet required after loading
+- 🆓 **Completely free** - no registration, no ads
+
+**🎯 Perfect for:** Remote workers, office professionals, students, anyone spending long hours at a computer.
 
 ## Features
 

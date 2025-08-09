@@ -1,3 +1,3 @@
 // Simple version control
-window.APP_VERSION = '1.0.1';
-console.log('Hydrate Move v' + window.APP_VERSION + ' - UI Fix Update');
+window.APP_VERSION = '1.0.2';
+console.log('Hydrate Move v' + window.APP_VERSION + ' - Feedback Feature Update');

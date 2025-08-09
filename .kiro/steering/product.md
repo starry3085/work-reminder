@@ -30,3 +30,8 @@ Office Wellness Reminder is a lightweight, privacy-first web application that he
 - **Fixed 30-minute intervals**: Based on health research showing optimal reminder frequency for hydration and posture breaks
 - **No interval customization**: Reduces cognitive load and prevents analysis paralysis
 - **Centralized constants**: Easy maintenance and consistent behavior across the application
+- **GitHub-based feedback**: Leverages existing open source infrastructure, no backend required
+- **Feedback button placement**: Top-right corner maintains consistency with web application conventions
+- **Color hierarchy**: Demo button uses orange (#f39c12) default state to attract first-time user attention, feedback button uses subtle primary color (#2c3e50) default state to avoid distraction
+- **Hover discoverability**: Both buttons use color inversion on hover - demo button darkens to primary color, feedback button highlights to orange
+- **Icon sizing**: GitHub icon proportionally increased to 28px for better visual balance in 48px circular button

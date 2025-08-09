@@ -7,45 +7,119 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#2c3e50">
+
+    <!-- 性能优化 -->
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="en-US">
+    <meta name="author" content="Hydrate Move Team">
+    <meta name="keywords"
+        content="office wellness, water reminder, standup reminder, health timer, productivity, work habits, hydration tracker, posture break">
+
+    <!-- 社交媒体优化 -->
+    <meta property="og:title" content="Hydrate Move - Free Office Wellness Timer">
+    <meta property="og:description"
+        content="Free browser-based office wellness timer that reminds you to drink water and stand up every 30 minutes. PWA support, works offline.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://starry3085.github.io/hydrate-move/">
+    <meta property="og:image" content="https://starry3085.github.io/hydrate-move/assets/og-image.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hydrate Move - Free Office Wellness Timer">
+    <meta name="twitter:description"
+        content="Smart reminders for office workers to stay hydrated and take movement breaks">
+    <meta name="twitter:image" content="https://starry3085.github.io/hydrate-move/assets/twitter-card.png">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Hydrate Move - Office Wellness Reminder</title>
+    <title>Hydrate Move - Free Office Wellness Timer</title>
     <meta name="description"
-        content="An application to help office workers develop healthy work habits with water and standup reminders">
-    <link rel="stylesheet" href="styles/main.css?v=1.0.1">
+        content="在浏览器里提醒喝水和站立的小工具，30分钟循环，支持离线PWA，完全免费。Free browser-based office wellness timer that reminds you to drink water and stand up every 30 minutes.">
+    <link rel="preload" href="styles/main.css?v=1.0.1" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="styles/main.css?v=1.0.1">
+    </noscript>
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="assets/standup-icon.png">
     <link rel="manifest" href="manifest.json">
+
+    <!-- 结构化数据 JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Hydrate Move",
+        "description": "Free browser-based office wellness timer that reminds you to drink water and stand up every 30 minutes.",
+        "url": "https://starry3085.github.io/hydrate-move/",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0"
+        },
+        "featureList": ["water reminder", "stand-up reminder", "PWA support", "offline functionality"],
+        "author": {
+            "@type": "Organization",
+            "name": "Hydrate Move Team"
+        },
+        "keywords": "office wellness, water reminder, standup reminder, health timer, productivity, work habits"
+    }
+    </script>
+
+    <!-- Baidu Analytics -->
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?YOUR_BAIDU_ANALYTICS_ID";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
 </head>
 
 <body>
     <div id="app">
         <!-- Main Control Panel -->
-        <main class="main-panel">
+        <main class="main-panel" role="main">
             <header class="app-header">
                 <h1>Hydrate Move</h1>
                 <p class="app-subtitle">Office Wellness Reminder - Maintain Healthy Work Habits</p>
-                
+
+                <!-- SEO optimized content - hidden from visual display -->
+                <div class="seo-hidden">
+                    <p>Stay hydrated and take movement breaks every 30 minutes. Free privacy-first office wellness timer
+                        that works offline with no registration required.</p>
+                    <h2>Office Wellness Timer Features</h2>
+                    <ul>
+                        <li>Water reminder every 30 minutes for better hydration</li>
+                        <li>Standup reminder for posture breaks and movement</li>
+                        <li>Progressive Web App with offline functionality</li>
+                        <li>Privacy-first design with local storage only</li>
+                        <li>Free office productivity tool for remote workers</li>
+                    </ul>
+                </div>
+
                 <!-- Demo Section -->
                 <div class="demo-section">
-                    <button class="btn-demo" id="demo-btn">Demo</button>
-                    <div class="demo-status" id="demo-status">Click Demo to see how reminders work</div>
+                    <button class="btn-demo" id="demo-btn"
+                        aria-label="Start demo mode to see how reminders work">Demo</button>
+                    <div class="demo-status" id="demo-status" role="status" aria-live="polite">Click Demo to see how
+                        reminders work</div>
                 </div>
             </header>
 
             <!-- Status Display Area -->
-            <section class="status-section">
-                <div class="reminder-card" id="water-card">
+            <section class="status-section" aria-label="Wellness Reminders">
+                <article class="reminder-card" id="water-card" aria-labelledby="water-title">
                     <div class="card-header">
-                        <div class="card-icon water-icon"></div>
-                        <h3>Water Reminder</h3>
+                        <div class="card-icon water-icon" aria-hidden="true"></div>
+                        <h3 id="water-title">Water Reminder</h3>
                     </div>
                     <div class="card-content">
                         <div class="status-info">
                             <span class="next-reminder-label">Remind every:</span>
                             <div class="time-remaining" id="water-time">
-                                <span class="interval-display">30 mins</span>
+                                <time datetime="PT30M" class="interval-display">30 mins</time>
                             </div>
                         </div>
                         <div class="daily-stats" id="water-stats">
@@ -57,20 +131,21 @@
 
                     </div>
                     <div class="card-controls">
-                        <button class="btn-primary" id="water-toggle">Start</button>
+                        <button class="btn-primary" id="water-toggle"
+                            aria-label="Start water reminder timer">Start</button>
                     </div>
-                </div>
+                </article>
 
-                <div class="reminder-card" id="standup-card">
+                <article class="reminder-card" id="standup-card" aria-labelledby="standup-title">
                     <div class="card-header">
-                        <div class="card-icon standup-icon"></div>
-                        <h3>Standup Reminder</h3>
+                        <div class="card-icon standup-icon" aria-hidden="true"></div>
+                        <h3 id="standup-title">Standup Reminder</h3>
                     </div>
                     <div class="card-content">
                         <div class="status-info">
                             <span class="next-reminder-label">Remind every:</span>
                             <div class="time-remaining" id="standup-time">
-                                <span class="interval-display">30 mins</span>
+                                <time datetime="PT30M" class="interval-display">30 mins</time>
                             </div>
                         </div>
                         <div class="daily-stats" id="standup-stats">
@@ -83,9 +158,10 @@
 
                     </div>
                     <div class="card-controls">
-                        <button class="btn-primary" id="standup-toggle">Start</button>
+                        <button class="btn-primary" id="standup-toggle"
+                            aria-label="Start standup reminder timer">Start</button>
                     </div>
-                </div>
+                </article>
             </section>
 
 
@@ -115,30 +191,33 @@
 
     <!-- Version Control for Cache Busting -->
     <script src="version.js?v=1.0.1" onerror="console.error('Failed to load version.js')"></script>
-    
+
     <!-- JavaScript Files -->
     <script src="js/constants.js?v=1.0.1" onerror="console.error('Failed to load constants.js')"></script>
+    <script src="js/analytics.js?v=1.0.1" onerror="console.error('Failed to load analytics.js')"></script>
     <script src="js/demo-controller.js?v=1.0.1" onerror="console.error('Failed to load demo-controller.js')"></script>
     <script src="js/error-handler.js?v=1.0.1" onerror="console.error('Failed to load error-handler.js')"></script>
     <script src="js/storage-manager.js?v=1.0.1" onerror="console.error('Failed to load storage-manager.js')"></script>
     <script src="js/app-settings.js?v=1.0.1" onerror="console.error('Failed to load app-settings.js')"></script>
-    <script src="js/notification-service.js?v=1.0.1" onerror="console.error('Failed to load notification-service.js')"></script>
+    <script src="js/notification-service.js?v=1.0.1"
+        onerror="console.error('Failed to load notification-service.js')"></script>
     <script src="js/reminder-manager.js?v=1.0.1" onerror="console.error('Failed to load reminder-manager.js')"></script>
     <script src="js/water-reminder.js?v=1.0.1" onerror="console.error('Failed to load water-reminder.js')"></script>
     <script src="js/standup-reminder.js?v=1.0.1" onerror="console.error('Failed to load standup-reminder.js')"></script>
     <script src="js/mobile-adapter.js?v=1.0.1" onerror="console.error('Failed to load mobile-adapter.js')"></script>
     <script src="js/ui-controller.js?v=1.0.1" onerror="console.error('Failed to load ui-controller.js')"></script>
+    <script src="js/feedback-button.js?v=1.0.1" onerror="console.error('Failed to load feedback-button.js')"></script>
     <script src="js/app.js?v=1.0.1" onerror="console.error('Failed to load app.js')"></script>
-    
+
     <!-- Script Loading Verification -->
     <script>
         console.log('All scripts loaded, checking class availability...');
         const expectedClasses = [
             'ErrorHandler', 'StorageManager', 'AppSettings',
             'NotificationService', 'ReminderManager',
-            'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'DemoController', 'OfficeWellnessApp'
+            'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'DemoController', 'Analytics', 'OfficeWellnessApp', 'FeedbackButton'
         ];
-        
+
         expectedClasses.forEach(className => {
             const exists = window[className] !== undefined;
             console.log(`${exists ? '✅' : '❌'} ${className}: ${exists ? 'Available' : 'Missing'}`);
@@ -158,10 +237,10 @@
 
                 // Check if required classes exist
                 const requiredClasses = [
-                    'ErrorHandler', 'StorageManager', 'AppSettings',
-                    'NotificationService', 'ReminderManager',
-                    'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'DemoController', 'OfficeWellnessApp'
-                ];
+            'ErrorHandler', 'StorageManager', 'AppSettings',
+            'NotificationService', 'ReminderManager',
+            'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'DemoController', 'Analytics', 'OfficeWellnessApp', 'FeedbackButton'
+        ];
 
                 // Debug: Log all class availability
                 console.log('Checking class availability:');
@@ -272,6 +351,19 @@
             if (app) {
                 window.app = app;
             }
+        }
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(function (registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function (err) {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
         }
 
         // Initialize app when DOM is ready
