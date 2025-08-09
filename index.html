@@ -84,10 +84,11 @@
             <header class="app-header">
                 <h1>Hydrate Move</h1>
                 <p class="app-subtitle">Office Wellness Reminder - Maintain Healthy Work Habits</p>
-                
+
                 <!-- SEO optimized content - hidden from visual display -->
                 <div class="seo-hidden">
-                    <p>Stay hydrated and take movement breaks every 30 minutes. Free privacy-first office wellness timer that works offline with no registration required.</p>
+                    <p>Stay hydrated and take movement breaks every 30 minutes. Free privacy-first office wellness timer
+                        that works offline with no registration required.</p>
                     <h2>Office Wellness Timer Features</h2>
                     <ul>
                         <li>Water reminder every 30 minutes for better hydration</li>
@@ -205,6 +206,7 @@
     <script src="js/standup-reminder.js?v=1.0.1" onerror="console.error('Failed to load standup-reminder.js')"></script>
     <script src="js/mobile-adapter.js?v=1.0.1" onerror="console.error('Failed to load mobile-adapter.js')"></script>
     <script src="js/ui-controller.js?v=1.0.1" onerror="console.error('Failed to load ui-controller.js')"></script>
+    <script src="js/feedback-button.js?v=1.0.1" onerror="console.error('Failed to load feedback-button.js')"></script>
     <script src="js/app.js?v=1.0.1" onerror="console.error('Failed to load app.js')"></script>
 
     <!-- Script Loading Verification -->
@@ -213,7 +215,7 @@
         const expectedClasses = [
             'ErrorHandler', 'StorageManager', 'AppSettings',
             'NotificationService', 'ReminderManager',
-            'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'DemoController', 'Analytics', 'OfficeWellnessApp'
+            'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'DemoController', 'Analytics', 'OfficeWellnessApp', 'FeedbackButton'
         ];
 
         expectedClasses.forEach(className => {
@@ -235,10 +237,10 @@
 
                 // Check if required classes exist
                 const requiredClasses = [
-                    'ErrorHandler', 'StorageManager', 'AppSettings',
-                    'NotificationService', 'ReminderManager',
-                    'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'DemoController', 'Analytics', 'OfficeWellnessApp'
-                ];
+            'ErrorHandler', 'StorageManager', 'AppSettings',
+            'NotificationService', 'ReminderManager',
+            'WaterReminder', 'StandupReminder', 'UIController', 'MobileAdapter', 'DemoController', 'Analytics', 'OfficeWellnessApp', 'FeedbackButton'
+        ];
 
                 // Debug: Log all class availability
                 console.log('Checking class availability:');

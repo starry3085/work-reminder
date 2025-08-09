@@ -1,7 +1,8 @@
 {
   "name": "Hydrate Move - Free Office Wellness Timer",
   "short_name": "Hydrate Move",
-  "description": "Free browser-based office wellness timer that reminds you to drink water and stand up every 30 minutes",
+  "description": "Free browser-based office wellness timer that reminds you to drink water and stand up every 30 minutes", 
+  "version": "1.0.2",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",

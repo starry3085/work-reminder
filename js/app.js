@@ -11,6 +11,7 @@ class OfficeWellnessApp {
         this.errorHandler = null;
         this.storage = null;
         this.analytics = null;
+        this.feedbackButton = null;
         
         // Error recovery configuration
         this.retryCount = 0;
@@ -40,6 +41,7 @@ class OfficeWellnessApp {
             this.initializeUI();
             this.initializeReminders();
             this.initializeDemoController();
+            this.initializeFeedbackButton();
             
             // Validate all components are ready
             this.validateInitialization();
@@ -188,6 +190,21 @@ class OfficeWellnessApp {
     }
 
     /**
+     * Initialize feedback button for GitHub Issues integration
+     * @private
+     */
+    initializeFeedbackButton() {
+        try {
+            this.feedbackButton = new FeedbackButton();
+            this.feedbackButton.init();
+            console.log('💬 Feedback button initialized');
+        } catch (error) {
+            console.warn('⚠️ Feedback button initialization failed:', error);
+            this.feedbackButton = null;
+        }
+    }
+
+    /**
      * Validate all components are properly initialized
      * @private
      */
@@ -196,7 +213,8 @@ class OfficeWellnessApp {
             uiController: this.uiController,
             waterReminder: this.waterReminder,
             standupReminder: this.standupReminder,
-            storage: this.storage
+            storage: this.storage,
+            feedbackButton: this.feedbackButton
             // demoController is optional - not required for core functionality
         };
 
@@ -376,6 +394,11 @@ class OfficeWellnessApp {
             if (this.uiController) {
                 this.uiController.destroy();
                 this.uiController = null;
+            }
+            
+            if (this.feedbackButton) {
+                this.feedbackButton.destroy();
+                this.feedbackButton = null;
             }
             
             console.log('Application cleanup completed');
